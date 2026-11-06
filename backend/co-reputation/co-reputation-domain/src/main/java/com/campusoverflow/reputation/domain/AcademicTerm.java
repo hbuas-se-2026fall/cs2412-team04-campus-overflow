@@ -12,21 +12,46 @@ public final class AcademicTerm {
 
     public static final ZoneId CAMPUS_ZONE = ZoneId.of("Asia/Shanghai");
 
+    /** 春季学期起始月（含）。 */
+    private static final int SPRING_START_MONTH = 2;
+    /** 秋季学期起始月（含）。 */
+    private static final int FALL_START_MONTH = 8;
+
     private AcademicTerm() {
     }
 
+    /**
+     * 学期键，形如 {@code 2026-FALL}。
+     *
+     * <p>8–12 月归属当年的秋季学期；次年 1 月仍归属上一年的秋季学期（寒假不另立学期）；
+     * 2–7 月归属当年的春季学期。全部按 {@link #CAMPUS_ZONE} 判定，避免 UTC 跨月把开学首日算进上一学期。
+     */
     public static String termKey(Instant at) {
-        // TODO(S3)：实现 AcademicTerm.termKey——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：AcademicTerm.termKey 尚未实现");
+        LocalDate date = LocalDate.ofInstant(at, CAMPUS_ZONE);
+        int month = date.getMonthValue();
+        if (month >= FALL_START_MONTH) {
+            return date.getYear() + "-FALL";
+        }
+        if (month < SPRING_START_MONTH) {
+            return (date.getYear() - 1) + "-FALL";
+        }
+        return date.getYear() + "-SPRING";
     }
 
-    public static String weekKey(Instant at) {
-        // TODO(S3)：实现 AcademicTerm.weekKey——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：AcademicTerm.weekKey 尚未实现");
-    }
-
+    /** 月键，形如 {@code 2026-10}；按校园时区切月，以北京时间零点为界。 */
     public static String monthKey(Instant at) {
-        // TODO(S3)：实现 AcademicTerm.monthKey——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：AcademicTerm.monthKey 尚未实现");
+        LocalDate date = LocalDate.ofInstant(at, CAMPUS_ZONE);
+        return "%04d-%02d".formatted(date.getYear(), date.getMonthValue());
+    }
+
+    /**
+     * 周键，形如 {@code 2026-W41}。遵循 ISO-8601 周规则：周一为一周之首，年份取「周所属年」，
+     * 因此跨年周（如 2027-01-01 属 2026-W53）不会被拆成两个周榜。
+     */
+    public static String weekKey(Instant at) {
+        LocalDate date = LocalDate.ofInstant(at, CAMPUS_ZONE);
+        int weekYear = date.get(IsoFields.WEEK_BASED_YEAR);
+        int week = date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR);
+        return "%04d-W%02d".formatted(weekYear, week);
     }
 }
