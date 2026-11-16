@@ -25,9 +25,18 @@ public class BadgeService {
         this.clock = clock;
     }
 
+    /**
+     * 授予徽章。幂等：已持有该徽章直接返回，不再落库也不重复发 {@link BadgeAwardedEvent}。
+     * 评审可能把某条 outbox_event 的 published_at 置空让它重放，因此同一个事件调两次只能有一枚徽章。
+     * 数据库侧 {@code uk_badge(user_id, badge_code)} 是最后一道防线（并发授予时由唯一键兜底）。
+     */
     @Transactional(propagation = Propagation.MANDATORY)
     public void grant(long userId, BadgeType type) {
-        // TODO(S3)：实现 BadgeService.grant——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：BadgeService.grant 尚未实现");
+        if (badges.has(userId, type)) {
+            return;
+        }
+        badges.award(new BadgeAward(userId, type, clock.instant()));
+        events.publish(new BadgeAwardedEvent(EventIds.next(), clock.instant(), userId, type.name(),
+                type.displayName()));
     }
 }

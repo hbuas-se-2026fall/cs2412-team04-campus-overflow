@@ -46,19 +46,36 @@ public class ReputationEventHandlers {
         this.clock = clock;
     }
 
+    /**
+     * 注册即开户：声誉 0 起算，悬赏积分按角色发放（教师/助教 1000，学生/管理员 0）。
+     * 幂等：账户已存在说明这个事件已经处理过（或用户是管理员补建的），直接跳过，不重建、不覆盖积分。
+     */
     @EventListener
     @Transactional
     public void on(UserRegisteredEvent e) {
-        // TODO(S3)：实现 ReputationEventHandlers.on——参考领域单元测试与 arc42 文档中的业务规则
-        System.out.println("[walking-skeleton] Reputation 暂未实现，忽略事件 " + e.eventId());
+        if (accounts.findByUserId(e.userId()).isPresent()) {
+            return;
+        }
+        accounts.save(ReputationAccount.open(e.userId(), ReputationRulebook.initialPoints(e.role())));
     }
 
-    /** 场景 R-2 的异步后半段：采纳 → 回答者 +15 → 徽章 → 悬赏结算。 */
+    /**
+     * 场景 R-2 的异步后半段：采纳 → 回答者 +15 → 徽章 → 悬赏结算。
+     * 采纳数徽章的授予时机就在这里：先记账（重复事件会被账本唯一键挡掉），
+     * 再用「累计被采纳条数」问 {@link BadgePolicy#forAcceptedCount}，1 条给「初露锋芒」、10 条给「解惑达人」。
+     */
     @EventListener
     @Transactional
     public void on(AnswerAcceptedEvent e) {
-        // TODO(S3)：实现 ReputationEventHandlers.on——参考领域单元测试与 arc42 文档中的业务规则
-        System.out.println("[walking-skeleton] Reputation 暂未实现，忽略事件 " + e.eventId());
+        int delta = ReputationRulebook.acceptedDelta(e.answerAuthorId(), e.questionAuthorId());
+        if (delta != 0) {
+            ledgerService.record(e.answerAuthorId(), e.eventId(), ReputationReason.ANSWER_ACCEPTED, delta,
+                    "ANSWER", e.answerId());
+        }
+        long acceptedCount = ledger.countByUserAndReason(e.answerAuthorId(), ReputationReason.ANSWER_ACCEPTED);
+        BadgePolicy.forAcceptedCount(acceptedCount)
+                .forEach(type -> badges.grant(e.answerAuthorId(), type));
+        bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.eventId());
     }
 
     @EventListener
@@ -68,17 +85,23 @@ public class ReputationEventHandlers {
         System.out.println("[walking-skeleton] Reputation 暂未实现，忽略事件 " + e.eventId());
     }
 
+    /**
+     * 提交回答 →「初来乍到」。只要有一条回答就有，之后重复提交不再给第二枚（由 BadgeService.grant 去重）。
+     * 回答本身不加声誉（只有被采纳、被投票才加分），所以这里不记账。
+     */
     @EventListener
     @Transactional
     public void on(AnswerSubmittedEvent e) {
-        // TODO(S3)：实现 ReputationEventHandlers.on——参考领域单元测试与 arc42 文档中的业务规则
-        System.out.println("[walking-skeleton] Reputation 暂未实现，忽略事件 " + e.eventId());
+        badges.grant(e.answerAuthorId(), BadgeType.FIRST_ANSWER);
     }
 
+    /**
+     * 教师认证回答 →「名师认可」。与「初露锋芒」区分：那个是被提问者采纳，这个是被教师背书。
+     * 认证只发徽章、不改声誉（认证不是投票，不进每日上限）。重复投递由徽章存在性检查吞掉。
+     */
     @EventListener
     @Transactional
     public void on(AnswerEndorsedEvent e) {
-        // TODO(S3)：实现 ReputationEventHandlers.on——参考领域单元测试与 arc42 文档中的业务规则
-        System.out.println("[walking-skeleton] Reputation 暂未实现，忽略事件 " + e.eventId());
+        badges.grant(e.answerAuthorId(), BadgeType.TEACHER_ENDORSED);
     }
 }
