@@ -5,6 +5,7 @@ import com.campusoverflow.reputation.api.ReputationSummary;
 import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -20,15 +21,25 @@ public class ReputationApiImpl implements ReputationApi {
         this.accounts = accounts;
     }
 
+    /**
+     * 单用户声誉。Discovery 的问答卡片、通知都只用到 userId + reputation；
+     * 未开户（账户还没建）的用户按 0 返回，避免上游因为一次查询失败就整页报错。
+     */
     @Override
     public ReputationSummary summary(long userId) {
-        // TODO(S3)：实现 ReputationApiImpl.summary——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：ReputationApiImpl.summary 尚未实现");
+        return accounts.findByUserId(userId)
+                .map(a -> new ReputationSummary(a.userId(), a.reputation()))
+                .orElseGet(() -> new ReputationSummary(userId, 0));
     }
 
+    /** 批量声誉，供列表页避免 N+1；不存在的用户不出现在结果里（调用方按 0 处理）。 */
     @Override
     public Map<Long, Integer> reputations(Collection<Long> userIds) {
-        // TODO(S3)：实现 ReputationApiImpl.reputations——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：ReputationApiImpl.reputations 尚未实现");
+        if (userIds == null || userIds.isEmpty()) {
+            return Map.of();
+        }
+        return accounts.findAllByUserId(userIds).stream()
+                .collect(Collectors.toMap(ReputationAccount::userId, ReputationAccount::reputation,
+                        (left, right) -> left, LinkedHashMap::new));
     }
 }
