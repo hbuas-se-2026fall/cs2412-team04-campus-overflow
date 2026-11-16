@@ -40,9 +40,11 @@ public final class ReputationRulebook {
         throw new UnsupportedOperationException("TODO(S3)：ReputationRulebook.applyDailyCap 尚未实现");
     }
 
-    /** 开户时发放的悬赏积分（与声誉是两种不同的“货币”）。 */
+    /** 开户时发放的悬赏积分（与声誉是两种不同的“货币”）：教师/助教 1000，学生/管理员 0。 */
     public static int initialPoints(Role role) {
-        // TODO(S3)：实现 ReputationRulebook.initialPoints——参考领域单元测试与 arc42 文档中的业务规则
-        throw new UnsupportedOperationException("TODO(S3)：ReputationRulebook.initialPoints 尚未实现");
+        return switch (role) {
+            case TEACHER, TA -> 1000;
+            case STUDENT, ADMIN -> 0;
+        };
     }
 }
