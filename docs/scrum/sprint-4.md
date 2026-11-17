@@ -40,7 +40,7 @@
 - [x] v1.0.0 tag 与 GitHub Release 可见
 - [x] 禁用账号：非 ADMIN 403、禁自己 ID-1007、禁用后旧会话失效且登录失败（[`s4-disable-account.md`](../reports/s4-disable-account.md)）
 - [x] `mvn verify` / CI 全绿，覆盖率报告可点开（`docs/final/screenshots/coverage/`）
-- [ ] 干净环境按 README 启动并完成注册→登录→提问→回答
+- [x] 干净环境按 README 启动并完成注册→登录→提问→回答（compose 基础设施 #150 + 全新库全流程 [`s4-clean-env-full-flow.md`](../reports/s4-clean-env-full-flow.md)）
 - [x] `docs/final/README.md` 七项全部有可点链接（5 份个人总结已齐）
 - [ ] 两次彩排记录（≤15 分钟、每人 ≥2 分钟）
 
