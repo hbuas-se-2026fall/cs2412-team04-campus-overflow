@@ -38,4 +38,20 @@ Docker : 29.9.3 / build 5457199（Engine running）
 docker info --format '{{.ServerVersion}}' -> 29.9.3
 说明  : 首采（2026-10-29）记录为“未安装”；二采由青岑在本机代跑确认，
         版本与 Engine 状态已同步到 env-matrix.md 第 2 节。
-        房国栋本机截图仍待其本人补交；本文件只记录已核实的二采结果。
+        本机截图已于 2026-11-18 由本人补交（见本目录 env-fangguodong-docker.png）。
+
+二次采集（Docker 装好之后）
+--------------------------
+采集日期: 2026-11-18
+Docker : 29.9.3（Docker Desktop，WSL2 后端，Engine running）
+         docker --version  -> Docker version 29.9.3, build 5457199
+         docker info --format "{{.ServerVersion}}" -> 29.9.3
+         Registry Mirrors  : https://docker.1ms.run （实测可用；
+                             中科大 / 网易 / 腾讯云三家已停服，http=000）
+Node   : v24.18.1（复采一致）
+[PASS] Docker       29.9.3（10-29 首采时为 not installed，本次补采）
+截图   : env-fangguodong-docker.png（本文件同目录）
+
+说明：首采截图 env-fangguodong.png 拍于 10-29，当时未装 Docker，
+      其中的 java -version / mvn -v 仍有效；Docker 一栏以本文件与
+      env-fangguodong-docker.png 为准。
