@@ -27,9 +27,9 @@
 - Discovery 覆盖率截图与 CSV：[`screenshots/coverage/`](screenshots/coverage/README.md)
 - 覆盖率与测试报告：CI Actions 构件 + [`03-quality.md`](03-quality.md) + [`screenshots/coverage/`](screenshots/coverage/README.md)
 - 发布记录：[`docs/release/v0.3.0.md`](../release/v0.3.0.md)、[`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md)
-- v1.0.0 Release Notes：[`docs/release/v1.0.0.md`](../release/v1.0.0.md)（待发布 PR / tag）
+- v1.0.0 Release Notes：[`docs/release/v1.0.0.md`](../release/v1.0.0.md)（**已发布**：[Release v1.0.0](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0)，tag → `10925c7`）
 - v1.0.0 发布验证：[`docs/reports/release-v1.0.0-verification.md`](../reports/release-v1.0.0-verification.md)
-- Sprint 4 计划/执行：[`docs/scrum/sprint-4.md`](../scrum/sprint-4.md)（进行中，SM 陈明哲）
+- Sprint 4 计划/执行：[`docs/scrum/sprint-4.md`](../scrum/sprint-4.md)（已发布 v1.0.0；仅 T4-08 彩排待执行，SM 陈明哲）
 - 禁用账号验证：[`docs/reports/s4-disable-account.md`](../reports/s4-disable-account.md)（接口 + 测试 + 截图）
 
 ## 交付检查（对应指导书 9.4）
