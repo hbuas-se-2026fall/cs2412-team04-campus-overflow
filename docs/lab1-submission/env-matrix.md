@@ -135,7 +135,11 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 - [ ] 本页第 2、3 节表格无空白 ⬜
 - [ ] 版本差异（如有）已写入下方"已知差异"并说明处置
 
-> Docker 状态（2026-11-18）：房国栋本机已装 Docker Desktop 29.9.3（WSL2 后端），`docker info` 正常、`Registry Mirrors` 生效，可执行 `docker compose -f deploy/docker-compose.yml up -d` 做干净环境验证。青岑已于 11-09 采集（见第 2 节）。
+> Docker 状态（2026-11-18）：房国栋本机已装 Docker Desktop 29.9.3（WSL2 后端），`docker info` 正常。
+> **干净环境部署验证已完成**：`docker compose up -d mysql redis` 两容器 `healthy`，后端启动 
+> `Started CampusOverflowApplication in 12.3s`、`/actuator/health` = `UP`、演示数据可读。
+> 证据见 [`docs/reports/s4-clean-env-deploy-verify.md`](../reports/s4-clean-env-deploy-verify.md)。
+> 注意：USTC / 网易 / 腾讯云镜像源在 2026-11-18 实测全部不可用，请改用 `docker.1ms.run`。
 
 ## 6. 已知差异与处置
 
