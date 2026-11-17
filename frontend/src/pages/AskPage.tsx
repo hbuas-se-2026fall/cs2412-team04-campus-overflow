@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../auth';
+import { MarkdownPreview } from '../components/MarkdownPreview';
+
+type BodyMode = 'edit' | 'preview' | 'split';
 
 export function AskPage() {
   const { me } = useAuth();
@@ -11,6 +14,7 @@ export function AskPage() {
   const [tags, setTags] = useState('');
   const [courseId, setCourseId] = useState<string>('');
   const [error, setError] = useState('');
+  const [mode, setMode] = useState<BodyMode>('edit');
 
   const submit = async () => {
     try {
@@ -32,9 +36,32 @@ export function AskPage() {
       <label>标题（10–150 字，尽量具体）
         <input value={title} onChange={(e) => setTitle(e.target.value)} />
       </label>
-      <label>正文（Markdown，至少 20 字：说明你尝试过什么、卡在哪里）
-        <textarea rows={12} value={body} onChange={(e) => setBody(e.target.value)} />
-      </label>
+
+      <div className="md-field">
+        <div className="md-field-head">
+          <span>正文（Markdown，至少 20 字：说明你尝试过什么、卡在哪里）</span>
+          {/* 编辑 / 预览 / 分屏：实时预览正文效果与代码高亮 */}
+          <div className="tabs tabs-sm">
+            <button type="button" className={mode === 'edit' ? 'active' : ''}
+                    onClick={() => setMode('edit')}>编辑</button>
+            <button type="button" className={mode === 'preview' ? 'active' : ''}
+                    onClick={() => setMode('preview')}>预览</button>
+            <button type="button" className={mode === 'split' ? 'active' : ''}
+                    onClick={() => setMode('split')}>分屏</button>
+          </div>
+        </div>
+
+        <div className={`md-field-body ${mode === 'split' ? 'is-split' : ''}`}>
+          {mode !== 'preview' && (
+            <textarea rows={14} value={body} onChange={(e) => setBody(e.target.value)}
+                      placeholder={'支持 Markdown：**加粗**、`行内代码`、列表、以及 ```java 代码块```'} />
+          )}
+          {mode !== 'edit' && (
+            <MarkdownPreview source={body} placeholder="左侧输入后，这里实时显示渲染效果和代码高亮" />
+          )}
+        </div>
+      </div>
+
       <label>标签（1–5 个，用空格或逗号分隔）
         <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="数据结构 红黑树" />
       </label>
