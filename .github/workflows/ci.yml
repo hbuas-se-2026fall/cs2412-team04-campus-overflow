@@ -8,6 +8,11 @@ on:
   pull_request:
     branches: [main, develop]
 
+# V3 §8.5 控制 Actions 用量：同一分支的新提交取消旧运行，避免排队浪费
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   backend:
     name: 后端构建与验证
@@ -38,10 +43,10 @@ jobs:
       - name: 覆盖率门禁
         run: mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am
 
-      # 阶段 5：集成测试（S1 允许失败）
+      # 阶段 5：集成测试（V3 §8.3：S3/S4 起必须绿，不再容错）
+      # -Dtest=none 让 surefire 不重复跑单测（阶段 2 已跑），只由 failsafe 执行 *IT
       - name: 集成测试
-        run: mvn -B -f backend/pom.xml verify -Dsurefire.skip=true
-        continue-on-error: true
+        run: mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: 归档测试报告
         if: always()
@@ -72,8 +77,9 @@ jobs:
     name: 容器镜像构建
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    # push 与"目标为 main 的 PR（发布）"都要产出镜像检查，否则发布 PR 永远等不到该必需检查
-    if: github.event_name == 'push' || github.event.pull_request.base.ref == 'main'
+    # V3 §8.5：只在 main 的 push（发布）与目标为 main 的 PR 上构建镜像；
+    # 同时保证 main 的必需检查「容器镜像构建」总能被满足（PR→main 会触发）
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
     steps:
       - uses: actions/checkout@v4
       - name: 构建后端镜像
