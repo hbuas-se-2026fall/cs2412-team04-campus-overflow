@@ -45,7 +45,11 @@ jobs:
 
       # 阶段 5：集成测试（V3 §8.3：S3/S4 起必须绿，不再容错）
       # -Dtest=none 让 surefire 不重复跑单测（阶段 2 已跑），只由 failsafe 执行 *IT
+      # DOCKER_HOST 显式指向 runner 的 docker socket，避免 Testcontainers 探测失败
       - name: 集成测试
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+          TESTCONTAINERS_RYUK_DISABLED: "true"
         run: mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: 归档测试报告
