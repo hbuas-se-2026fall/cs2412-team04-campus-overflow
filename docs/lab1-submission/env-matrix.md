@@ -39,7 +39,7 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 
 | 成员 | GitHub | OS | JDK | Maven | Node.js | Docker | 采集日期 | env 截图 | mvn 测试证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | 29.9.3（青岑机器代跑，Engine running） | 2026-11-15 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png) | ✅ [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log)（截图待补） |
+| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-18 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png) | ✅ [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log)（截图待补） |
 | 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
 | 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装 | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ 同图（含 `mvn -B test` 摘要） |
 | 刘俊琒 | `Liujunfeng520` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ 待补 | ⬜ 待补 |
@@ -135,13 +135,19 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 - [ ] 本页第 2、3 节表格无空白 ⬜
 - [ ] 版本差异（如有）已写入下方"已知差异"并说明处置
 
+> Docker 状态（2026-11-18）：房国栋本机已装 Docker Desktop 29.9.3（WSL2 后端），`docker info` 正常。
+> **干净环境部署验证已完成**：`docker compose up -d mysql redis` 两容器 `healthy`，后端启动 
+> `Started CampusOverflowApplication in 12.3s`、`/actuator/health` = `UP`、演示数据可读。
+> 证据见 [`docs/reports/s4-clean-env-deploy-verify.md`](../reports/s4-clean-env-deploy-verify.md)。
+> 注意：USTC / 网易 / 腾讯云镜像源在 2026-11-18 实测全部不可用，请改用 `docker.1ms.run`。
+
 ## 6. 已知差异与处置
 
 | 成员 | 差异 | 处置 | 状态 |
 | --- | --- | --- | --- |
 | 房国栋 | `git` 未加入系统 PATH（使用 `D:\Program Files\Git\cmd\git.exe`） | 已加入 PATH；本文档命令仍保留绝对路径兜底 | ⚠️ 已记录 |
 | 房国栋 | 命令行 `java` 默认指向 JDK **1.8.0_481**（系统 PATH 里 Oracle `javapath` 排在前面），但 IDEA/JBR 的 21 可用；Maven 实际已用 21（编译日志 `release 21` 且无 `invalid target release`） | 截图前执行 `$env:JAVA_HOME="E:\IntelliJ IDEA 2025.3.3\jbr"; $env:Path="$env:JAVA_HOME\bin;"+$env:Path`；长期方案见文末"PATH 修正" | ✅ 已解决（临时） |
-| 房国栋 | Docker Desktop：10-29 记录为"未安装"，之后已安装；版本已由青岑在本机代跑确认 | `docker --version` → `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` → `29.9.3`；与 `env-matrix` 第 2 节同步 | ✅ 已记录（2026-11-16，青岑代跑） |
+| 房国栋 | Docker Desktop：10-29 记录为"未安装"，11-16 由青岑代跑取值，11-18 本人机器装好并实测 | `docker --version` → `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` → `29.9.3`；`docker info` 的 `Registry Mirrors` 已生效（中科大 / 网易 / 腾讯云）；WSL2 后端（`wsl --install --no-distribution` + 重启后可运行） | ✅ 已完成（2026-11-18 本机实测） |
 | 魏志国 | 本机 JDK 为 25.0.2（达标线 21） | 高于达标线、可编译运行；JaCoCo 0.8.12 agent 不支持 JDK 25，本地取证用 `-Djacoco.skip=true`（CI 用 JDK 21 正常出覆盖率）；不再为此降级本机环境 | ⚠️ 已记录 |
 
 ### PATH 修正（长期，一次到位）
