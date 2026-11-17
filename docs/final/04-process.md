@@ -20,7 +20,7 @@
 | 工作约定 / DoR / DoD | [`docs/team-agreement.md`](../team-agreement.md)、[`dor-dod.md`](../team/dor-dod.md) | 含 CI 红灯 30 分钟认领、事件重放命令 |
 | Product Backlog | [`docs/backlog/product-backlog.md`](../backlog/product-backlog.md) | PB-01～48，含 PBI/Issue 映射 |
 | Sprint 计划与记录 | [`docs/scrum/`](../scrum/) | S0～S4（S4 为发布草案）；每个 Sprint 含目标、范围、站会、验收 |
-| 燃尽图 | `sprint-1-burndown.png`、`sprint-2-burndown.png` | S1/S2 已归档 |
+| 燃尽图 | `sprint-1-burndown.png`、`sprint-2-burndown.png`、`sprint-3-burndown.png` | S1/S2/S3 已归档（S3 见 [`sprint-3.md`](../scrum/sprint-3.md) §五之二） |
 | 评审与回顾 | 各 `sprint-N.md` 的 Review / 回顾章节 | 含未达标项与行动项 |
 | CI 运行记录 | GitHub Actions | 每次 PR 的后端/前端检查；v0.3.0 三阶段绿 |
 
@@ -36,6 +36,8 @@
 | 问题 | 改进 | 证据 |
 | --- | --- | --- |
 | S0/S1 发布没有打 tag | S4 前补齐 v0.1.0～v0.3.0，并固化「发布 PR + tag + Release Notes」 | [`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md) |
-| 环境证据只有 2/5 | 采集脚本 + 统一归档，S3 前补到 4/5（刘俊琒待补） | [`docs/lab1-submission/env-matrix.md`](../lab1-submission/env-matrix.md) |
+| 环境证据只有 2/5 | 采集脚本 + 统一归档，**5/5 已齐**（刘俊琒 #159 补拍后收口） | [`docs/lab1-submission/env-matrix.md`](../lab1-submission/env-matrix.md) |
 | CI 被重复 workflow 与额度拖累 | 删除重复 `ci.yaml`、仓库转 Public、固定 `SPRINT_MODULES` | `sprint-2.md` §五 |
 | 缺陷台账状态过期 | 每次评审前复核并关闭已修复项 | [`docs/qa/defects.md`](../qa/defects.md) |
+| S3 与 S2/S4 交叠，未逐日站会、无计划会纪要 | 压缩执行时改为「开工同步 + 收口同步」两次固定节点，站会记录按当日合并 PR 回填（只记可查证事实，不补写发言） | [`sprint-3.md`](../scrum/sprint-3.md) §四 |
+| 48 条 Issue 的验收清单是模板文本、从未逐条勾选，Issue 状态与交付脱节 | 交付以 PR 合并为准；v1.0.0 发布后统一按「已交付→`status:done` 并关闭、不做→留决策评论后关闭/保持 open」同步 Issue（刘俊琒执行，T4-06 决策见 [`s4-deferred-items-decision.md`](../reports/s4-deferred-items-decision.md)） | [`product-backlog.md`](../backlog/product-backlog.md) S4 未交付项 |

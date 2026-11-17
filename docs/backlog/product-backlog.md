@@ -65,6 +65,19 @@
 | 未排期 | PB-48（Won't） | 8 |
 | **合计** | 48 条 | **160** |
 
+### S4 范围内未交付项（决策留痕）
+
+v1.0.0 于 2026-11-17 发布并冻结范围，以下三条 Could 项**未交付**，从 S4 迭代移出（26 SP → 实际交付 15 SP）：
+
+| PBI | 用户故事 | SP | Issue | 处置 |
+| --- | --- | ---: | --- | --- |
+| PB-41 | 个人资料查看与修改 | 3 | [#67](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/67) | 只保留查看（`/auth/me`），修改移入 v1.1 |
+| PB-43 | 通知红点 SSE 实时刷新 | 5 | [#69](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/69) | 维持页面拉取 + 手动刷新，移入 v1.1 |
+| PB-45 | 问题列表压测与缓存 | 3 | [#71](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/71) | Redis 缓存已交付；压测转 tech-debt |
+
+理由、替代能力与后续见 [`docs/reports/s4-deferred-items-decision.md`](../reports/s4-deferred-items-decision.md)（T4-06 决策记录）；
+Issue 侧的关闭/标签同步（44 done / 3 不做 / 1 Won't）见 [`board-sync-2026-11-17.md`](board-sync-2026-11-17.md)。
+
 ## 团队 Sprint 1 承诺（P0）
 
 团队当前 Sprint 1 承诺 P0 = **US-01 ~ US-04 = 13 SP**：
