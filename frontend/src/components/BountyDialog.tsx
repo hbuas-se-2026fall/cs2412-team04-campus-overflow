@@ -164,10 +164,11 @@ function formatRemain(ms: number): string {
   return `${s} 秒`;
 }
 
-/** REP-1003 / REP-1004 / REP-1002 等错误码 → 中文提示 */
+/** REP-1001（已关闭/已采纳）、REP-1002（积分不足）、REP-1003/1004（越界）→ 中文提示 */
 function describe(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
+      case 'REP-1001': return '问题已关闭或已采纳，不能发起悬赏';
       case 'REP-1002': return '可用悬赏积分不足';
       case 'REP-1003': return '悬赏积分需在 10–500 之间';
       case 'REP-1004': return '悬赏期限需在 1–14 天之间';
