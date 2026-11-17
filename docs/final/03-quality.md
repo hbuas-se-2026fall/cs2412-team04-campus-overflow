@@ -41,9 +41,21 @@ co-discovery/co-discovery-domain,co-discovery/co-discovery-application
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-![co-discovery-domain JaCoCo 行覆盖 78.26%](screenshots/coverage/coverage-discovery.png)
+四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
-截图与原始数据：[`screenshots/coverage/`](screenshots/coverage/README.md)（`coverage-discovery.png` + `coverage-discovery.csv`）。
+| 模块 | 行覆盖 | 行覆盖率 | 分支覆盖 | 报告截图 | 原始 CSV |
+| --- | ---: | ---: | ---: | --- | --- |
+| `co-identity-domain` | 103 / 136 | **75.74%** | 40 / 66（60.61%） | [`coverage-identity.png`](screenshots/coverage/coverage-identity.png) | [`coverage-identity.csv`](screenshots/coverage/coverage-identity.csv) |
+| `co-qa-domain` | 192 / 231 | **83.12%** | 71 / 90（78.89%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
+| `co-reputation-domain` | 136 / 166 | **81.93%** | 46 / 56（82.14%） | [`coverage-reputation.png`](screenshots/coverage/coverage-reputation.png) | [`coverage-reputation.csv`](screenshots/coverage/coverage-reputation.csv) |
+| `co-discovery-domain` | 72 / 92 | **78.26%** | 41 / 60（68.33%） | [`coverage-discovery.png`](screenshots/coverage/coverage-discovery.png) | [`coverage-discovery.csv`](screenshots/coverage/coverage-discovery.csv) |
+
+| | |
+| :---: | :---: |
+| ![co-identity-domain 75.74%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 83.12%](screenshots/coverage/coverage-qa.png) |
+| ![co-reputation-domain 81.93%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.26%](screenshots/coverage/coverage-discovery.png) |
+
+> 采集口径与复现命令见 [`screenshots/coverage/README.md`](screenshots/coverage/README.md)（采集人 陈明哲，2026-11-17，JDK 21 全仓 `mvn verify -DskipITs -Djacoco.skip=false` 后生成）。
 
 ## 3.3 端到端与冒烟
 
