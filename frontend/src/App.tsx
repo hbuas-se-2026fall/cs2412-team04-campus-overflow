@@ -9,6 +9,7 @@ import { LoginPage } from './pages/LoginPage';
 import { LeaderboardPage } from './pages/LeaderboardPage';
 import { ReputationPage } from './pages/ReputationPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { SearchPage } from './pages/SearchPage';
 import { CourseListPage } from './pages/courses/CourseListPage';
 import { MyCoursesPage } from './pages/courses/MyCoursesPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -33,6 +34,7 @@ function Header() {
       <nav>
         <Link to="/">问题</Link>
         <Link to="/courses">课程</Link>
+        <Link to="/search">搜索</Link>
         {me && <Link to="/courses/mine">我的课程</Link>}
         <Link to="/leaderboard">排行榜</Link>
         {me && <Link to="/notifications">通知{unread > 0 && <span className="badge">{unread}</span>}</Link>}
@@ -88,6 +90,7 @@ export function App() {
             <Route path="/courses" element={<CourseListPage />} />
             <Route path="/courses/mine" element={<RequireAuth><MyCoursesPage /></RequireAuth>} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/users/:id/reputation" element={<ReputationPage />} />
             <Route path="/notifications" element={<RequireAuth><NotificationsPage /></RequireAuth>} />

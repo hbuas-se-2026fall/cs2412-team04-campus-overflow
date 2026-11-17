@@ -72,11 +72,19 @@ export const api = {
   myCourses: () => get<Course[]>('/v1/courses/mine'),
   joinCourse: (courseId: number) => request<void>('POST', `/v1/courses/${courseId}/join`, {}),
 
-  search: (q: string, params: { tag?: string; sort?: string; unanswered?: boolean; page?: number } = {}) => {
-    const search = new URLSearchParams({ q, page: String(params.page ?? 1) });
+  search: (q: string, params: {
+    tag?: string; sort?: string; unanswered?: boolean; bounty?: boolean;
+    courseId?: number; page?: number; size?: number;
+  } = {}) => {
+    const search = new URLSearchParams({ page: String(params.page ?? 1) });
+    // 关键词留空时只按筛选条件查询，不传空的 q（后端不会因此报 2 字符限制）
+    if (q.trim()) search.set('q', q.trim());
     if (params.tag) search.set('tag', params.tag);
     if (params.sort) search.set('sort', params.sort);
     if (params.unanswered) search.set('unanswered', 'true');
+    if (params.bounty) search.set('bounty', 'true');
+    if (params.courseId) search.set('courseId', String(params.courseId));
+    if (params.size) search.set('size', String(params.size));
     return get<Page<SearchResult>>(`/v1/search/questions?${search}`);
   },
   related: (questionId: number) =>
