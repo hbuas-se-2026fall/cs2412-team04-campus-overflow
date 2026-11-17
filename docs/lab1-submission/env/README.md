@@ -17,6 +17,7 @@
 | 文件 | 内容 |
 | --- | --- |
 | `env-<拼音>.png` | 终端里 `java -version` / `mvn -v` / `node -v` / `docker --version` 同屏 |
+| `env-<拼音>-docker.png` | Docker 装好后的二次采集（首采时未装 Docker 的人补） |
 | `env-<拼音>.txt` | `scripts/dev-env/collect-env.*` 打印的那一行 Markdown |
 | `mvn-test-<拼音>.png` | `mvn clean test` 结尾（`BUILD SUCCESS` 或 `BUILD FAILURE` + 原因） |
 
@@ -79,4 +80,4 @@ mvn clean test
 | 成员 | 差异 | 处置 |
 | --- | --- | --- |
 | 房国栋 | 命令行 `java` 默认指向 JDK 1.8（系统 PATH 里 Oracle `javapath` 排在前面），但 Maven 实际使用 JDK 21（编译日志 `release 21`） | 截图前执行 `$env:JAVA_HOME="E:\IntelliJ IDEA 2025.3.3\jbr"; $env:Path="$env:JAVA_HOME\bin;"+$env:Path`；长期方案见 `env-matrix.md` §6 |
-| 房国栋 | Docker Desktop：11-18 已在本机装好并实测（WSL2 后端） | `docker --version` → `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` → `29.9.3`；`Registry Mirrors` 已生效；已同步 `env-matrix.md` 第 2 节 |
+| 房国栋 | Docker Desktop：11-18 已在本机装好并实测（WSL2 后端） | `docker --version` -> `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` -> `29.9.3`；`Registry Mirrors` = `https://docker.1ms.run`（原中科大/网易/腾讯云已停服）；二采截图 [`env-fangguodong-docker.png`](env-fangguodong-docker.png)；已同步 `env-matrix.md` 第 2 节 |
