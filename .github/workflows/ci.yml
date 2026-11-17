@@ -49,6 +49,8 @@ jobs:
       - name: 集成测试
         env:
           DOCKER_HOST: unix:///var/run/docker.sock
+          # runner 的 Docker daemon 要求 API ≥1.40，而 docker-java 默认 1.32，需显式指定
+          DOCKER_API_VERSION: "1.43"
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 
