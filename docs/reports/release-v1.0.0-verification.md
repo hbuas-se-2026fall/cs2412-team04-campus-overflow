@@ -49,8 +49,9 @@ v1.0.0 -> 10925c7   v1.0.0 发布（main，PR #135）
 | --- | --- | --- |
 | 镜像构建 | ✅ backend / frontend Dockerfile 均 build success | CI `容器镜像构建` job（main `10925c7`） |
 | compose 配置 | ✅ 已入库并接入 observability profile | `deploy/docker-compose.yml`、`deploy/prometheus.yml`、`deploy/grafana/` |
-| 运行时 `docker compose up -d --build` | ⬜ 待有 Docker 的机器执行 | 负责人：房国栋 / 彩排机；执行后补 `docker compose ps` + health + Grafana 截图 |
-| 本机限制 | 无 Docker（WSL2/Hyper-V 未启用） | 不影响 v1.0.0 tag/Release，已记录为部署验证遗留 |
+| 运行时 `docker compose up -d mysql redis` + 后端启动 | ✅ 已在有 Docker 的机器完成 | 房国栋 PR #150：[`s4-clean-env-deploy-verify.md`](s4-clean-env-deploy-verify.md)（compose 两容器 healthy、后端 health=UP）；`sprint-4.md` 对应验收已勾 |
+| 全新库全流程（注册→登录→提问→回答） | ✅ 已完成 | PR #156：[`s4-clean-env-full-flow.md`](s4-clean-env-full-flow.md) |
+| 本机限制（历史记录） | 编写本报告时作者本机无 Docker | 已由 #150/#156 在有 Docker 的机器上补验，遗留关闭 |
 
 ## 六、签署
 
