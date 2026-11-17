@@ -41,7 +41,7 @@
 - [x] 禁用账号：非 ADMIN 403、禁自己 ID-1007、禁用后旧会话失效且登录失败（[`s4-disable-account.md`](../reports/s4-disable-account.md)）
 - [x] `mvn verify` / CI 全绿，覆盖率报告可点开（`docs/final/screenshots/coverage/`）
 - [ ] 干净环境按 README 启动并完成注册→登录→提问→回答
-- [ ] `docs/final/README.md` 七项全部有可点链接
+- [x] `docs/final/README.md` 七项全部有可点链接（5 份个人总结已齐）
 - [ ] 两次彩排记录（≤15 分钟、每人 ≥2 分钟）
 
 ## 五、已知阻塞
