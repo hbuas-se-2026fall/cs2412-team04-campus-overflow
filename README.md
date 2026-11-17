@@ -33,7 +33,46 @@ TeamX（cs2412-team04）《软件工程》课程项目。基于 Spring Boot + Re
 docker compose -f deploy/docker-compose.yml up -d mysql redis
 ```
 
-默认端口：MySQL `3306`、Redis `6379`。如果本机已有 MySQL 占用 3306，先停掉本机服务，或修改 compose 的端口映射。
+默认端口：MySQL `3306`、Redis `6379`。
+
+**如果本机已装 MySQL、3306 被占用**（Windows 上常见 `MySQL80` 服务），有两种做法：
+
+方式一，先停本机服务（验证完可以再开回来）：
+
+```bash
+# Windows（管理员 PowerShell）
+net stop MySQL80
+docker compose -f deploy/docker-compose.yml up -d mysql redis
+```
+
+方式二，把容器端口映射到 3307，不动本机 MySQL。建一个本地覆盖文件
+`deploy/docker-compose.local.yml`（该文件已在 `.gitignore` 中，不会入库）：
+
+```yaml
+services:
+  mysql:
+    ports: !override
+      - "3307:3306"
+```
+
+> 注意必须写 `!override`。compose 合并多个 `-f` 时，`ports` 默认是**追加**而不是替换，
+> 不写 `!override` 会变成 3306 和 3307 同时暴露，3306 仍然冲突。
+
+然后带上覆盖文件启动，并让后端连 3307：
+
+```bash
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d mysql redis
+
+# 后端启动前指定端口（默认值 3306 见 application.yml 的 ${DB_PORT:3306}）
+DB_PORT=3307 mvn -pl co-bootstrap -am spring-boot:run
+```
+
+PowerShell 写法：
+
+```powershell
+$env:DB_PORT = "3307"
+mvn -pl co-bootstrap -am spring-boot:run
+```
 
 ### 2.3 启动后端（demo profile）
 

@@ -16,6 +16,11 @@ export function AskPage() {
   const [error, setError] = useState('');
   const [mode, setMode] = useState<BodyMode>('edit');
 
+  /** 没有加入任何课程时不允许发布：问题必须挂在课程下，同班同学才看得到 */
+  const hasCourse = (me?.courses?.length ?? 0) > 0;
+  /** 标题与正文都填了才允许点击，减少无意义的 422 */
+  const canSubmit = hasCourse && title.trim().length > 0 && body.trim().length > 0;
+
   const submit = async () => {
     try {
       const { id } = await api.ask({
@@ -72,7 +77,13 @@ export function AskPage() {
         </select>
       </label>
       {error && <p className="error">{error}</p>}
-      <button className="primary" onClick={submit}>发布问题</button>
+      {!hasCourse && (
+        <p className="error">
+          你还没有加入任何课程，问题需要挂在课程下才能发布。
+          <a href="/courses"> 去课程页加入 →</a>
+        </p>
+      )}
+      <button className="primary" onClick={submit} disabled={!canSubmit}>发布问题</button>
     </div>
   );
 }
