@@ -42,7 +42,7 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 | 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-18 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log)（截图待补） |
 | 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
 | 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装 | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ 同图（含 `mvn -B test` 摘要） |
-| 刘俊琒 | `Liujunfeng520` | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ 待补 | ⬜ 待补 |
+| 刘俊琒 | `Liujunfeng520` | Microsoft Windows 10.0.19045 | 21.0.11（java/javac 同版本） | 3.9.11 | v24.20.0 / npm 11.19.0 | ⬜ 未安装（见 §6） | 2026-11-17 | ✅ [`env-liujunfeng.png`](env/env-liujunfeng.png) | ✅ [`mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) + [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) |
 | 青岑 | `qing963666` | Microsoft Windows 10.0.26200 | 21.0.10 | 3.9.2 | v26.13.0 / npm 11.20.0 | 29.9.2 | 2026-11-09 | ✅ [`env-qingcen.png`](env/env-qingcen.png) | ✅ [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
 图例：✅ 达标　⚠️ 版本不符但已记录　⬜ 待采集
@@ -106,7 +106,7 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | 房国栋 | ❌ 红（预期） | `co-qa-domain`：`TODO(S2)：MarkdownBody.ofQuestion 尚未实现`；18 个用例中 2 失败 13 错误 | ✅ `co-shared-kernel` 2、`co-identity-domain` 9 全绿 | [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log) |
 | 魏志国 | ❌ 红（预期） | `co-discovery-domain`：`TODO(S3)：SearchQuery.terms / RelatedQuestionPolicy 尚未实现`（S3 未开工的 TDD 桩）；1 失败 2 错误 | ✅ shared-kernel 2、identity 9、qa-domain 42、qa-application 32、reputation 36，共 121 条全绿 | [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log)、[`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
 | 陈明哲 | ⬜ | ⬜ | ⬜ | ⬜ |
-| 刘俊琒 | ⬜ | ⬜ | ⬜ | ⬜ |
+| 刘俊琒 | ✅ 全绿（S4 收口后） | 无 | ✅ 27 个模块、165 个用例全绿 | [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) + [`screenshots/mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) |
 | 青岑 | ✅ QA 两模块绿（42+32） | 无 | ✅ `co-qa-domain` 42、`co-qa-application` 32 | [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
 ---
@@ -149,6 +149,8 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | 房国栋 | 命令行 `java` 默认指向 JDK **1.8.0_481**（系统 PATH 里 Oracle `javapath` 排在前面），但 IDEA/JBR 的 21 可用；Maven 实际已用 21（编译日志 `release 21` 且无 `invalid target release`） | 截图前执行 `$env:JAVA_HOME="E:\IntelliJ IDEA 2025.3.3\jbr"; $env:Path="$env:JAVA_HOME\bin;"+$env:Path`；长期方案见文末"PATH 修正" | ✅ 已解决（临时） |
 | 房国栋 | Docker Desktop：10-29 记录为"未安装"，11-16 由青岑代跑取值，11-18 本人机器装好并实测 | `docker --version` → `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` → `29.9.3`；`docker info` 的 `Registry Mirrors` 为 `https://docker.1ms.run`（中科大 / 网易 / 腾讯云三家已停服，实测 http=000）；二采截图见 [`env/env-fangguodong-docker.png`](env/env-fangguodong-docker.png)；WSL2 后端（`wsl --install --no-distribution` + 重启后可运行） | ✅ 已完成（2026-11-18 本机实测） |
 | 魏志国 | 本机 JDK 为 25.0.2（达标线 21） | 高于达标线、可编译运行；JaCoCo 0.8.12 agent 不支持 JDK 25，本地取证用 `-Djacoco.skip=true`（CI 用 JDK 21 正常出覆盖率）；不再为此降级本机环境 | ⚠️ 已记录 |
+| 刘俊琒 | 系统 PATH 里 `java` 指向 `...\Oracle\Java\javapath` 转发存根（本机已无对应 JDK，执行无输出）；`mvn` 完全未入 PATH（Maven 由 IDEA 内置，在 `D:\ideal\IntelliJ IDEA 2026.1\plugins\maven\lib\maven3\bin`）；`C:\Program Files\nodejs` 条目被截断成 `gram Files\nodejs\`（丢了 `C:\Pro`），导致终端里 `node` 找不到 | 采集前在同一窗口临时修正（命令见 [`env/env-liujunfeng.txt`](env/env-liujunfeng.txt) §0）；长期方案同本文末「PATH 修正」，把三条写进系统变量 | ⚠️ 已记录（2026-11-17） |
+| 刘俊琒 | Docker Desktop 未安装（`C:\Program Files\Docker` 不存在） | 本机不参与容器化冒烟与镜像构建；Docker 相关验证由房国栋/青岑代跑，与本表房国栋 2026-10-29 同一处置 | ⚠️ 已记录 |
 
 ### PATH 修正（长期，一次到位）
 
