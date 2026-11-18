@@ -13,7 +13,7 @@
 | `co-reputation-domain` | 136 / 166 | **81.93%** | 46 / 56 | 82.14% |
 | `co-discovery-domain` | 72 / 92 | **78.26%** | 41 / 60 | 68.33% |
 
-四个模块行覆盖率均 ≥ 70%，CI 覆盖率门禁阶段（`mvn verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am`）通过。
+四个模块行覆盖率均 ≥ 70%，CI 覆盖率门禁阶段（`mvn verify -DskipITs -Djacoco.skip=false`，全量模块）通过。
 
 ## 文件
 

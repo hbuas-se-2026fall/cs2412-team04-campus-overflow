@@ -1,7 +1,5 @@
 # CampusOverflow 持续集成流水线（对应 arc42 第 10 章适应度函数与第 7 章部署视图）
 name: CI
-env:
-  SPRINT_MODULES: co-shared-kernel,co-identity/co-identity-domain,co-qa/co-qa-domain,co-qa/co-qa-application,co-reputation/co-reputation-domain,co-reputation/co-reputation-application,co-discovery/co-discovery-domain,co-discovery/co-discovery-application
 on:
   push:
     branches: [main, develop, "sprint/**"]
@@ -31,19 +29,19 @@ jobs:
       - name: 编译
         run: mvn -B -f backend/pom.xml clean compile
 
-      # 阶段 2：单元测试（Sprint 范围）
+      # 阶段 2：单元测试（全量）
       - name: 单元测试
-        run: mvn -B -f backend/pom.xml test -pl $SPRINT_MODULES -am
+        run: mvn -B -f backend/pom.xml test
 
       # 阶段 3：架构适应度函数
       - name: 架构约束检查
         run: mvn -B -f backend/pom.xml test -pl co-bootstrap -am -Dtest=ArchitectureTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
-      # 阶段 4：覆盖率门禁（Sprint 范围）
+      # 阶段 4：覆盖率门禁（全量）
       - name: 覆盖率门禁
-        run: mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am
+        run: mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false
 
-      # 阶段 5：集成测试（V3 §8.3：S3/S4 起必须绿，不再容错）
+      # 阶段 5：全量集成测试（V3 §8.3：S3/S4 起硬门禁，不再容错）
       # -Dtest=none 让 surefire 不重复跑单测（阶段 2 已跑），只由 failsafe 执行 *IT
       # DOCKER_HOST 显式指向 runner 的 docker socket，避免 Testcontainers 探测失败
       - name: 集成测试
