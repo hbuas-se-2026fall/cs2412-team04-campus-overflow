@@ -1,8 +1,9 @@
-# CampusOverflow Sprint 0 测试计划
+# CampusOverflow Sprint 0 测试计划（历史归档）
 
 > 负责人：青岑（QA）
 > 范围：Lab1–Lab3 / V3 Sprint 0
 > 版本：v1.0
+> 状态：历史计划（Sprint 0）。表中“待执行”为当时记录；实际执行结果见 [`docs/final/03-quality.md`](../final/03-quality.md) 与 `scripts/smoke/`，本文件不再更新。
 
 ## 1. 测试目标
 
