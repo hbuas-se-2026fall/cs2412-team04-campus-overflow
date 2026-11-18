@@ -22,13 +22,14 @@
 | T4-07 | README、ADR-010、用户手册 | 青岑 | ✅ #130 |
 | T4-01 | develop→main 发布 PR、v1.0.0 tag、GitHub Release、部署验证 | 陈明哲（SM）/ 魏志国（PO 审批） | ✅ PR #135 → `10925c7`；tag `v1.0.0`；[Release](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0) |
 | T4-08 | 两次彩排：≤15 分钟、每人 ≥2 分钟、两次顺利 | 陈明哲组织 / 全员 | ⬜ 第一次 2026-11-17、第二次发布后，见 [`rehearsal-log.md`](../final/rehearsal-log.md) |
-| 9.4 交付物 | 七项索引、个人总结、≤5 分钟视频 | 全员 | 🟨 索引、视频（`docs/final/demo-v1.0.0.webm`）与 4 份总结（陈明哲、青岑、魏志国、刘俊琒）已入库；房国栋 1 份待补 |
+| T4-06 | 容量项（PB-41/43/45）范围决策：做或不做都要留痕 | 房国栋（记录：刘俊琒） | ✅ 三项均不做，理由/替代/后续见 [`s4-deferred-items-decision.md`](../reports/s4-deferred-items-decision.md) |
+| 9.4 交付物 | 七项索引、个人总结、≤5 分钟视频 | 全员 | 🟨 索引、视频（`docs/final/demo-v1.0.0.webm`）与 **5/5 个人总结**（陈明哲、青岑、魏志国、刘俊琒、房国栋）已入库（#154）；仅剩两次彩排记录 |
 
 ## 三、发布检查（T4-01）
 
 - [x] `develop` 最新 CI：后端构建与验证 / 前端构建 / 容器镜像三绿
 - [x] 全仓 27 模块 `mvn verify -DskipITs -Djacoco.skip=false` 通过（2026-11-17，JDK 21）
-- [x] 覆盖率：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥0.70
+- [x] 覆盖率：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥0.70（口径：`docs/final/screenshots/coverage/*.csv` 的 LINE COVERED / TOTAL）
 - [x] T1-15 冒烟 `SMOKE PASS`；demo profile 数据可加载
 - [x] `develop → main` 发布 PR #135（魏志国、青岑 Approve，三检查绿）
 - [x] `v1.0.0` tag 指向 main 合并提交 `10925c7`
@@ -48,5 +49,5 @@
 
 1. v1.0.0 发布 PR 需要 ≥2 Approve（含 SM/PO），且 main 的 `容器镜像构建` 必需检查需随 PR 触发（ci.yml 已支持 base=main）。
 2. 彩排需全员到场；当前只有脚本、计时表和青岑的讲稿。
-3. 5 分钟视频已入库；个人总结已交 4 份，房国栋 1 份未提交。
-4. 本机无 Docker，compose 一键部署需在彩排机器上验证。
+3. 5 分钟视频已入库；个人总结 **5/5 已交齐**（#154），本条阻塞关闭。
+4. 干净环境部署已在有 Docker 的机器上验证（#150 基础设施 healthy、#156 全新库全流程），本条阻塞关闭；仅「两次彩排」仍待执行（T4-08）。

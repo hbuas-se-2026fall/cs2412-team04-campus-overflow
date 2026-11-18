@@ -17,7 +17,8 @@
 ## 配套材料
 
 - 用户手册：[`user-guide.md`](user-guide.md)
-- 演示视频（55s，1280×800）：[`demo-v1.0.0.webm`](demo-v1.0.0.webm)
+- 演示视频（**5:00，1280×870，十段字幕分镜**）：[`demo-v1.0.0-5min.mp4`](demo-v1.0.0-5min.mp4)（分镜见 [`05-demo-script.md`](05-demo-script.md) §5.3）
+- 早期短版演示视频（55s，1280×800）：[`demo-v1.0.0.webm`](demo-v1.0.0.webm)
 - 彩排排期与计时：[`rehearsal-log.md`](rehearsal-log.md)
 - 青岑彩排计时稿：[`rehearsal-qingcen.md`](rehearsal-qingcen.md)
 - 个人总结：[陈明哲](personal-summary-chenmingzhe.md)、[青岑](personal-summary-qingcen.md)、[魏志国](personal-summary-weizhiguo.md)、[刘俊琒](personal-summary-liujunfeng.md)、[房国栋](personal-summary-fangguodong.md)
@@ -27,9 +28,9 @@
 - Discovery 覆盖率截图与 CSV：[`screenshots/coverage/`](screenshots/coverage/README.md)
 - 覆盖率与测试报告：CI Actions 构件 + [`03-quality.md`](03-quality.md) + [`screenshots/coverage/`](screenshots/coverage/README.md)
 - 发布记录：[`docs/release/v0.3.0.md`](../release/v0.3.0.md)、[`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md)
-- v1.0.0 Release Notes：[`docs/release/v1.0.0.md`](../release/v1.0.0.md)（待发布 PR / tag）
+- v1.0.0 Release Notes：[`docs/release/v1.0.0.md`](../release/v1.0.0.md)（**已发布**：[Release v1.0.0](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0)，tag → `10925c7`）
 - v1.0.0 发布验证：[`docs/reports/release-v1.0.0-verification.md`](../reports/release-v1.0.0-verification.md)
-- Sprint 4 计划/执行：[`docs/scrum/sprint-4.md`](../scrum/sprint-4.md)（进行中，SM 陈明哲）
+- Sprint 4 计划/执行：[`docs/scrum/sprint-4.md`](../scrum/sprint-4.md)（已发布 v1.0.0；仅 T4-08 彩排待执行，SM 陈明哲）
 - 禁用账号验证：[`docs/reports/s4-disable-account.md`](../reports/s4-disable-account.md)（接口 + 测试 + 截图）
 
 ## 交付检查（对应指导书 9.4）
@@ -39,5 +40,5 @@
 - [x] `docs/ddd/`、`docs/adr/`（S3 已就位）
 - [x] `docs/scrum/sprint-0～4`（S4 记录已入库）
 - [x] 覆盖率报告归档（`docs/final/screenshots/coverage/`）
-- [x] `docs/final` 答辩材料 + ≤5 分钟演示视频（`demo-v1.0.0.webm`）
+- [x] `docs/final` 答辩材料 + ≤5 分钟演示视频（`demo-v1.0.0-5min.mp4`，5:00 字幕分镜版；另有 55s 短版 `demo-v1.0.0.webm`）
 - [x] 每人一份个人总结（5/5）

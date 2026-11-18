@@ -33,6 +33,6 @@
 
 **ADR-009 渐进式质量门禁**
 
-- `SPRINT_MODULES` 随 Sprint 扩容：S1 只跑 Q&A 范围，S2 加 reputation，S3 加 discovery；
-- 单元测试必过；覆盖率 `domain.coverage.minimum=0.70`；集成测试 `continue-on-error`；
+- 渐进期用 `SPRINT_MODULES` 扩范围，S4 收口删除变量、恢复全量 `mvn test` / `mvn verify`；
+- 单元测试必过；覆盖率 `domain.coverage.minimum=0.70`；集成测试自 2026-11-17 起为硬门禁；
 - S3 收口后五个后端阶段 + 前端阶段全绿，ADR-009 状态改为“已完成”。

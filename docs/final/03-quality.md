@@ -10,20 +10,13 @@
 | 阶段 | 命令 | 作用 |
 | --- | --- | --- |
 | 1 编译 | `mvn -f backend/pom.xml clean compile` | 全仓编译 |
-| 2 单元测试 | `mvn test -pl $SPRINT_MODULES -am` | Sprint 范围单元测试 |
+| 2 单元测试 | `mvn test` | 全量单元测试（27 模块） |
 | 3 架构约束 | `mvn test -pl co-bootstrap -Dtest=ArchitectureTest` | ArchUnit 分层/依赖（FF-4） |
-| 4 覆盖率门禁 | `mvn verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am` | domain 行覆盖 ≥ 0.70 |
-| 5 集成测试 | `mvn verify -Dsurefire.skip=true`，`continue-on-error` | S1–S3 允许失败（ADR-009） |
+| 4 覆盖率门禁 | `mvn verify -DskipITs -Djacoco.skip=false` | 全量 domain 行覆盖 ≥ 0.70 |
+| 5 集成测试 | `mvn verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false` | 硬门禁：Testcontainers 起 MySQL/Redis，失败即阻断 |
 | 前端 | `npm run typecheck` + `npm run build` | 类型检查与构建 |
 
-`SPRINT_MODULES` 在 S3 收口后为：
-
-```text
-co-shared-kernel,co-identity/co-identity-domain,
-co-qa/co-qa-domain,co-qa/co-qa-application,
-co-reputation/co-reputation-domain,co-reputation/co-reputation-application,
-co-discovery/co-discovery-domain,co-discovery/co-discovery-application
-```
+S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量模块；集成测试同时改为硬门禁。
 
 ## 3.2 测试与覆盖率
 
@@ -41,9 +34,21 @@ co-discovery/co-discovery-domain,co-discovery/co-discovery-application
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-![co-discovery-domain JaCoCo 行覆盖 78.26%](screenshots/coverage/coverage-discovery.png)
+四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
-截图与原始数据：[`screenshots/coverage/`](screenshots/coverage/README.md)（`coverage-discovery.png` + `coverage-discovery.csv`）。
+| 模块 | 行覆盖 | 行覆盖率 | 分支覆盖 | 报告截图 | 原始 CSV |
+| --- | ---: | ---: | ---: | --- | --- |
+| `co-identity-domain` | 103 / 136 | **75.74%** | 40 / 66（60.61%） | [`coverage-identity.png`](screenshots/coverage/coverage-identity.png) | [`coverage-identity.csv`](screenshots/coverage/coverage-identity.csv) |
+| `co-qa-domain` | 192 / 231 | **83.12%** | 71 / 90（78.89%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
+| `co-reputation-domain` | 136 / 166 | **81.93%** | 46 / 56（82.14%） | [`coverage-reputation.png`](screenshots/coverage/coverage-reputation.png) | [`coverage-reputation.csv`](screenshots/coverage/coverage-reputation.csv) |
+| `co-discovery-domain` | 72 / 92 | **78.26%** | 41 / 60（68.33%） | [`coverage-discovery.png`](screenshots/coverage/coverage-discovery.png) | [`coverage-discovery.csv`](screenshots/coverage/coverage-discovery.csv) |
+
+| | |
+| :---: | :---: |
+| ![co-identity-domain 75.74%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 83.12%](screenshots/coverage/coverage-qa.png) |
+| ![co-reputation-domain 81.93%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.26%](screenshots/coverage/coverage-discovery.png) |
+
+> 采集口径与复现命令见 [`screenshots/coverage/README.md`](screenshots/coverage/README.md)（采集人 陈明哲，2026-11-17，JDK 21 全仓 `mvn verify -DskipITs -Djacoco.skip=false` 后生成）。
 
 ## 3.3 端到端与冒烟
 

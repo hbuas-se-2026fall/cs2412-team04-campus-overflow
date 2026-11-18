@@ -1,10 +1,13 @@
 # Sprint 3 · 计划（Discovery：搜索投影 / 通知中心 / 相关推荐）
 
 > Scrum Master：房国栋（D，角色卡 S3 既定）　PO：魏志国
-> 时间盒：2026-11-23（周一）～ 2026-12-04（周五），共 10 个工作日
-> 范围：PB-31～PB-40（Discovery / 搜索与通知）；范围来源：[`docs/backlog/product-backlog.md`](../backlog/product-backlog.md)
-> 状态：**草案（PO 代拟，2026-11-16）—— 待房国栋主持 S3 计划会确认后去掉本标记**
+> 时间盒（计划）：2026-11-23 ～ 2026-12-04，10 个工作日；**实际执行：2026-11-16 ～ 2026-11-17（2 天，S2 提前收口后接续，窗口前移）**
+> 范围：PB-31～PB-39（Discovery / 搜索与通知，31 SP）；范围来源：[`docs/backlog/product-backlog.md`](../backlog/product-backlog.md)
+> 状态：**已执行并收口（2026-11-17）**；燃尽图 [`sprint-3-burndown.png`](sprint-3-burndown.png) 已归档
 > S3 目标（角色卡口径）：**移除全部行走骨架，`mvn verify` 全绿**；搜索、推荐、通知三处在界面可用。
+>
+> 收口说明：本文件原为 PO 代拟草案，S3 在 11-16～11-17 压缩执行完毕，SM 未另出计划会纪要；
+> 下文 §三～§五 已按**实际合并记录**（PR #117～#133）回填，验收项逐条附证据。
 
 ---
 
@@ -24,11 +27,11 @@
 | 通知后端（房国栋 T3-03/06/07：MentionParser / NotificationProjector / NotificationService） | ✅ 已在 develop，0 TODO | 文件树核查 2026-11-16 |
 | 搜索边界证据（单字 422 / 空词处理） | ✅ 截图 | [`sprint-3-search-422.png`](sprint-3-search-422.png)、[`sprint-3-search-empty.png`](sprint-3-search-empty.png) |
 | 搜索冒烟记录 | ✅ | [`sprint-3-search.md`](sprint-3-search.md) |
-| 搜索投影 `SearchIndexProjector`（T3-04，B 代 A 实现） | 🟨 PR #120 | 10 个 TODO 实现 + `SearchIndexProjectorTest` 3 条幂等用例 |
+| 搜索投影 `SearchIndexProjector`（T3-04，B 代 A 实现） | ✅ PR #120 已合并（2026-11-16 12:18） | 10 个 TODO 实现 + `SearchIndexProjectorTest` 3 条幂等用例 |
 | 通知侧测试 | ✅ 本次补充 | `NotificationProjectorTest` 5 条 + `NotificationServiceTest` 3 条 |
 | CI 纳入 discovery | ✅ 本次补充 | `SPRINT_MODULES` 增加 `co-discovery-domain/application` |
 
-## 三、任务分解（待计划会确认到 ≤1 天粒度）
+## 三、任务分解（S3 收口后的实际归属）
 
 | 成员 | 任务 | 内容 | 验收 |
 | --- | --- | --- | --- |
@@ -42,25 +45,56 @@
 | 全员 | T3-11 | demo profile 完整走查演示数据，走不通记缺陷 Issue | 演示路径 0 阻断缺陷 |
 | 全员 | T3-12 | 回归测试与缺陷修复，功能冻结 | `mvn verify` 全绿且无 P0/P1 缺陷 |
 
-## 四、每日站会（10:00，≤15 分钟，三问）
+## 四、站会与执行节奏（压缩执行：2 次同步）
 
-> 开始后按日填写；SM 房国栋维护。
+> S3 与 S2 收口、S4 发布交叠，实际只做**开工同步**与**收口同步**两次，未按周一/三/五逐日站会
+> （流程改进已记入 [`04-process.md`](../final/04-process.md)）。下表按当日合并到 `develop` 的 PR 回填，
+> 只记录可查证的事实，不虚构发言。
 
-| 日期 | 成员 | 昨日完成 | 今日计划 | 阻塞 |
-| --- | --- | --- | --- | --- |
-| （待填） | | | | |
+| 时间 | 类型 | 本日完成（按合并 PR 归集） | 阻塞与处置 |
+| --- | --- | --- | --- |
+| 2026-11-16 09:00 | 开工同步 | #117 搜索词归一化 + 相关问题排序（C）；#120 `SearchIndexProjector` 十方法（B 代 A）；#119 搜索 422 / 索引阻塞证据 | 中文搜索首测 `total=0`（投影器未实现）→ 当日 #120 合并后解除 |
+| 2026-11-16 14:00 | 中途复核 | #122 中文搜索与相关问题通过证据；#126 通知测试 5+3 条 + CI 纳入 discovery + `discovery.http`；#128 可观测性四面板 | — |
+| 2026-11-17 08:30 | 收口同步 | #132 discovery 覆盖率证据（78.26%）；#133 S3/S4 材料骨架收口；全仓 `mvn verify` 27 模块全绿 | 前端三处未单独立 S3 走查记录 → 由 S4 演示视频（`docs/final/demo-v1.0.0.webm`）覆盖 |
 
-## 五、验收清单
+## 五、验收清单（S3 收口，2026-11-17）
 
 - [x] `mvn verify` 全绿（5 个后端阶段 + 前端阶段），CI 完整门禁恢复（E 复核 2026-11-16）
 - [x] co-discovery 模块 **0 TODO**（`DiscoveryQueryService`、`SearchIndexProjector`）
 - [x] `domain.coverage.minimum=0.70` 通过；ADR-009 状态改“已完成”
-- [ ] 中文搜索命中（ADR-005 ngram 口径）、相关问题返回有序列表
-- [ ] 通知：同一事件不重复发；只能标记自己的；未读数正确
-- [ ] 前端搜索页 + 相关侧栏 + 通知已读 + @高亮 可演示
-- [ ] T3-11 demo 走查记录（0 阻断缺陷）；T3-12 功能冻结
-- [ ] 燃尽图归档 `docs/scrum/sprint-3-burndown.png`
+- [x] 中文搜索命中（ADR-005 ngram 口径）：`q=红黑树` → `total=2`，命中 id=7/id=8，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-hit.png`](sprint-3-search-hit.png)
+- [x] 相关问题返回有序列表：`Related count: 1`，排序口径见 `RelatedQuestionPolicy`（同文件 §3、[`sprint-3-search-related.png`](sprint-3-search-related.png)）
+- [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 5 条（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
+- [x] 前端三处可用：`QuestionListPage`（关键词 + 标签 + 未回答 + 四排序）、`QuestionDetailPage` 相关问题侧栏与 `@昵称` 高亮、`NotificationsPage`（单条已读/全部已读/未读数）；演示见 `docs/final/demo-v1.0.0.webm`（55 秒）
+  - 逐条截图（2026-11-18 复采，本机 `demo` profile + 浏览器实拍）：
+    - 搜索页两栏布局（左结果 / 右相关标签 + 相关问题 + 热门标签）：[`s3-front-search.png`](s3-front-search.png)
+    - 单字关键词 422 中文提示（`DIS-1001` → 「每个关键词至少 2 个字符」）：[`s3-front-search-422.png`](s3-front-search-422.png)
+    - 详情页 `@昵称` 高亮（评论里 `@小红` 蓝底标记）：[`s3-front-mention.png`](s3-front-mention.png)
+    - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)
+    - 通知页未读数角标（`通知 6`）与 6 条未读列表：[`s3-front-notifications.png`](s3-front-notifications.png)
+    - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)
+- [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频；缺陷台账 BUG-001～BUG-006 全部关闭，无 P0/P1 遗留（[`docs/qa/defects.md`](../qa/defects.md)）
+- [x] T3-12 功能冻结：S3 范围 31 SP 全部合入 `develop`，v1.0.0 于 2026-11-17 发布
+- [x] 燃尽图归档 [`sprint-3-burndown.png`](sprint-3-burndown.png)
 
+## 五之二、燃尽图与数据
+
+口径：纵轴为 S3 范围内尚未合入 `develop` 的 Story Point；**完成 = 对应 PBI 的 PR 合并**（不用 Issue 勾选状态，
+因为 48 条 Issue 的验收清单是模板文本、未被逐条勾选）。范围 PB-31～PB-39 合计 **31 SP**。
+
+| 时间点 | 理想剩余 | 实际剩余 | 本段完成（证据 PR） |
+| --- | ---: | ---: | --- |
+| 2026-11-16 AM（开工同步） | 31 | 31 | 计划会未单出纪要，从开工时点起算 |
+| 2026-11-16 PM | 20.7 | 18 | PB-31 搜索（5）#117、PB-32 投影（5）#120、PB-33 相关问题（3）#122 |
+| 2026-11-16 EOD | 10.3 | 4 | PB-34/35/36/39 通知四件套（5+3+3+3=14）#126 |
+| 2026-11-17 AM（收口同步） | 0 | 0 | PB-37 覆盖率（3）#132、PB-38 demo 数据（1）#133 |
+
+> 实际曲线在 11-16 当天即下探到 4 SP，原因是通知侧（PB-34～PB-36、PB-39）由房国栋一人在 #126 一次性合入；
+> 剩余 4 SP 依赖覆盖率与 demo 数据的归档提单，故落到 11-17 上午。
+
+![Sprint 3 burndown](sprint-3-burndown.png)
+
+生成脚本：[`scripts/dev-env/make-sprint3-burndown.ps1`](../../scripts/dev-env/make-sprint3-burndown.ps1)（改数据后重跑即可）。
 
 ## 六、CI 与验证（E 复核，2026-11-16）
 

@@ -17,6 +17,7 @@
 | 文件 | 内容 |
 | --- | --- |
 | `env-<拼音>.png` | 终端里 `java -version` / `mvn -v` / `node -v` / `docker --version` 同屏 |
+| `env-<拼音>-docker.png` | Docker 装好后的二次采集（首采时未装 Docker 的人补） |
 | `env-<拼音>.txt` | `scripts/dev-env/collect-env.*` 打印的那一行 Markdown |
 | `mvn-test-<拼音>.png` | `mvn clean test` 结尾（`BUILD SUCCESS` 或 `BUILD FAILURE` + 原因） |
 
@@ -52,13 +53,13 @@ mvn clean test
 | 房国栋 | `2177023844` | ✅ [`env-fangguodong.png`](env-fangguodong.png) | ✅ [`env-fangguodong.txt`](env-fangguodong.txt) | ✅ [`mvn-test-fangguodong.log`](../logs/mvn-test-fangguodong.log)（完整构建日志，78 KB；截图待补） | 2026-11-15 |
 | 魏志国 | `2123345397-star` | ✅ [`env-weizhiguo.png`](env-weizhiguo.png) | ✅ [`env-weizhiguo.txt`](env-weizhiguo.txt) | ✅ [`mvn-test-weizhiguo.png`](../screenshots/mvn-test-weizhiguo.png) + [`完整日志`](../logs/mvn-test-weizhiguo.log)（121 绿 + co-discovery `TODO(S3)` 预期红） | 2026-11-16 |
 | 陈明哲 | `cmz666-BOT` | ✅ [`env-chenmingzhe.png`](env-chenmingzhe.png) | ✅ [`env-chenmingzhe.txt`](env-chenmingzhe.txt) | ✅ 同图（含 `mvn -B test` 摘要） | 2026-11-16 |
-| 刘俊琒 | `Liujunfeng520` | ⬜ 待补 | ⬜ | ⬜ | |
+| 刘俊琒 | `Liujunfeng520` | ✅ [`env-liujunfeng.png`](env-liujunfeng.png) | ✅ [`env-liujunfeng.txt`](env-liujunfeng.txt) | ✅ [`mvn-test-liujunfeng.png`](../screenshots/mvn-test-liujunfeng.png) + [`完整日志`](../logs/mvn-test-liujunfeng.log)（27 模块 165 用例全绿） | 2026-11-17 |
 | 青岑 | `qing963666` | ✅ [`env-qingcen.png`](env-qingcen.png) | ✅ [`env-qingcen.txt`](env-qingcen.txt) | ✅ [`mvn-test-qingcen.png`](../screenshots/mvn-test-qingcen.png) | 2026-11-15 |
 
 图例：✅ 已交　⬜ 待补
 
-> 其余四人补齐后，把对应的 `env-<拼音>.png` / `env-<拼音>.txt` 放进本目录，并把上表改成 ✅，
-> 同时更新 [`../env-matrix.md`](../env-matrix.md) 第 2 节的汇总行。
+> 五人已齐（2026-11-17）。后续如重跑采集，替换同名文件即可，并同步更新
+> [`../env-matrix.md`](../env-matrix.md) 第 2 节的汇总行。`mvn` 测试截图仅房国栋待补（已有完整日志）。
 
 ---
 
@@ -79,4 +80,4 @@ mvn clean test
 | 成员 | 差异 | 处置 |
 | --- | --- | --- |
 | 房国栋 | 命令行 `java` 默认指向 JDK 1.8（系统 PATH 里 Oracle `javapath` 排在前面），但 Maven 实际使用 JDK 21（编译日志 `release 21`） | 截图前执行 `$env:JAVA_HOME="E:\IntelliJ IDEA 2025.3.3\jbr"; $env:Path="$env:JAVA_HOME\bin;"+$env:Path`；长期方案见 `env-matrix.md` §6 |
-| 房国栋 | Docker Desktop：11-18 已在本机装好并实测（WSL2 后端） | `docker --version` → `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` → `29.9.3`；`Registry Mirrors` 已生效；已同步 `env-matrix.md` 第 2 节 |
+| 房国栋 | Docker Desktop：11-18 已在本机装好并实测（WSL2 后端） | `docker --version` -> `Docker version 29.9.3, build 5457199`；`docker info --format '{{.ServerVersion}}'` -> `29.9.3`；`Registry Mirrors` = `https://docker.1ms.run`（原中科大/网易/腾讯云已停服）；二采截图 [`env-fangguodong-docker.png`](env-fangguodong-docker.png)；已同步 `env-matrix.md` 第 2 节 |

@@ -1,12 +1,15 @@
 # CampusOverflow 持续集成流水线（对应 arc42 第 10 章适应度函数与第 7 章部署视图）
 name: CI
-env:
-  SPRINT_MODULES: co-shared-kernel,co-identity/co-identity-domain,co-qa/co-qa-domain,co-qa/co-qa-application,co-reputation/co-reputation-domain,co-reputation/co-reputation-application,co-discovery/co-discovery-domain,co-discovery/co-discovery-application
 on:
   push:
     branches: [main, develop, "sprint/**"]
   pull_request:
     branches: [main, develop]
+
+# V3 §8.5 控制 Actions 用量：同一分支的新提交取消旧运行，避免排队浪费
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend:
@@ -26,22 +29,28 @@ jobs:
       - name: 编译
         run: mvn -B -f backend/pom.xml clean compile
 
-      # 阶段 2：单元测试（Sprint 范围）
+      # 阶段 2：单元测试（全量）
       - name: 单元测试
-        run: mvn -B -f backend/pom.xml test -pl $SPRINT_MODULES -am
+        run: mvn -B -f backend/pom.xml test
 
       # 阶段 3：架构适应度函数
       - name: 架构约束检查
         run: mvn -B -f backend/pom.xml test -pl co-bootstrap -am -Dtest=ArchitectureTest -DfailIfNoTests=false -Dsurefire.failIfNoSpecifiedTests=false
 
-      # 阶段 4：覆盖率门禁（Sprint 范围）
+      # 阶段 4：覆盖率门禁（全量）
       - name: 覆盖率门禁
-        run: mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am
+        run: mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false
 
-      # 阶段 5：集成测试（S1 允许失败）
+      # 阶段 5：全量集成测试（V3 §8.3：S3/S4 起硬门禁，不再容错）
+      # -Dtest=none 让 surefire 不重复跑单测（阶段 2 已跑），只由 failsafe 执行 *IT
+      # DOCKER_HOST 显式指向 runner 的 docker socket，避免 Testcontainers 探测失败
       - name: 集成测试
-        run: mvn -B -f backend/pom.xml verify -Dsurefire.skip=true
-        continue-on-error: true
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+          # runner 的 Docker daemon 要求 API ≥1.40，而 docker-java 默认 1.32，需显式指定
+          DOCKER_API_VERSION: "1.43"
+          TESTCONTAINERS_RYUK_DISABLED: "true"
+        run: mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 
       - name: 归档测试报告
         if: always()
@@ -72,8 +81,9 @@ jobs:
     name: 容器镜像构建
     runs-on: ubuntu-latest
     needs: [backend, frontend]
-    # push 与"目标为 main 的 PR（发布）"都要产出镜像检查，否则发布 PR 永远等不到该必需检查
-    if: github.event_name == 'push' || github.event.pull_request.base.ref == 'main'
+    # V3 §8.5：只在 main 的 push（发布）与目标为 main 的 PR 上构建镜像；
+    # 同时保证 main 的必需检查「容器镜像构建」总能被满足（PR→main 会触发）
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'main')
     steps:
       - uses: actions/checkout@v4
       - name: 构建后端镜像
