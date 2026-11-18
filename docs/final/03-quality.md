@@ -10,20 +10,13 @@
 | 阶段 | 命令 | 作用 |
 | --- | --- | --- |
 | 1 编译 | `mvn -f backend/pom.xml clean compile` | 全仓编译 |
-| 2 单元测试 | `mvn test -pl $SPRINT_MODULES -am` | Sprint 范围单元测试 |
+| 2 单元测试 | `mvn test` | 全量单元测试（27 模块） |
 | 3 架构约束 | `mvn test -pl co-bootstrap -Dtest=ArchitectureTest` | ArchUnit 分层/依赖（FF-4） |
-| 4 覆盖率门禁 | `mvn verify -DskipITs -Djacoco.skip=false -pl $SPRINT_MODULES -am` | domain 行覆盖 ≥ 0.70 |
-| 5 集成测试 | `mvn verify -Dsurefire.skip=true`，`continue-on-error` | S1–S3 允许失败（ADR-009） |
+| 4 覆盖率门禁 | `mvn verify -DskipITs -Djacoco.skip=false` | 全量 domain 行覆盖 ≥ 0.70 |
+| 5 集成测试 | `mvn verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false` | 硬门禁：Testcontainers 起 MySQL/Redis，失败即阻断 |
 | 前端 | `npm run typecheck` + `npm run build` | 类型检查与构建 |
 
-`SPRINT_MODULES` 在 S3 收口后为：
-
-```text
-co-shared-kernel,co-identity/co-identity-domain,
-co-qa/co-qa-domain,co-qa/co-qa-application,
-co-reputation/co-reputation-domain,co-reputation/co-reputation-application,
-co-discovery/co-discovery-domain,co-discovery/co-discovery-application
-```
+S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量模块；集成测试同时改为硬门禁。
 
 ## 3.2 测试与覆盖率
 
