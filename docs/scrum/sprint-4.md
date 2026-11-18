@@ -3,7 +3,7 @@
 > Scrum Master：陈明哲（E）　PO / 发布经理：魏志国
 > 范围：稳定化、禁用账号、可观测性、v1.0.0 发布、彩排
 > 状态：**已发布 v1.0.0（2026-11-17）**；T4-08 彩排待执行。
-> 更新：T4-02（#127）、T4-04（#128）、T4-05（#129）、T4-07（#130）已合入；T4-01 已完成（PR #135 / tag v1.0.0 / Release）；T4-08 彩排与干净环境部署运行时验证待执行。
+> 更新：T4-02（#127）、T4-04（#128）、T4-05（#129）、T4-07（#130）已合入；T4-01 已完成（PR #135 / tag v1.0.0 / Release），干净环境**全栈 compose 构建**已于 2026-11-18 验证并修复 Dockerfile 缺陷；T4-08 彩排待执行。
 
 ## 一、Sprint 目标
 
@@ -42,6 +42,7 @@
 - [x] 禁用账号：非 ADMIN 403、禁自己 ID-1007、禁用后旧会话失效且登录失败（[`s4-disable-account.md`](../reports/s4-disable-account.md)）
 - [x] `mvn verify` / CI 全绿，覆盖率报告可点开（`docs/final/screenshots/coverage/`）
 - [x] 干净环境按 README 启动并完成注册→登录→提问→回答（compose 基础设施 #150 + 全新库全流程 [`s4-clean-env-full-flow.md`](../reports/s4-clean-env-full-flow.md)）
+- [x] 干净环境 `docker compose -f deploy/docker-compose.yml up -d --build` **全栈**构建运行（backend + web 四容器、Nginx 80 端口反代后端 API、health=UP）—— [`s4-compose-fullstack-verify.md`](../reports/s4-compose-fullstack-verify.md)，2026-11-18；本次同时修复 `deploy/backend.Dockerfile` 的 COPY 通配符缺陷（`co-bootstrap-*.jar` → `campus-overflow.jar`），并补 `.dockerignore`
 - [x] `docs/final/README.md` 七项全部有可点链接（5 份个人总结已齐）
 - [ ] 两次彩排记录（≤15 分钟、每人 ≥2 分钟）
 
