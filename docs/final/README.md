@@ -17,7 +17,8 @@
 ## 配套材料
 
 - 用户手册：[`user-guide.md`](user-guide.md)
-- 演示视频（55s，1280×800）：[`demo-v1.0.0.webm`](demo-v1.0.0.webm)
+- 演示视频（**5:00，1280×870，十段字幕分镜**）：[`demo-v1.0.0-5min.mp4`](demo-v1.0.0-5min.mp4)（分镜见 [`05-demo-script.md`](05-demo-script.md) §5.3）
+- 早期短版演示视频（55s，1280×800）：[`demo-v1.0.0.webm`](demo-v1.0.0.webm)
 - 彩排排期与计时：[`rehearsal-log.md`](rehearsal-log.md)
 - 青岑彩排计时稿：[`rehearsal-qingcen.md`](rehearsal-qingcen.md)
 - 个人总结：[陈明哲](personal-summary-chenmingzhe.md)、[青岑](personal-summary-qingcen.md)、[魏志国](personal-summary-weizhiguo.md)、[刘俊琒](personal-summary-liujunfeng.md)、[房国栋](personal-summary-fangguodong.md)
@@ -39,5 +40,5 @@
 - [x] `docs/ddd/`、`docs/adr/`（S3 已就位）
 - [x] `docs/scrum/sprint-0～4`（S4 记录已入库）
 - [x] 覆盖率报告归档（`docs/final/screenshots/coverage/`）
-- [x] `docs/final` 答辩材料 + ≤5 分钟演示视频（`demo-v1.0.0.webm`）
+- [x] `docs/final` 答辩材料 + ≤5 分钟演示视频（`demo-v1.0.0-5min.mp4`，5:00 字幕分镜版；另有 55s 短版 `demo-v1.0.0.webm`）
 - [x] 每人一份个人总结（5/5）
