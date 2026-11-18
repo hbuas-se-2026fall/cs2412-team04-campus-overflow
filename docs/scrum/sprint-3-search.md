@@ -1,7 +1,20 @@
-# Sprint 3 · 搜索与相关问题验收（进行中）
+# Sprint 3 · 搜索与相关问题验收（已通过）
 
 > 负责人：青岑（C）　范围：T3-01 / T3-02 / T3-05
 > 环境：demo profile，MySQL/Redis Docker，`http://localhost:8080`
+> 验收日期：2026-11-17（后端）；2026-11-18（前端复核）
+
+## 验收结果总表
+
+| 验收项 | 结果 | 证据 |
+| --- | --- | --- |
+| 单字关键词边界 | ✅ `q=树` 返回 422 `DIS-1001`（每个关键词至少 2 个字符） | §1、[`sprint-3-search-422.png`](sprint-3-search-422.png) |
+| 中文搜索 | ✅ `q=红黑树` → `total=2`，命中 id=7/id=8 | §3、[`sprint-3-search-hit.png`](sprint-3-search-hit.png)、[`sprint-3-search-hit.log`](sprint-3-search-hit.log) |
+| 相关问题 | ✅ `Related count=1`，`similarity=1.0`，按共享标签排序 | §3、[`sprint-3-search-related.png`](sprint-3-search-related.png) |
+| 通知幂等 / 仅本人可标已读 / 未读数 | ✅ `NotificationProjectorTest` 5 条 + `NotificationServiceTest` 3 条全部通过 | [`sprint-3.md`](sprint-3.md) §五 |
+| 前端三处 | ✅ 搜索页、相关问题侧栏、通知未读/已读均可用 | [`s3-front-search.png`](s3-front-search.png)、[`s3-front-search-422.png`](s3-front-search-422.png)、[`s3-front-mention.png`](s3-front-mention.png)、[`s3-front-related.png`](s3-front-related.png)、[`s3-front-notifications.png`](s3-front-notifications.png)、[`s3-front-notifications-read.png`](s3-front-notifications-read.png) |
+
+**结论：S3 搜索与通知验收项全部通过，无阻塞项。**
 
 ## 1. 已验证
 
