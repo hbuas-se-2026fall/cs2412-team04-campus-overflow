@@ -19,4 +19,4 @@
 
 - `Story Points` / `Sprint` 两列在截图时**尚未填值**，字段本身已建好。
 - `Sprint` 迭代由 GitHub 自动生成 `Sprint 1 / 2 / 3`；与 V3 的 Sprint 0～4 口径尚未逐项对齐。
-- `Public` 可见性只有组织 owner 能改；当前看板为 Private，待 owner 操作。
+- 组织侧限制：Projects 当前只能设为 **Private**；组长魏志国已确认（2026-11-18 群聊）。V3 的 Public 要求在当前组织设置下无法满足，答辩时按此实际口径说明。
