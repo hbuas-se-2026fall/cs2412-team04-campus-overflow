@@ -216,6 +216,6 @@ bounty        : status=AWARDED, points=50
 | 3 | 赞 +10 / 踩 −2 / 改投 −12 / 每日 200 上限 | ✅ | `ReputationRulebookTest` |
 | 4 | 50 分 / 7 天悬赏、结算、到期退款 | ✅ | `sprint-2-bounty*.log`、`bounty-smoke.ps1` |
 | 5 | 排行榜、流水 403、对账 | ✅ | `ReputationQueryAuthorizationTest`、`ReputationApiImplTest`、#100 |
-| 6 | 全量测试与发布标签 | ⚠️ 测试通过；`v0.3.0` 标签待发布 | CI、测试流水 |
+| 6 | 全量测试与发布标签 | ✅ 测试通过；`v0.3.0` 已发布（tag `a4114dc`） | CI、测试流水、[`release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md) |
 
-彩排结论：第 1～5 条可以在评审时按顺序演示；第 6 条的版本标签需在评审前由发布负责人补打。
+彩排结论：第 1～5 条可在评审时按顺序演示；第 6 条 `v0.3.0` 已于 2026-11-16 发布（tag `a4114dc`，PR #115）。
