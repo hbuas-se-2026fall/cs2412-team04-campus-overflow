@@ -25,5 +25,5 @@
 
 1. 本 tag 为 **RC**，指向 `s3/completion` 的最终提交；PR #126 合入 `develop` 后，正式发布仍应走 `develop → main` 并复核 tag/Tag 对象。
 2. 旧 walking-skeleton 时期已投递的事件不会自动补搜索索引；需要新问题或单独 reindex。
-3. `env/env-fangguodong.txt` 的 Docker 二采来自青岑机器代跑记录，房国栋本机截图仍待本人补交。
-4. `docs/scrum/sprint-3.md` 仍是计划草案，S3 结束后由房国栋主持计划会确认并更新为执行记录。
+3. ~~`env/env-fangguodong.txt` 的 Docker 二采来自青岑机器代跑记录，房国栋本机截图仍待本人补交。~~ **2026-11-18 已闭环**：房国栋本机安装 Docker Desktop 29.9.3（WSL2）并复采，截图见 `docs/lab1-submission/env/env-fangguodong-docker.png`，全栈 compose 部署验证见 `docs/reports/s4-compose-fullstack-verify.md`。
+4. ~~`docs/scrum/sprint-3.md` 仍是计划草案，S3 结束后由房国栋主持计划会确认并更新为执行记录。~~ **2026-11-17 已闭环**：S3 在 11-16～11-17 压缩执行完毕，文件已改为「已执行并收口」，补齐站会/燃尽图/验收勾选，见 `docs/scrum/sprint-3.md`。
