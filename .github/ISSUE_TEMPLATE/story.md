@@ -2,9 +2,11 @@
 name: 用户故事 / PBI
 about: 从 Product Backlog 拆出的用户故事，含验收标准与点数
 title: "[US-xx] "
-labels: ["type:story", "status:backlog"]
+labels: ["type:story"]
 assignees: ""
 ---
+
+<!-- 提交前补 ctx:identity/qa/reputation/discovery/frontend/infra 和 priority:must/should/could/wont；被阻塞时加 status:blocked -->
 
 ## 用户故事
 
