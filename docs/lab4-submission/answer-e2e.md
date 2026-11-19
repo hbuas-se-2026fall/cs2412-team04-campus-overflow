@@ -73,5 +73,5 @@ boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == nul
 | 2 | 至少 1 名成员 Approve | #89 经评审合并 | ✅ |
 | 3 | 验收标准逐条通过 | 本文第二节接口结果 + 第三节 SQL；无 P0/P1 | ✅ |
 | 4 | 文档同步 | 本文 + PR #97 的 JDBC 配置修复 | ✅ |
-| 5 | PR 合并、分支删除、看板移 Done | PR #97 已合并；分支/看板卡由 SM 收尾 | ⚠️ 待 SM |
+| 5 | PR 合并、分支删除、看板移 Done | PR #97 已合并；分支 `feat/qa-answer` 已删除（2026-11-19，作者收尾）；看板卡已随 #160 看板同步移入 Done（Done 44） | ✅（2026-11-19 收口） |
 | 6 | 无明文密钥、无调试残留 | `AnswerCommandService` 无调试注释；开发默认密码来自模板 | ✅ |
