@@ -60,9 +60,9 @@ public class QuestionCommandService {
     @Transactional
     public long post(Actor actor, PostQuestionCommand cmd) {
         // 1) 关联课程必须真实存在；不传课程表示“不挂课程的公开提问”，允许为空
-        if (cmd.courseId() != null) {
-            identity.findCourse(cmd.courseId())
-                    .orElseThrow(() -> new NotFoundException("QA-1006", "课程不存在：" + cmd.courseId()));
+        //    用 isEmpty() 判断而非丢弃 orElseThrow 的返回值（Sonar java:S2201，2026-11-19 修复）
+        if (cmd.courseId() != null && identity.findCourse(cmd.courseId()).isEmpty()) {
+            throw new NotFoundException("QA-1006", "课程不存在：" + cmd.courseId());
         }
 
         // 2) 值对象负责格式校验：标题 10–150、正文 ≥20、标签 1–5 且小写去重
