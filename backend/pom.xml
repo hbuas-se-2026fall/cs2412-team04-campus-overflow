@@ -35,6 +35,8 @@
         <commonmark.version>0.24.0</commonmark.version>
         <owasp-sanitizer.version>20240325.1</owasp-sanitizer.version>
         <jacoco.version>0.8.12</jacoco.version>
+        <!-- SonarQube 扫描插件（Lab 7 Step 3） -->
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <!-- 覆盖 Spring Boot 3.4.5 BOM 的 testcontainers 1.20.x：其内置 docker-java 默认 Docker API 1.32，
              GitHub runner 的 daemon 要求 ≥1.40（否则 "Could not find a valid Docker environment"）；
              1.21.x 的 docker-java 默认 API 已升级，CampusOverflowFlowIT 才能在 CI 上运行（V3 §8.3） -->
@@ -190,6 +192,11 @@
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>${jacoco.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.sonarsource.scanner.maven</groupId>
+                    <artifactId>sonar-maven-plugin</artifactId>
+                    <version>${sonar-maven-plugin.version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -17,7 +17,8 @@ export function CourseListPage() {
   const load = useCallback(() => {
     setCourses(null);
     setError('');
-    api.courses()
+    api
+      .courses()
       .then(setCourses)
       .catch((e: Error) => setError(e.message));
   }, []);
@@ -27,8 +28,8 @@ export function CourseListPage() {
   }, [authLoading, load]);
 
   const handleJoined = (courseId: number) => {
-    setCourses((prev) =>
-      prev?.map((c) => (c.id === courseId && !c.myRole ? { ...c, myRole: 'STUDENT' } : c)) ?? prev,
+    setCourses(
+      (prev) => prev?.map((c) => (c.id === courseId && !c.myRole ? { ...c, myRole: 'STUDENT' } : c)) ?? prev,
     );
   };
 

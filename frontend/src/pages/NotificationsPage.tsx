@@ -8,11 +8,20 @@ export function NotificationsPage() {
   const [error, setError] = useState('');
 
   const load = () =>
-    api.notifications()
-      .then((p) => { setItems(p.items); setError(''); })
-      .catch((e: Error) => { setItems([]); setError(e.message); });
+    api
+      .notifications()
+      .then((p) => {
+        setItems(p.items);
+        setError('');
+      })
+      .catch((e: Error) => {
+        setItems([]);
+        setError(e.message);
+      });
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+  }, []);
 
   const readOne = async (id: number) => {
     await api.readOne(id).catch(() => undefined);
@@ -29,7 +38,9 @@ export function NotificationsPage() {
       </div>
 
       <div className="actions">
-        <button onClick={() => api.readAll().then(load)} disabled={unread === 0}>全部标记为已读</button>
+        <button onClick={() => api.readAll().then(load)} disabled={unread === 0}>
+          全部标记为已读
+        </button>
         <button onClick={load}>刷新</button>
       </div>
 
@@ -47,10 +58,19 @@ export function NotificationsPage() {
         {items?.map((n) => (
           <li key={n.id} className={n.read ? 'muted' : ''}>
             <span className="notif-type">{typeLabel(n.type)}</span>
-            <Link to={n.link} onClick={() => { if (!n.read) void readOne(n.id); }}>{n.title}</Link>
+            <Link
+              to={n.link}
+              onClick={() => {
+                if (!n.read) void readOne(n.id);
+              }}
+            >
+              {n.title}
+            </Link>
             <span className="muted"> · {new Date(n.createdAt).toLocaleString('zh-CN')}</span>
             {!n.read && (
-              <button className="link-btn" onClick={() => readOne(n.id)}>标为已读</button>
+              <button className="link-btn" onClick={() => readOne(n.id)}>
+                标为已读
+              </button>
             )}
           </li>
         ))}
