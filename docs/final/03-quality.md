@@ -74,7 +74,7 @@ BUG-003 于 2026-11-17 复核关闭：`main` 为 2 Approve + 后端/前端/容�
 - `v0.3.0` → `a4114dc`（main，PR #115）：CI 后端/前端/容器镜像三阶段绿
 
 详见 [`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md)。
-- 可观测性四面板与对账指标演练：[`docs/reports/t4-04-observability.md`](../reports/t4-04-observability.md)
+- 可观测性四面板与对账指标演练：[`docs/reports/t4-04-observability.md`](../reports/t4-04-observability.md)；UI 截图 [`screenshots/grafana/grafana-four-panels.png`](screenshots/grafana/grafana-four-panels.png)
 
 ## 3.6 复现命令
 
