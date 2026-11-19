@@ -16,7 +16,7 @@
 | 议题 | 结论 | 备注 |
 | --- | --- | --- |
 | Sprint 目标 | 搜索能搜到中文、相关问题可推荐、通知中心可用；CI 恢复完整门禁 | 角色卡 S3 |
-| 迭代范围 | PB-31～PB-40；骨架清理（`DiscoveryQueryService` 2 个、`SearchIndexProjector` 10 个 TODO） | `docs/ddd/` 与缺陷台账 |
+| 迭代范围 | PB-31～PB-39（与文件开头及 backlog 归属一致；PB-40 禁用账号属 Sprint 4，已在 T4-02 交付）；骨架清理（`DiscoveryQueryService` 2 个、`SearchIndexProjector` 10 个 TODO） | `docs/ddd/` 与缺陷台账 |
 | 本次不做 | S4 发布项（v1.0.0、Grafana 面板、禁用账号）；新功能面不做扩张 | T4 系列留给 Sprint 4 |
 
 ## 二、当前基础（S2 期间已提前完成）

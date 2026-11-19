@@ -11,7 +11,7 @@
 
 | 交付物 | 证据 | 结果 |
 | --- | --- | --- |
-| 48 条 PBI Issue 与 Backlog 单一口径 | Issue #27~#74（`[PB-xx]` + User Story + Given/When/Then）、`docs/backlog/product-backlog.md` | 看板 49 项状态归位（Done 31 / Sprint Backlog 10 / Backlog 8），API 复核零误差 |
+| 48 条 PBI Issue 与 Backlog 单一口径 | Issue #27~#74（`[PB-xx]` + User Story + Given/When/Then）、`docs/backlog/product-backlog.md` | 看板状态：初导入时 49 项归位（Done 31 / Sprint Backlog 10 / Backlog 8）；后由 #160 看板同步（board-sync 2026-11-17）按交付事实更新为 **48 条全部处置：44 closed / 3 open（v1.1 候选）/ 1 Won't**，最终口径见 [`docs/backlog/board-sync-2026-11-17.md`](../backlog/board-sync-2026-11-17.md) |
 | 分支保护与必需状态检查（BUG-003 关闭） | Branch Protection API 核验记录 `docs/lab1-submission/README.md`；`develop` 勾上 `后端构建与验证`、`前端构建`（1 Approve + dismiss stale + enforce admins） | main/develop 双分支保护完整，CI 失败阻断合并 |
 | Question.accept 五步校验（T1-03） | `QuestionTest.Accepting` 5 条 | 全绿 |
 | Answer 聚合与 AnswerCommandService（T1-04/08） | `AnswerTest` 3 条、`AnswerAndVoteServiceTest` 4/4；事件参数顺序修复 PR #89 | 全绿 |
