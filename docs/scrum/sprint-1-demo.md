@@ -112,8 +112,12 @@
 | 2 | 再点一次 | 取消收藏，按钮恢复 |
 | 3 | 未登录点击 | 引导登录，不发出请求 |
 
-> ⚠️ **演示前必须确认**：收藏接口若尚未合并（后端 `collect` 用例未实现），本场景改为**口头说明 + 展示接口契约**，不要现场点出 500。
-> 确认方式：`http/qa.http` 里跑一次 `POST /api/v1/questions/{id}/collect`，返回 2xx 再演。
+> ⚠️ **US-06「收藏」当前状态（2026-11-18 复核）**：后端 `collect` 用例**未实现**，
+> 前端也无收藏入口，`product-backlog.md` 里**没有对应 PBI**。
+> 因此本场景**不参与现场演示**，改为口头说明「收藏功能未纳入 v1.0.0 范围」，
+> 并指向 [`product-backlog.md`](../backlog/product-backlog.md) 说明它在 V3 早期清单里存在、
+> 但未进入 Sprint 拆分。**不要现场点，会 404/500。**
+> 若需补做，先在 backlog 立 PBI 再排 Sprint，不宜在评审前临时加。
 
 ---
 
@@ -155,7 +159,19 @@
 | 404 | 地址栏改 `id=999999` | 「问题不存在」页 |
 | 无权限 | 未加入课程的学生打开课程内问题 | 「没有查看权限」页 |
 
-这四张截图放进 `docs/screenshots/s1-states/`。
+这四张截图已归档到 [`docs/screenshots/s1-states/`](../screenshots/s1-states/)（2026-11-18 实采）：
+
+| 状态 | 文件 | 构造方式 |
+| --- | --- | --- |
+| 空列表 | [`01-empty.png`](../screenshots/s1-states/01-empty.png) | 搜索不存在的关键词 |
+| 加载中 | [`02-loading-skeleton.png`](../screenshots/s1-states/02-loading-skeleton.png) | 拦截 `/api/v1/questions` 延迟 6 秒，骨架屏可见 |
+| 404 | [`03-notfound-404.png`](../screenshots/s1-states/03-notfound-404.png) | 访问 `/questions/999999` |
+| 无权限 | [`04-no-permission.png`](../screenshots/s1-states/04-no-permission.png) | 学生访问 `/admin` |
+
+> ⚠️ **一处与原设计的偏差（已核实）**：原计划用「未加入课程的学生打开课程内问题」触发无权限，
+> 但实测后端 `QuestionQueryService.detail()` **不校验课程成员身份**——全新注册、未加入任何课程的账号
+> 同样能读到课程内问题全文。故此状态改用前端路由守卫 `RequireAdmin` 的「无权限访问」页取证。
+> 若产品要求「课程内问题仅成员可见」，需后端补成员校验 + 前端补 403 分支，建议 v1.1 明确规则。
 
 ---
 
@@ -183,7 +199,7 @@
 
 | 日期 | 参与人 | 通过场景 | 暴露的问题 | 处置 |
 | --- | --- | --- | --- | --- |
-| 2026-10-__ |  |  |  |  |
+| 待定（S1 评审前） | 待填 | 待填 | 待填 | 待填 |
 
 ---
 
