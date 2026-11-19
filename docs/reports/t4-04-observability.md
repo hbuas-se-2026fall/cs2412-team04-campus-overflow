@@ -90,4 +90,4 @@ docker compose -f deploy/docker-compose.yml --profile observability up -d --buil
 
 - 三项自定义指标均在 `/actuator/prometheus` 实测有值；对账指标完成 1→0 演练；
 - HTTP 直方图桶已开启，P95 查询有数据来源；
-- 本机无 Docker，未启动 Grafana 容器做 UI 截图；dashboard JSON 与 provisioning 已入库，**在装有 Docker 的机器上按第四节一条命令即可复现四面板**，S4 彩排时补 Grafana 截图。
+- 2026-11-19 已用 Windows 原生 Grafana 11.3.0 + Prometheus 2.55.1 启动同一份 provisioning/dashboard 完成 UI 截图：[`docs/final/screenshots/grafana/grafana-four-panels.png`](../final/screenshots/grafana/grafana-four-panels.png)（四面板均有数据：backlog=0、dead_letters=0、mismatches=0、P95 `/api/v1/questions`≈11.7ms）。有 Docker 的机器仍可按第四节一条命令复现。
