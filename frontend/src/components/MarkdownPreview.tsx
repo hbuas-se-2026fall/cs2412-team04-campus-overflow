@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { Marked } from 'marked';
+import { Marked, Renderer, type Tokens } from 'marked';
 import hljs from 'highlight.js/lib/core';
 // 只注册课程里真正会出现的语言，避免把整包 1MB 的 highlight.js 打进产物
 import bash from 'highlight.js/lib/languages/bash';
@@ -43,22 +43,28 @@ hljs.registerLanguage('yml', yaml);
  * 3. 没有新语法的降级：`marked` 解析失败的极端情况下退回纯文本显示，不白屏。
  */
 
+/**
+ * 类型完整的自定义 renderer：继承 marked 的 Renderer 以获得 this.parser 的类型与运行时绑定。
+ * 用裸对象字面量时 this.parser 无类型（tsc 报 TS2339/TS7022），且 token 隐式 any。
+ */
+class PreviewRenderer extends Renderer {
+  /** 关闭原始 HTML，避免预览区被注入 */
+  override html(): string {
+    return '';
+  }
+
+  override link({ href, title, tokens }: Tokens.Link): string {
+    const text = this.parser.parseInline(tokens ?? []);
+    const titleAttr = title ? ` title="${escapeAttr(title)}"` : '';
+    return `<a href="${escapeAttr(href ?? '#')}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
+  }
+}
+
 const marked = new Marked({
   gfm: true,
   breaks: true,
   async: false,
-  renderer: {
-    // 关闭原始 HTML，避免预览区被注入
-    html() {
-      return '';
-    },
-    link(token) {
-      const href = token.href ?? '#';
-      const text = this.parser.parseInline(token.tokens ?? []);
-      const title = token.title ? ` title="${escapeAttr(token.title)}"` : '';
-      return `<a href="${escapeAttr(href)}" target="_blank" rel="noopener noreferrer"${title}>${text}</a>`;
-    },
-  },
+  renderer: new PreviewRenderer(),
 });
 
 function escapeAttr(value: string): string {

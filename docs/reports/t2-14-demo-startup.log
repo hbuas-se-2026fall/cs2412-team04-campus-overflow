@@ -1,0 +1,6 @@
+#2026-11-15 16:10:01.742 +08:00  首次以 demo profile 启动（JDK 21.0.10 / MySQL 8.4 / 临时实例 3307）
+2026-11-15T16:10:01.742+08:00  INFO 26508 --- [campus-overflow] [           main] c.c.CampusOverflowApplication            : Started CampusOverflowApplication in 9.592 seconds (process running for 10.061)
+2026-11-15T16:10:02.914+08:00  INFO 26508 --- [campus-overflow] [           main] c.c.bootstrap.demo.DemoDataSeeder        : 演示数据初始化完成：管理员 admin01 / 教师 T2001 / 助教 TA3001 / 学生 2023001-2023003，密码 Campus2026
+#2026-11-15 16:43:08 +08:00  补装 Redis 5.0 后再次启动，验证 seeder 幂等
+2026-11-15T16:43:08.858+08:00  INFO 24164 --- [campus-overflow] [           main] c.c.CampusOverflowApplication            : Started CampusOverflowApplication in 24.071 seconds (process running for 24.47)
+2026-11-15T16:43:09.791+08:00  INFO 24164 --- [campus-overflow] [           main] c.c.bootstrap.demo.DemoDataSeeder        : 演示数据已存在，跳过初始化

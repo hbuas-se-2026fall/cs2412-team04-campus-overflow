@@ -9,11 +9,11 @@
 | 时间 | 段落 | 主讲 | 内容 | 兜底 |
 | --- | --- | --- | --- | --- |
 | 0:00–2:00 | 架构 | 陈明哲 | 模块化单体 + 六边形；4 上下文；outbox + 幂等 + 对账 | 打开展示 [`docs/final/01-architecture.md`](01-architecture.md) |
-| 2:00–6:00 | 问答主流程 | 刘俊琒 | 登录 → 发问题（标签小写）→ B 回答 → 投票 → 采纳 → 详情 | 提前用 `http/questions.http` 预热一条问题 |
+| 2:00–6:00 | 问答主流程 | 刘俊琒 | 登录 → 发问题（标签小写）→ B 回答 → 投票 → 采纳 → 详情 | 提前用 `http/qa.http` 预热一条问题 |
 | 6:00–9:00 | 声誉与悬赏 | 魏志国 / 青岑 | 采纳后 +15；发起 50 分悬赏（冻结 50）；结算/退款；排行榜 | 用 demo 教师账号 T2001；数据已由 seeder 准备 |
 | 9:00–12:00 | 搜索、通知与管理页 | 青岑 / 房国栋 | 中文搜索（红黑树）→ 相关问题 → 通知未读/已读 → 管理员认证/无权限 | 搜索无结果时展示 `sprint-3-search.md` 的 422/空结果证据并说明索引；管理页用截图兜底 |
 | 12:00–14:00 | CI 与质量 | 陈明哲 | Actions 五阶段 + 前端；覆盖率四模块；Grafana 四面板 | 提前打开 Actions 与 Grafana 页面各一个标签 |
-| 14:00–15:00 | 收尾 / 提问 | 全员 | v1.0.0 范围、已知风险（BUG-003）、下一步 | 用 `docs/final/03-quality.md` §3.7 |
+| 14:00–15:00 | 收尾 / 提问 | 全员 | v1.0.0 范围、已知风险与改进（BUG-003 已关闭）、下一步 | 用 `docs/final/03-quality.md` §3.7 |
 
 ## 5.2 逐步点击路径
 
@@ -59,7 +59,7 @@
 **D. CI 与可观测性（陈明哲）**
 
 1. Actions 最近一次 `develop`：五个后端阶段 + 前端；
-2. Coverage：四个 domain 模块 70%+（qa 83.12 / identity 75.74 / reputation 80.72 / discovery 78.26）；
+2. Coverage：四个 domain 模块 70%+（qa 83.12 / identity 75.74 / reputation 81.93 / discovery 78.26）；
 3. Grafana `CampusOverflow · 质量与可观测性`：
    - 发件箱积压 `co_outbox_backlog`
    - 死信 `co_outbox_dead_letters`

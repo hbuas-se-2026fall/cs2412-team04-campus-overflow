@@ -38,7 +38,7 @@
 | 刘俊琒（A） | T3-04 | `SearchIndexProjector` 十个方法：firstTime 幂等 + Posted/Edited/AnswerSubmitted/ContentDeleted/Accepted/VoteCast(仅 QUESTION)/Bounty 事件投影 | 同一事件投递两次只生效一次 |
 | 青岑（C） | T3-05 | `DiscoveryQueryService` search/related：SearchPort → 批量作者 → 视图；中文词命中、单字 422 DIS-1001 | 域测试 + 应用测试全绿 |
 | 房国栋（D） | T3-10 | 前端搜索页（标签/未回答/悬赏筛选 + 四排序）、相关问题侧栏、通知单条已读、@昵称高亮 | 三处在界面可用；**T4-03 之外的 S3 前端全部收口** |
-| 房国栋（D） | SM | 主持计划会（确认本文件）+ 每周一/三/五站会 + 燃尽图归档 | `docs/scrum/sprint-3-burndown.png` |
+| 房国栋（D） | SM | 主持计划会（确认本文件）+ 开工/中途/收口 **3 次同步**（压缩执行，未按周一/三/五逐日站会）+ 燃尽图归档 | `docs/scrum/sprint-3-burndown.png`、§四 |
 | 陈明哲（E） | T3-08 | 删除 Discovery 剩余骨架；本地与 CI 跑 `mvn verify`（含 CampusOverflowFlowIT）；CI 恢复完整门禁；ADR-009 状态改“已完成” | 5 个后端阶段 + 前端阶段全绿 |
 | 陈明哲（E） | T3-09 | 根 POM `domain.coverage.minimum` 收口 0.70 并保证通过 | JaCoCo 报告 ≥70% |
 | 魏志国（B，PO） | PO | PB-31~40 验收口径与 Milestone 描述；评审会 9.1 七维度自查 | 任意证据当场可指出 |
@@ -55,7 +55,7 @@
 | --- | --- | --- | --- |
 | 2026-11-16 09:00 | 开工同步 | #117 搜索词归一化 + 相关问题排序（C）；#120 `SearchIndexProjector` 十方法（B 代 A）；#119 搜索 422 / 索引阻塞证据 | 中文搜索首测 `total=0`（投影器未实现）→ 当日 #120 合并后解除 |
 | 2026-11-16 14:00 | 中途复核 | #122 中文搜索与相关问题通过证据；#126 通知测试 5+3 条 + CI 纳入 discovery + `discovery.http`；#128 可观测性四面板 | — |
-| 2026-11-17 08:30 | 收口同步 | #132 discovery 覆盖率证据（78.26%）；#133 S3/S4 材料骨架收口；全仓 `mvn verify` 27 模块全绿 | 前端三处未单独立 S3 走查记录 → 由 S4 演示视频（`docs/final/demo-v1.0.0.webm`）覆盖 |
+| 2026-11-17 08:30 | 收口同步 | #132 discovery 覆盖率证据（78.26%）；#133 S3/S4 材料骨架收口；全仓 `mvn verify` 27 模块全绿 | 前端三处走查记录于 2026-11-18 补齐（`s3-front-*.png` 六张，见 §五），S4 另有 5 分钟演示视频 |
 
 ## 五、验收清单（S3 收口，2026-11-17）
 
@@ -65,7 +65,7 @@
 - [x] 中文搜索命中（ADR-005 ngram 口径）：`q=红黑树` → `total=2`，命中 id=7/id=8，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-hit.png`](sprint-3-search-hit.png)
 - [x] 相关问题返回有序列表：`Related count: 1`，排序口径见 `RelatedQuestionPolicy`（同文件 §3、[`sprint-3-search-related.png`](sprint-3-search-related.png)）
 - [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 5 条（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
-- [x] 前端三处可用：`QuestionListPage`（关键词 + 标签 + 未回答 + 四排序）、`QuestionDetailPage` 相关问题侧栏与 `@昵称` 高亮、`NotificationsPage`（单条已读/全部已读/未读数）；演示见 `docs/final/demo-v1.0.0.webm`（55 秒）
+- [x] 前端三处可用（2026-11-18 补逐条截图，此前只有 S4 视频覆盖）：`QuestionListPage`（关键词 + 标签 + 未回答 + 四排序）、`QuestionDetailPage` 相关问题侧栏与 `@昵称` 高亮、`NotificationsPage`（单条已读/全部已读/未读数）；演示见 `docs/final/demo-v1.0.0.webm`（55 秒）
   - 逐条截图（2026-11-18 复采，本机 `demo` profile + 浏览器实拍）：
     - 搜索页两栏布局（左结果 / 右相关标签 + 相关问题 + 热门标签）：[`s3-front-search.png`](s3-front-search.png)
     - 单字关键词 422 中文提示（`DIS-1001` → 「每个关键词至少 2 个字符」）：[`s3-front-search-422.png`](s3-front-search-422.png)

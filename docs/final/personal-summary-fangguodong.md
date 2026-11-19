@@ -24,7 +24,7 @@
 | 排行榜周期切换 + 悬赏对话框 + 声誉主页（T2-13） | `LeaderboardPage.tsx`、`components/BountyDialog.tsx`、`pages/ReputationPage.tsx` | ✅ 四周期可切；悬赏倒计时（剩 1 小时变红、过期「已结束」） |
 | 搜索页与通知（T3-10） | `pages/SearchPage.tsx`、`NotificationsPage.tsx` | ✅ 标签/未回答/悬赏筛选 + 四排序 + 分页 |
 | Markdown 实时预览与代码高亮（T4-03） | `components/MarkdownPreview.tsx`，`AskPage.tsx` 编辑/预览/分屏 | ✅ `marked` + 按需注册的 `highlight.js`，原始 HTML 已禁用；产物 314 kB |
-| 环境证据（E3） | `docs/lab1-submission/env-matrix.md`、`env/`、`scripts/dev-env/collect-env.*` | 🟨 4/5 人采集；Docker 版本待采集 |
+| 环境证据（E3） | `docs/lab1-submission/env-matrix.md`、`env/`、`scripts/dev-env/collect-env.*` | ✅ 5/5 人采集齐；本人 Docker 29.9.3 与 `mvn-test` 全绿 165 用例均已补 |
 | 身份绑定核查（E4） | `docs/lab1-submission/identity-audit.md`、`scripts/dev-env/audit-authors.*` | ✅ 定位「邮箱绑在个人小号、课程账号贡献为 0」并整改为 noreply |
 | ADR-003 主讲（T0-05） | `docs/notes/architecture.md` §8 | ✅ 含代码落点表与 `RedisLoginThrottle` 逐行讲解 |
 | Sprint 3 过程记录（SM） | `docs/scrum/sprint-3.md` | ✅ 计划会、站会、回顾与行动项 |
@@ -55,7 +55,7 @@
 | --- | --- | --- |
 | 早期把实验要求的文档路径当成自己独占（把演示脚本写到 SM 的 `sprint-1.md`，导致 PR 冲突） | 一次 rebase 冲突与返工 | 动笔前先 `git log -- 该路径` 看有没有人维护，新内容另起文件名并在原文件加指路链接 |
 | 本地 git remote 没跟上仓库迁移，代码推到旧仓库 | 评审方在团队仓库看不到 E1，产生一轮往返澄清 | 每周一核对 `git remote -v` 与团队公告；推送后立刻在 PR 里确认链接可达 |
-| Docker 一直没装，导致 E3 缺一份证据、干净环境部署验证无法自测 | E3 只能做到 4/5，`docker compose` 验证转嫁他人 | 环境类任务在 Sprint **第一天**完成安装并截图，不留到最后一周 |
+| Docker 拖到最后一周才装，期间 E3 缺证据、干净环境部署验证只能转嫁他人（最终 11-18 自行补齐，并顺带发现 `backend.Dockerfile` 的 jar 通配符缺陷） | E3 一度只能做到 4/5；全栈 compose 构建路径长期未被验证 | 环境类任务在 Sprint **第一天**完成安装并截图；「跑一次完整 compose」应进 Sprint 计划而非临到发布才做 |
 | 前端新增依赖时没先看产物体积（highlight.js 全量引入使包体从 203 kB 涨到 1.2 MB） | 首屏加载变慢 | 引入依赖前先看 bundle 分析，按需注册子模块（本次改为 `lib/core` + 10 种语言，回落到 314 kB） |
 | 演示脚本写得详细，但彩排次数不够 | S4 彩排只有脚本、未完成两次顺利通过 | 把「彩排」当成有工时的任务排进 Sprint，而不是评审前顺手做 |
 

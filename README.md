@@ -63,13 +63,15 @@ services:
 ```bash
 docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d mysql redis
 
-# 后端启动前指定端口（默认值 3306 见 application.yml 的 ${DB_PORT:3306}）
+# 从仓库根进入后端目录，再指定端口启动（默认 3306 见 application.yml 的 ${DB_PORT:3306}）
+cd backend
 DB_PORT=3307 mvn -pl co-bootstrap -am spring-boot:run
 ```
 
 PowerShell 写法：
 
 ```powershell
+cd backend
 $env:DB_PORT = "3307"
 mvn -pl co-bootstrap -am spring-boot:run
 ```
@@ -166,8 +168,9 @@ npm run build
 
 ### 4.3 CI
 
-GitHub Actions 的 `CI` 流水线包含后端编译、Sprint 范围单元测试、ArchUnit、覆盖率门禁、
-集成测试（容错阶段）和前端类型检查/构建。发布到 `main` 的 PR 还会构建前后端镜像。
+GitHub Actions 的 `CI` 流水线包含后端编译、全量单元测试、ArchUnit、覆盖率门禁、
+集成测试（Testcontainers，硬门禁，失败即阻断）和前端类型检查/构建。
+目标为 `main` 的 PR / `main` push 还会构建前后端镜像；`main` push 同时推送 GHCR（sha + latest）。
 
 ## 5. Docker 一键部署
 

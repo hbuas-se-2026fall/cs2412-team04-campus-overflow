@@ -58,7 +58,7 @@ mvn -f backend/pom.xml -pl co-qa/co-qa-application -am test \
 作为 Sprint 1 的 SM，评审前需要的文档已补齐：
 
 - Sprint 1 执行记录（计划会结论、两次站会、风险与对策）：[`docs/scrum/sprint-1.md`](../scrum/sprint-1.md)
-- 燃尽图（迭代范围 40 SP，11-05 收盘剩余 25）：[`docs/scrum/sprint-1-burndown.png`](../scrum/sprint-1-burndown.png)
+- 燃尽图（迭代范围 40 SP，11-05 收盘剩余 12；2026-11-19 按 backlog 估点重算并补绘 D3～D8）：[`docs/scrum/sprint-1-burndown.png`](../scrum/sprint-1-burndown.png)
 - Sprint 1 看板（T2-01 / T2-03 / T3-01 / T4-01 已推进到 Done）：[`docs/sprint-1-backlog.png`](../sprint-1-backlog.png)
 - PR 已挂 `Closes #32, #33, #34`（PB-06 发布问题 / PB-07 列表 / PB-08 详情）。
 
@@ -70,5 +70,5 @@ mvn -f backend/pom.xml -pl co-qa/co-qa-application -am test \
 
 ## 6. 后续（Sprint 1 剩余）
 
-- 燃尽图按每次站会续绘，D3（11-06）起数据待补。
+- 燃尽图已补绘至 D8（11-13 收口，交付 28/40 SP），数据与口径见 [`sprint-1.md`](../scrum/sprint-1.md) §三，生成脚本 `scripts/dev-env/make-sprint1-burndown.ps1`。
 - Sprint 1 范围 PB-06～PB-19 中，PB-09～PB-13 问题侧已随 #86 落地，回答/投票/评论由 B、C 推进，通知与前端由 C、D 推进。

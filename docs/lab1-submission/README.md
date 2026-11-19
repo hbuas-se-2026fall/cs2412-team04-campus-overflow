@@ -185,4 +185,4 @@ git ls-files | grep -E '(^|/)\.env$|node_modules/|/target/|/dist/'
 | 工具链配置完整性（30%） | 仓库、分支保护、看板、IM 群 | ✅ 均已就位 |
 | 团队章程质量（30%） | 章程 v1.0 是否具体可执行 | ✅ 含价值观、沟通、规约、DoD、签字 |
 | Git 协作熟练度（30%） | 分支、PR、评审、合并流程 | ✅ 8 个 PR 已合并；2 个 PR 缺正式 Review（已在第 5 节标注） |
-| 团队氛围与协作（10%） | 课堂观察、站会记录 | ✅ `docs/team/daily-standup-01.md` |
+| 团队氛围与协作（10%） | 课堂观察、站会记录 | ✅ `docs/team/daily-standup-01.md`（2026-10-26，5 人角色已按 `docs/team.md` 校对，文末附勘误） |
