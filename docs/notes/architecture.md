@@ -61,7 +61,7 @@ backend/pom.xml（父 POM）
 
 ## 7. 新同学阅读顺序
 
-1. `docs/adr/` 8 条 ADR
+1. `docs/adr/` 10 条 ADR
 2. `backend/co-identity`（完整参考实现）
 3. `co-qa-domain` 的领域测试（需求说明书）
 4. `docs/ddd/` 的事件、上下文映射、聚合与不变式

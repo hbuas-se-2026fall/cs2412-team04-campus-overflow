@@ -5,18 +5,18 @@
 | 姓名 | 陈明哲 |
 | 角色 | SM / E（测试与质量门禁、可观测性） |
 | 负责 | CI 与覆盖率门禁、行走骨架、声誉幂等测试、冒烟脚本、可观测性、发布验证 |
-| 参与 Sprint | S0 / S1 / S2 / S3（S4 进行中） |
+| 参与 Sprint | S0 / S1 / S2 / S3 / S4 |
 
 ## 一、我负责的交付物（带证据）
 
 | 交付物 | 证据 | 结果 |
 | --- | --- | --- |
 | 渐进门禁与 CI 范围扩容（Q&A → Reputation → Discovery） | `.github/workflows/ci.yml`、PR #96 / #103 / 本轮 #126 | 五后端阶段 + 前端全绿 |
-| 域覆盖率门槛 0.70 | `backend/pom.xml`、JaCoCo 报告；qa 83.12% / identity 75.74% / reputation 80.72% / discovery 78.26% | 通过 |
+| 域覆盖率门槛 0.70 | `backend/pom.xml`、JaCoCo 报告；qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26% | 通过 |
 | 声誉幂等与结算测试 | `ReputationTestFixtures`、`ReputationEventHandlersTest`（6 条）、`ReputationSettlementTest`（6 条），PR #103 | 50+ 测试全绿 |
 | T1-15 端到端冒烟 | `scripts/smoke/smoke.ps1` / `.sh`、PR #104 | `SMOKE PASS`，一条命令跑通主链路 |
 | 可观测性 | `co_reputation_mismatches` 定时刷新、Grafana 四面板 + provisioning、`deploy/prometheus.yml` | 四指标可复现 |
-| 发布验证 | `v0.1.0`～`v0.3.0` tag、`docs/reports/release-v0.2.0-v0.3.0.md`、PR #118 / #121 | 三版本 tag 与 CI 证据归档 |
+| 发布验证 | `v0.1.0`～`v1.0.0` tag、GitHub Release、`docs/reports/release-v1.0.0-verification.md` | 五版本 tag/Release 与 CI 证据归档 |
 | 团队文档 | `docs/scrum/sprint-0.md`、`team-agreement.md` 重放命令、`docs/final` 骨架 | 入库 |
 
 ## 二、技术收获
@@ -37,7 +37,7 @@
 | --- | --- | --- |
 | v0.1.0/v0.2.0 发布时漏打 tag，后来补打 | 版本追溯不连续 | Sprint 末把「打 tag」写进 DoD 检查项，发布 PR 合并后立即打 |
 | 环境截图与 T0-05 签署拖到收尾 | 评审前集中补材料 | S0 第一周就按脚本采集并归档，签署随文档合并 |
-| 分支保护 `required_status_checks` 仍未启用（BUG-003） | CI 失败不一定阻断合并 | S4 前与 PO 确认发布流程触发条件后开启 |
+| 分支保护 `required_status_checks` 曾未启用（BUG-003） | CI 失败不一定阻断合并 | S4 通过仓库规则集 #27436601 为 develop 启用后端/前端必需检查，缺陷关闭 |
 
 ## 五、自评
 
