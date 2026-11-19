@@ -8,13 +8,13 @@
 
 | # | 检查项 | 结果 | 证据 |
 | --- | --- | --- | --- |
-| 1 | `develop` 最新 CI 三阶段 | 后端 ✅ / 前端 ✅ / 容器镜像 ✅ | GitHub Actions（`0073294`） |
+| 1 | CI 范围 | develop 后端 ✅ / 前端 ✅；发布 PR→main 另跑容器镜像 ✅ | GitHub Actions（`0073294` 为发布时候选，main `10925c7`） |
 | 2 | 全仓 `mvn verify`（27 模块，含 ArchUnit） | **BUILD SUCCESS** | 2026-11-17 本地 JDK 21 实跑 |
-| 3 | domain 覆盖率门槛 0.70 | qa 83.12% / identity 75.74% / reputation 80.72% / discovery 78.26% | JaCoCo `jacoco.csv` |
+| 3 | domain 覆盖率门槛 0.70 | qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26% | JaCoCo `jacoco.csv` |
 | 4 | T1-15 主链路冒烟 | `SMOKE PASS` | `scripts/smoke/README.md`，2026-11-15 demo 环境 |
 | 5 | demo profile 启动 + 演示数据 | 启动成功；6 账号 / 1 课程 / 3 问题，重启幂等 | [`t2-14-demo-profile.md`](t2-14-demo-profile.md) |
 | 6 | 可观测性四指标 | 三项自定义指标 + HTTP P95 直方图；对账 1→0 演练通过 | [`t4-04-observability.md`](t4-04-observability.md) |
-| 7 | 禁用账号（T4-02） | 接口 + 3 条测试 + 会话撤销；真实 Redis 会话验证列入彩排 | [`s4-disable-account.md`](s4-disable-account.md) |
+| 7 | 禁用账号（T4-02） | 接口 + 3 条测试 + 真实 Redis 会话验证（旧 Cookie 401、重登失败、管理员未被误踢） | [`s4-disable-account.md`](s4-disable-account.md) |
 | 8 | Release Notes | [`docs/release/v1.0.0.md`](../release/v1.0.0.md)（新功能/已知问题/部署步骤） | 本仓库 |
 
 ## 二、发布步骤与结果
