@@ -44,11 +44,11 @@
 | PB-38 | demo profile 演示数据 | E6 | Should | 1 | S3 | [#64](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/64) |
 | PB-39 | Discovery 应用层单元测试 | E6 | Must | 3 | S3 | [#65](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/65) |
 | PB-40 | 禁用违规账号并下线 | E1 | Should | 5 | S4 | [#66](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/66) |
-| PB-41 | 个人资料查看与修改 | E1 | Could | 3 | S4 | [#67](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/67) |
+| PB-41 | 个人资料查看与修改 | E1 | Could | 3 | S4（未做，见决策记录） | [#67](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/67) |
 | PB-42 | 前端体验优化 | E7 | Should | 3 | S4 | [#68](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/68) |
-| PB-43 | 通知红点 SSE 实时刷新 | E7 | Could | 5 | S4 | [#69](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/69) |
+| PB-43 | 通知红点 SSE 实时刷新 | E7 | Could | 5 | S4（未做，见决策记录） | [#69](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/69) |
 | PB-44 | Grafana 运维指标 | E6 | Should | 2 | S4 | [#70](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/70) |
-| PB-45 | 问题列表压测与缓存 | E6 | Could | 3 | S4 | [#71](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/71) |
+| PB-45 | 问题列表压测与缓存 | E6 | Could | 3 | S4（未做，见决策记录） | [#71](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/71) |
 | PB-46 | docker compose 一键部署 v1.0 | E6 | Must | 2 | S4 | [#72](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/72) |
 | PB-47 | 管理员管理页面 | E1 | Could | 3 | S4 | [#73](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/73) |
 | PB-48 | 教师审批选课申请 | E1 | Won't | 8 | - | [#74](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/74) |

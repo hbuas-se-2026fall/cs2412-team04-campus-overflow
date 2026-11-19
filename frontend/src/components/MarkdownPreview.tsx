@@ -68,11 +68,7 @@ const marked = new Marked({
 });
 
 function escapeAttr(value: string): string {
-  return value
-    .replace(/&/g, '&amp;')
-    .replace(/"/g, '&quot;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /** 把 Markdown 源码转成 HTML 字符串（已做 HTML 转义与高亮） */

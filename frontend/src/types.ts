@@ -2,67 +2,158 @@ export type Role = 'STUDENT' | 'TA' | 'TEACHER' | 'ADMIN';
 
 /** 课程（发布语言 CourseView）。myRole 为 null 表示尚未加入该课程。 */
 export interface Course {
-  id: number; code: string; name: string; term: string;
-  teacherId: number; teacherName: string; myRole: string | null;
+  id: number;
+  code: string;
+  name: string;
+  term: string;
+  teacherId: number;
+  teacherName: string;
+  myRole: string | null;
 }
 
 export type CourseRole = 'STUDENT' | 'TEACHING_ASSISTANT' | 'TEACHER';
 
-export interface Author { id: number; displayName: string; role: string; verified: boolean }
-export interface Page<T> { items: T[]; total: number; page: number; size: number }
+export interface Author {
+  id: number;
+  displayName: string;
+  role: string;
+  verified: boolean;
+}
+export interface Page<T> {
+  items: T[];
+  total: number;
+  page: number;
+  size: number;
+}
 
 export interface Me {
-  id: number; username: string; displayName: string; email: string; role: Role;
-  verified: boolean; college?: string; className?: string;
+  id: number;
+  username: string;
+  displayName: string;
+  email: string;
+  role: Role;
+  verified: boolean;
+  college?: string;
+  className?: string;
   courses: { id: number; code: string; name: string; term: string; teacherName: string }[];
 }
 
 /** 管理员用户视图（后端 UserView）：学号/工号已脱敏。 */
 export interface AdminUser {
-  id: number; maskedUsername: string; displayName: string; role: Role; verified: boolean;
-  college?: string | null; className?: string | null; createdAt: string;
+  id: number;
+  maskedUsername: string;
+  displayName: string;
+  role: Role;
+  verified: boolean;
+  college?: string | null;
+  className?: string | null;
+  createdAt: string;
 }
 
 export interface QuestionSummary {
-  id: number; title: string; excerpt: string; tags: string[]; courseId?: number;
-  author: Author; score: number; answerCount: number; viewCount: number; accepted: boolean; createdAt: string;
+  id: number;
+  title: string;
+  excerpt: string;
+  tags: string[];
+  courseId?: number;
+  author: Author;
+  score: number;
+  answerCount: number;
+  viewCount: number;
+  accepted: boolean;
+  createdAt: string;
 }
 
-export interface Comment { id: number; author: Author; parentId?: number; body: string; createdAt: string }
+export interface Comment {
+  id: number;
+  author: Author;
+  parentId?: number;
+  body: string;
+  createdAt: string;
+}
 
 export interface Answer {
-  id: number; body: string; bodyHtml: string; author: Author; score: number; accepted: boolean;
-  endorsedBy?: Author; myVote: number; canEdit: boolean; createdAt: string; comments: Comment[];
+  id: number;
+  body: string;
+  bodyHtml: string;
+  author: Author;
+  score: number;
+  accepted: boolean;
+  endorsedBy?: Author;
+  myVote: number;
+  canEdit: boolean;
+  createdAt: string;
+  comments: Comment[];
 }
 
 export interface QuestionDetail {
-  id: number; title: string; body: string; bodyHtml: string; tags: string[];
+  id: number;
+  title: string;
+  body: string;
+  bodyHtml: string;
+  tags: string[];
   course?: { id: number; code: string; name: string };
-  author: Author; score: number; answerCount: number; viewCount: number; acceptedAnswerId?: number;
-  myVote: number; createdAt: string;
+  author: Author;
+  score: number;
+  answerCount: number;
+  viewCount: number;
+  acceptedAnswerId?: number;
+  myVote: number;
+  createdAt: string;
   permissions: { canEdit: boolean; canDelete: boolean; canAccept: boolean; canManage: boolean };
-  comments: Comment[]; answers: Answer[];
+  comments: Comment[];
+  answers: Answer[];
 }
 
-export interface SearchResult extends QuestionSummary { bountyOpen: boolean }
-export interface LeaderboardEntry { rank: number; userId: number; displayName: string; verified: boolean; score: number }
-export interface Notification { id: number; type: string; title: string; link: string; read: boolean; createdAt: string }
+export interface SearchResult extends QuestionSummary {
+  bountyOpen: boolean;
+}
+export interface LeaderboardEntry {
+  rank: number;
+  userId: number;
+  displayName: string;
+  verified: boolean;
+  score: number;
+}
+export interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  link: string;
+  read: boolean;
+  createdAt: string;
+}
 export interface ReputationProfile {
-  userId: number; displayName: string; reputation: number;
+  userId: number;
+  displayName: string;
+  reputation: number;
   /** 积分字段仅本人可见，他人查看时为 null（后端 ReputationProfileView 约定） */
-  availablePoints?: number | null; frozenPoints?: number | null;
+  availablePoints?: number | null;
+  frozenPoints?: number | null;
   badges: { code: string; name: string; description: string; awardedAt: string }[];
 }
 
 /** 声誉流水的一条（LedgerEntryView） */
 export interface LedgerEntry {
-  id: number; reason: string; reasonLabel: string; delta: number;
-  refType: string; refId: number; createdAt: string;
+  id: number;
+  reason: string;
+  reasonLabel: string;
+  delta: number;
+  refType: string;
+  refId: number;
+  createdAt: string;
 }
 
 /** 悬赏（BountyView）；status: OPEN / AWARDED / CLOSED / EXPIRED */
 export interface Bounty {
-  id: number; questionId: number; sponsorId: number; sponsorName: string;
-  points: number; status: string; createdAt: string; expiresAt: string;
-  winnerId?: number | null; answerId?: number | null;
+  id: number;
+  questionId: number;
+  sponsorId: number;
+  sponsorName: string;
+  points: number;
+  status: string;
+  createdAt: string;
+  expiresAt: string;
+  winnerId?: number | null;
+  answerId?: number | null;
 }
