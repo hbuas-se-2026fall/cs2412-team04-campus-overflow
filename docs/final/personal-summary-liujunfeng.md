@@ -13,7 +13,7 @@
 | --- | --- | --- |
 | 分支保护与协作工具链（S0-04） | GitHub Branch Protection API 2026-11-17 核验：`main` = 2 Approve + 后端/前端/容器三项必需检查；`develop` = 1 Approve + 后端/前端两项必需检查（规则集 `develop required checks`，`app_id=15368`），两分支 `enforce_admins=true`；`docs/qa/defects.md` BUG-002 / BUG-003 | 管理员不可绕过、CI 未过不可合；BUG-002 已修复，BUG-003 已补齐必需检查 |
 | Q&A 问题侧领域与应用层（T1-01/02/07/10/11） | PR #86（合并提交 `3f96258`，14 文件 +1093/−22）；`Question`、`MarkdownBody`、`Tags`、`QuestionCommandService`、`QuestionQueryService`、`QaQueryApiImpl.findQuestion`；`QuestionTest` 33 条（本次新增 12 条边界） | `co-qa-domain` 42 条、`co-qa-application` 28 条全绿；POST→GET 端到端 201/200 且 `qa_question` 核对落行（`docs/lab4-submission/`） |
-| Sprint 1 执行记录与燃尽图（SM） | PR #90；`docs/scrum/sprint-1.md`、`sprint-1-burndown.png`（40 SP → 11-05 剩 25）、`docs/sprint-1-backlog.png` | 计划会结论、两次站会、风险与对策可逐条复查 |
+| Sprint 1 执行记录与燃尽图（SM） | PR #90；`docs/scrum/sprint-1.md`、`sprint-1-burndown.png`（40 SP → D1 收盘 32 → 11-05 收盘 **12**，**S1 交付 28/40 SP**）、`docs/sprint-1-backlog.png` | 计划会结论、两次站会、风险与对策可逐条复查；燃尽数据经 2026-11-19 按 backlog 重算修正（原记 D2 25、旧图 35/25 作废） |
 | CI 工作流与容错策略（BUG-002） | PR #25 / #26 / #79 / #80 / #82 / #83 / #84 / #93；`.github/workflows/ci.yml`、`docs/adr/009-渐进式质量门禁.md` | PR 上稳定出现「后端构建与验证 / 前端构建」；根目录重复 `ci.yaml` 清理，工作流只留一份 |
 | S2 角色 A：徽章授予与声誉查询 | #91（`ReputationAccount` / `BadgePolicy` / 四个事件处理器）；PR #109（授权用例 13 条 + `http/reputation.http` + 流水拆箱 NPE 修复） | `co-reputation-application` 34/34、`ArchitectureTest` 1/1、CI 全绿；「他人看流水 403 REP-3002 / 他人看不到积分」由人工点页面变成回归用例 |
 | Lab 1–4 交付文档与证据归档 | `docs/lab1-submission/README.md`（分支保护核验表与 PR 记录）、`docs/lab4-submission/README.md`（E2E 截图 + Redis 键 + 数据库核对） | 每份 lab 都有可点证据、可复现命令与遗留项，评审不需要口头解释 |
@@ -43,5 +43,5 @@
 ## 五、自评
 
 - **对团队目标的贡献**：把 Q&A 问题侧从「接口能通」推进到「有 33 条领域用例 + 端到端证据」；把 CI 与分支保护从「有工作流文件」推进到「PR 上真的跑、跑不过真的合不了」；S1 作为 SM 让迭代过程可复查；S2 之后把声誉查询的越权边界固化成 13 条回归用例。
-- **需要团队/老师支持的地方**：S4 两次彩排需要全员按时到场、各自控制在 2 分钟内（我负责讲「问答主链路 + 声誉查询权限」这一段）；干净环境 `docker compose up -d --build` 的验证需要有 Docker 的机器，我本机没有；Projects 看板 48 张卡的导入状态需要 Project 读权限（我的 token 只有 `repo`/`workflow`/`gist`），需 PO 或有权限的同学确认。
+- **需要团队/老师支持的地方**：S4 两次彩排需要全员按时到场、各自控制在 2 分钟内（我负责讲「问答主链路 + 声誉查询权限」这一段）；干净环境 `docker compose up -d --build` 的验证需要有 Docker 的机器，我本机没有；Projects 看板 48 张卡**已于 2026-11-17 由我网页导入完成**（`label:type:story` 全选 → Projects → 开启 `Item closed → Done` 工作流，记录见 [`board-sync-2026-11-17.md`](../backlog/board-sync-2026-11-17.md) §三），但我的 token 只有 `repo`/`workflow`/`gist`、无 `read:project`，**导入后的条目数无法用脚本二次核对**，如需逐卡点验要请有 Project 读权限的同学或 PO 帮忙看一眼。
 - **签字 / 日期**：刘俊琒 / 2026-11-17
