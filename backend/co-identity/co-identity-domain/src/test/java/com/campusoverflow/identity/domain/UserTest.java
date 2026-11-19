@@ -1,7 +1,9 @@
 package com.campusoverflow.identity.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 
 import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
@@ -10,6 +12,7 @@ import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import org.junit.jupiter.api.Test;
+
 
 class UserTest {
 
@@ -72,5 +75,25 @@ class UserTest {
         assertThatThrownBy(() -> PasswordPolicy.validate("short1")).isInstanceOf(BusinessRuleException.class);
         assertThatThrownBy(() -> PasswordPolicy.validate("onlyletters")).isInstanceOf(BusinessRuleException.class);
         PasswordPolicy.validate("Passw0rd!");
+    }
+
+    @Test
+    void emailPatternIsLinearTimeAndKeepsOriginalSemantics() {
+        // Sonar java:S5852 回归：修复前后语义必须一致 —— @ 后至少「一段.」再接一段
+        assertThatCode(() -> User.register("20230001", "小明", "a@b.c", "h", null, null, NOW))
+                .doesNotThrowAnyException();
+        assertThatCode(() -> User.register("20230001", "小明", "a@b.c.d", "h", null, null, NOW))
+                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> User.register("20230001", "小明", "a@b", "h", null, null, NOW))
+                .isInstanceOf(BusinessRuleException.class);
+        assertThatThrownBy(() -> User.register("20230001", "小明", "a@b.", "h", null, null, NOW))
+                .isInstanceOf(BusinessRuleException.class);
+        assertThatThrownBy(() -> User.register("20230001", "小明", "a@.b", "h", null, null, NOW))
+                .isInstanceOf(BusinessRuleException.class);
+        // 灾难性回溯输入：旧正则在超长 "a@" + 重复域名段 上会指数级回溯；修复后应快速失败
+        String evil = "a@" + "b.".repeat(2000) + "!";
+        assertTimeoutPreemptively(java.time.Duration.ofSeconds(2), () ->
+                assertThatThrownBy(() -> User.register("20230001", "小明", evil, "h", null, null, NOW))
+                        .isInstanceOf(BusinessRuleException.class));
     }
 }
