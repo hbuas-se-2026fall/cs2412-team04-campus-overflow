@@ -236,9 +236,10 @@ mvn -B -f backend/pom.xml sonar:sonar   -Dsonar.host.url=http://localhost:9000 -
 | --- | --- | --- | --- | --- |
 | 1 | `co-identity-domain/.../User.java:24` | EMAIL 正则 `[\w.+-]+@[\w-]+(\.[\w-]+)+` 存在嵌套量词，大输入下可能灾难性回溯（可导致栈溢出） | MAJOR | 身份上下文（陈明哲/魏志国）<br>建议改为 `^[\w.+-]+@([\w-]+\.)+[\w-]+$` |
 | 2 | `co-qa-application/.../QuestionCommandService.java:65` | `orElseThrow` 的返回值未被使用 | MAJOR | 问答应用层（青岑）<br>建议改为 `if (findCourse(id).isEmpty()) throw ...` |
-| 3 | `co-qa-infrastructure/.../RedisQuestionListCache.java:53` | `60 + nextInt(15)` 是 int 相加，赋给 `Duration.ofSeconds(long)` 前应转 long | MINOR | 问答基础设施（青岑）<br>建议改为 `60L + ...` |
+| 3 | ~~`co-qa-infrastructure/.../RedisQuestionListCache.java:53`~~ | ~~`60 + nextInt(15)` 是 int 相加~~ | MINOR | ✅ **已于 2026-11-19 修复**（PR #197 `fix/qa-cache-ttl-long`，现为 `60L + ...`） |
 
-> 三处都是**真实小缺陷**，修复成本极低（各 1 行），建议在 v1.1 首个 PR 一并处理；处理完门禁即可转绿。
+> 三处都是**真实小缺陷**，修复成本极低（各 1 行）。第 3 个已随 PR #197 修复，重新扫描后 Bugs 预计降为 **2**；
+> 余下 2 个（正则嵌套量词、`orElseThrow` 返回值）建议在 v1.1 首个 PR 一并处理，处理完门禁即可转绿。
 
 ### 4.5 截图
 
