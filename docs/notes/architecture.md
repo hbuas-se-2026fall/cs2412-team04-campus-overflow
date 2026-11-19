@@ -196,7 +196,7 @@ public Question save(Question q) {
 
 复核不是照抄 ADR，下面三条是逐行比对这个实现与 ADR 文本后发现的差异：
 
-1. **ADR「后果」里写的"需要显式处理乐观锁版本号的搬运"，在本实现里没有发生**。`toDomain` 把 `e.getVersion()` 读进领域对象，但 `save` 从不回写；版本号完全由 JPA 实体自己维护，领域对象上的 `version` 是只读快照。好处是映射代码简单，代价是**领域层感知不到并发冲突**——冲突以 `OptimisticLockException` 在适配器层抛出，应用层需要把这个异常翻译成对用户友好的提示（否则前端只会看到 500）。
+1. **ADR「后果」里写的"需要显式处理乐观锁版本号的搬运"，在本实现里没有发生**。`toDomain` 把 `e.getVersion()` 读进领域对象，但 `save` 从不回写；版本号完全由 JPA 实体自己维护，领域对象上的 `version` 是只读快照。好处是映射代码简单，代价是**领域层感知不到并发冲突**——冲突以 `ObjectOptimisticLockingFailureException` 在适配器层抛出。这个"感知不到"由一处兜底补齐：`GlobalExceptionHandler.optimisticLock` 把它翻译成 `409 / SYS-409-CONCURRENT /「内容已被他人修改，请刷新后重试」`。也就是说 ADR 描述的"搬运版本号"被"统一在边界翻译异常"替代了，这个替代关系 ADR 里没写，值得补一句。
 2. **`view_count` 是同一类计数器的第二种实现，且不在 `QuestionRepository` 端口上**。它走 `RedisViewCounter`：先在 Redis 里累加（`qa:views:pending`），再批量 `UPDATE qa_question SET view_count = view_count + ? WHERE id = ?`。只读 `QuestionRepository` 的人会以为浏览数也走整行回写。建议在 ADR-008 补一句"计数器有两种落地：即时原子 SQL（score/answerCount）与缓冲批量累加（viewCount）"。
 3. **待确认**：`Question` 持有 `score / answerCount / viewCount` 三个只读字段，意味着聚合内的计数器值可能与库中最新值不一致（并发原子更新后内存对象仍是旧值）。目前所有对外展示都走 `JdbcQaReadModel` 的读模型、不读聚合的计数器，所以没出问题；但这条约束应写进约定，否则后续有人在命令侧读 `question.score()` 做业务判断就会踩坑。
 
