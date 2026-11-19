@@ -142,7 +142,7 @@ bash scripts/dev-env/audit-authors.sh 2177023844
 - **核心结论**：团队成员必须确认"提交归属的账号 = 课程登记账号"，只看邮箱是否验证过是不够的；
 - 房国栋已整改：改用 `2177023844` 的 noreply，本分支 4 个提交的作者已重写；
 - 其余 4 人：按下表补齐 `user.email` 与归属账号，全部 ✅ 后本任务关闭；
-- 证据：`screenshots/identity-fangguodong.png`（`audit-authors.ps1` 输出 + `git log --format` 验证）。
+- 证据：[`screenshots/identity-fangguodong.png`](screenshots/identity-fangguodong.png)（2026-11-18 实采：`git config --global user.name` = 房国栋、`user.email` = `333220585+2177023844@users.noreply.github.com`；按邮箱聚合显示该 noreply 有 **32 个提交且判定 OK**，而 `W13636786666@163.com` 仅 6 个提交、作者仍是 `baigui`）。
 
 ---
 

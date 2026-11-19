@@ -112,8 +112,12 @@
 | 2 | 再点一次 | 取消收藏，按钮恢复 |
 | 3 | 未登录点击 | 引导登录，不发出请求 |
 
-> ⚠️ **演示前必须确认**：收藏接口若尚未合并（后端 `collect` 用例未实现），本场景改为**口头说明 + 展示接口契约**，不要现场点出 500。
-> 确认方式：`http/qa.http` 里跑一次 `POST /api/v1/questions/{id}/collect`，返回 2xx 再演。
+> ⚠️ **US-06「收藏」当前状态（2026-11-18 复核）**：后端 `collect` 用例**未实现**，
+> 前端也无收藏入口，`product-backlog.md` 里**没有对应 PBI**。
+> 因此本场景**不参与现场演示**，改为口头说明「收藏功能未纳入 v1.0.0 范围」，
+> 并指向 [`product-backlog.md`](../backlog/product-backlog.md) 说明它在 V3 早期清单里存在、
+> 但未进入 Sprint 拆分。**不要现场点，会 404/500。**
+> 若需补做，先在 backlog 立 PBI 再排 Sprint，不宜在评审前临时加。
 
 ---
 
@@ -157,6 +161,12 @@
 
 这四张截图放进 `docs/screenshots/s1-states/`。
 
+> **现状（2026-11-18）**：该目录**尚未建立**，四态截图待补。
+> 过渡证据：S3 前端验收已归档 6 张同类状态截图（骨架屏/空态/422/通知已读），
+> 见 [`s3-front-search.png`](s3-front-search.png)、[`s3-front-search-422.png`](s3-front-search-422.png)、
+> [`s3-front-notifications.png`](s3-front-notifications.png)、[`s3-front-notifications-read.png`](s3-front-notifications-read.png)；
+> S1 四态截图建议在 S4 彩排当天用同一套 demo 数据补拍。
+
 ---
 
 ## 10. 分工与认领
@@ -183,7 +193,7 @@
 
 | 日期 | 参与人 | 通过场景 | 暴露的问题 | 处置 |
 | --- | --- | --- | --- | --- |
-| 2026-10-__ |  |  |  |  |
+| 待定（S1 评审前） | 待填 | 待填 | 待填 | 待填 |
 
 ---
 
