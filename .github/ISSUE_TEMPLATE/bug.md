@@ -6,6 +6,8 @@ labels: ["type:bug"]
 assignees: ""
 ---
 
+<!-- 提交前补 ctx:identity/qa/reputation/discovery/frontend/infra 和 priority:must/should/could/wont；被阻塞时加 status:blocked -->
+
 ## 问题现象
 
 <!-- 实际发生了什么 -->

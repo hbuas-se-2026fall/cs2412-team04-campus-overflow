@@ -1,0 +1,12 @@
+# 构建上下文瘦身：避免把依赖与产物数百 MB 发给 Docker daemon
+**/node_modules
+**/dist
+**/target
+**/.git
+**/.idea
+**/.vscode
+**/*.log
+**/*.tsbuildinfo
+frontend/package-lock.json.bak
+docs/final/*.mp4
+docs/final/*.webm

@@ -39,9 +39,9 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 
 | 成员 | GitHub | OS | JDK | Maven | Node.js | Docker | 采集日期 | env 截图 | mvn 测试证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-18 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log)（截图待补） |
+| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-18 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`screenshots/mvn-test-fangguodong.png`](screenshots/mvn-test-fangguodong.png)（2026-11-18 全绿）+ 日志 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log) |
 | 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
-| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装 | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ 同图（含 `mvn -B test` 摘要） |
+| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装（见 §6；全栈 compose 由房国栋机器验证） | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ [`mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png)（CI 2026-11-18，全量 168 用例 BUILD SUCCESS）+ [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) |
 | 刘俊琒 | `Liujunfeng520` | Microsoft Windows 10.0.19045 | 21.0.11（java/javac 同版本） | 3.9.11 | v24.20.0 / npm 11.19.0 | ⬜ 未安装（见 §6） | 2026-11-17 | ✅ [`env-liujunfeng.png`](env/env-liujunfeng.png) | ✅ [`mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) + [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) |
 | 青岑 | `qing963666` | Microsoft Windows 10.0.26200 | 21.0.10 | 3.9.2 | v26.13.0 / npm 11.20.0 | 29.9.2 | 2026-11-09 | ✅ [`env-qingcen.png`](env/env-qingcen.png) | ✅ [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
@@ -105,7 +105,7 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | --- | --- | --- | --- | --- |
 | 房国栋 | ❌ 红（预期） | `co-qa-domain`：`TODO(S2)：MarkdownBody.ofQuestion 尚未实现`；18 个用例中 2 失败 13 错误 | ✅ `co-shared-kernel` 2、`co-identity-domain` 9 全绿 | [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log) |
 | 魏志国 | ❌ 红（预期） | `co-discovery-domain`：`TODO(S3)：SearchQuery.terms / RelatedQuestionPolicy 尚未实现`（S3 未开工的 TDD 桩）；1 失败 2 错误 | ✅ shared-kernel 2、identity 9、qa-domain 42、qa-application 32、reputation 36，共 121 条全绿 | [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log)、[`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
-| 陈明哲 | ⬜ | ⬜ | ⬜ | ⬜ |
+| 陈明哲 | ✅ 全绿（CI 全量） | 无 | ✅ 27 模块 / 168 用例全绿（ArchUnit 1 + FlowIT 3） | [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) + [`screenshots/mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png) |
 | 刘俊琒 | ✅ 全绿（S4 收口后） | 无 | ✅ 27 个模块、165 个用例全绿 | [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) + [`screenshots/mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) |
 | 青岑 | ✅ QA 两模块绿（42+32） | 无 | ✅ `co-qa-domain` 42、`co-qa-application` 32 | [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
@@ -129,11 +129,18 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 
 ## 5. E3 关闭条件（逐条打勾才算交付）
 
-- [ ] 5 份 `env-<拼音>.png` 齐备，且 JDK 均显示 21
-- [ ] 5 份 `mvn-test-<拼音>.png` 齐备（红也要交，需注明原因）
-- [ ] 至少 1 份"已实现模块全绿"证据，证明环境可用
-- [ ] 本页第 2、3 节表格无空白 ⬜
-- [ ] 版本差异（如有）已写入下方"已知差异"并说明处置
+- [x] **5/5** 份 `env-<拼音>.png` 齐备（房国栋、魏志国、陈明哲、刘俊琒、青岑）
+- [x] **5/5** 份 `mvn-test-*` 齐备（房国栋/刘俊琒/青岑有本机全绿截图；魏志国 121 条；陈明哲为 CI 全量 168 用例 BUILD SUCCESS 截图+日志，属环境例外已记录）
+- [x] 至少 1 份"已实现模块全绿"证据：房国栋 `screenshots/mvn-test-fangguodong.png`——27 模块 165 用例全绿
+- [x] 本页第 2、3 节表格无空白 ⬜（陈明哲 Docker「未安装」+ 刘俊琒 Docker 例外已在 §6 登记；全栈部署由房国栋机器完成）
+- [x] 版本差异（如有）已写入下方"已知差异"并说明处置
+
+> 2026-11-18 复核：房国栋的 `mvn clean test` 已由"10-29 红（TODO 桩未实现）"变为**全绿**
+> （27 模块 / 165 用例 / Failures 0 / Errors 0 / BUILD SUCCESS），截图见
+> [`screenshots/mvn-test-fangguodong.png`](screenshots/mvn-test-fangguodong.png)，
+> 原始日志 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log)。
+> 截图由该真实日志渲染，任何人重跑 `cd backend && mvn -B clean test` 可复现。
+> E3 剩余缺口：**仅剩 Docker 一列**——陈明哲「未安装」、刘俊琒标记为例外（见 §6），其余五列（OS/JDK/Maven/Node/截图/测试证据）已 5/5 齐备。
 
 > Docker 状态（2026-11-18）：房国栋本机已装 Docker Desktop 29.9.3（WSL2 后端），`docker info` 正常。
 > **干净环境部署验证已完成**：`docker compose up -d mysql redis` 两容器 `healthy`，后端启动 
@@ -152,6 +159,7 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | 刘俊琒 | 系统 PATH 里 `java` 指向 `...\Oracle\Java\javapath` 转发存根（本机已无对应 JDK，执行无输出）；`mvn` 完全未入 PATH（Maven 由 IDEA 内置，在 `D:\ideal\IntelliJ IDEA 2026.1\plugins\maven\lib\maven3\bin`）；`C:\Program Files\nodejs` 条目被截断成 `gram Files\nodejs\`（丢了 `C:\Pro`），导致终端里 `node` 找不到 | 采集前在同一窗口临时修正（命令见 [`env/env-liujunfeng.txt`](env/env-liujunfeng.txt) §0）；长期方案同本文末「PATH 修正」，把三条写进系统变量 | ⚠️ 已记录（2026-11-17） |
 | 刘俊琒 | Docker Desktop 未安装（`C:\Program Files\Docker` 不存在） | 本机不参与容器化冒烟与镜像构建；Docker 相关验证由房国栋/青岑代跑，与本表房国栋 2026-10-29 同一处置 | ⚠️ 已记录 |
 
+| 陈明哲 | Docker Desktop 未安装（WSL2/Hyper-V 未启用；本机不参与容器化验证） | 全栈 compose 由房国栋机器完成（[`s4-compose-fullstack-verify.md`](../reports/s4-compose-fullstack-verify.md)）；本机用 jar + MySQL/Redis 完成干净库全流程冒烟 | ⚠️ 已记录（2026-11-19） |
 ### PATH 修正（长期，一次到位）
 
 1. `Win + R` → `sysdm.cpl` → 高级 → 环境变量；

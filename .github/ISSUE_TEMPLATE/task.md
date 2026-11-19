@@ -2,9 +2,11 @@
 name: 工程任务
 about: 实现、配置或文档类任务，不含用户可见行为
 title: "[Task] "
-labels: ["type:task", "status:todo"]
+labels: ["type:task"]
 assignees: ""
 ---
+
+<!-- 提交前补 ctx:identity/qa/reputation/discovery/frontend/infra 和 priority:must/should/could/wont；被阻塞时加 status:blocked -->
 
 ## 任务描述
 

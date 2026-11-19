@@ -58,7 +58,7 @@ SMOKE PASS
 
 - **v0.2.0 为补打**：S1 结束时未执行 `develop → main` 发布 PR，tag 落在 S1 收尾提交 `a381bb8`（develop 历史）；S2 的发布 PR #115 才把 develop 合入 main，因此 `v0.3.0` 指向 main 的 `a4114dc`。
 - 后续 Sprint 3（v0.9.0 RC）与 Sprint 4（v1.0.0）应严格走「develop → main 发布 PR → 打 tag → Release Notes」流程，避免再次补打。
-- 本次验证不包含 GPG 签名与镜像推送 GHCR（属 S4 扩展项）。
+- 本次验证不包含 GPG 签名；镜像推送 GHCR 属 S4 扩展项，已在 S4 的 `images` job 补上（main push 时推送 backend/web 的 sha 与 latest 标签）。
 
 ## 六、签署
 

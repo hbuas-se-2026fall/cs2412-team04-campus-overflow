@@ -38,9 +38,9 @@ v1.0.0 -> 10925c7   v1.0.0 发布（main，PR #135）
 
 | 风险 | 影响 | 处置 |
 | --- | --- | --- |
-| 发布 PR 需要 2 个 Approve | 发布可能延迟 | 已请求 PO/SM 审批 |
-| 干净环境 compose 部署未在本机验证（无 Docker） | 首次部署风险 | 彩排机器执行 `docker compose ... up -d --build` 并走 README |
-| `docs/final` 视频与 3 份个人总结未交 | 9.4 交付不完整 | 责任人 S4 结束前补 |
+| 发布 PR 审批 | 已闭环 | #135 获魏志国、青岑 Approve 后合并（`10925c7`） |
+| 干净环境全栈 compose | ✅ 已闭环 | 房国栋 2026-11-18 在 Docker Desktop 29.9.3 上 `docker compose up -d --build` 起 backend/web 四容器，Nginx 80 反代，health=UP；见 [`s4-compose-fullstack-verify.md`](s4-compose-fullstack-verify.md) |
+| `docs/final` 视频/个人总结 | ✅ 已闭环 | 5 分钟视频 + 5/5 个人总结已归档，9.4 七项全勾 |
 | 两次彩排未执行 | T4-08 未闭环 | 按 [`rehearsal-log.md`](../final/rehearsal-log.md) 排期 |
 
 ## 五、干净环境部署验证

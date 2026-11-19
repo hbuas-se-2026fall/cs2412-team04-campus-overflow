@@ -80,6 +80,9 @@ jobs:
   images:
     name: 容器镜像构建
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs: [backend, frontend]
     # V3 §8.5：只在 main 的 push（发布）与目标为 main 的 PR 上构建镜像；
     # 同时保证 main 的必需检查「容器镜像构建」总能被满足（PR→main 会触发）
@@ -90,3 +93,25 @@ jobs:
         run: docker build -f deploy/backend.Dockerfile -t campus-overflow-backend:${{ github.sha }} .
       - name: 构建前端镜像
         run: docker build -f deploy/frontend.Dockerfile -t campus-overflow-web:${{ github.sha }} .
+
+      - name: 登录 GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 推送镜像到 GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          BACKEND=ghcr.io/hbuas-se-2026fall/cs2412-team04-campus-overflow/backend
+          WEB=ghcr.io/hbuas-se-2026fall/cs2412-team04-campus-overflow/web
+          docker tag campus-overflow-backend:${{ github.sha }} $BACKEND:${GITHUB_SHA}
+          docker tag campus-overflow-backend:${{ github.sha }} $BACKEND:latest
+          docker tag campus-overflow-web:${{ github.sha }} $WEB:${GITHUB_SHA}
+          docker tag campus-overflow-web:${{ github.sha }} $WEB:latest
+          docker push $BACKEND:${GITHUB_SHA}
+          docker push $BACKEND:latest
+          docker push $WEB:${GITHUB_SHA}
+          docker push $WEB:latest
