@@ -51,7 +51,7 @@ SMOKE PASS
 
 - compose 基础设施（MySQL/Redis 容器 healthy、后端启动、health=UP、Flyway/演示数据可读）已由 [#150](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/pull/150) 在 Docker Desktop 29.9.3 上验证；
 - 本文件补充「全新库全流程」证据，两者合起来覆盖 sprint-4「干净环境按 README 启动并完成注册→登录→提问→回答」验收。
-- 说明：本次全流程的后端以 jar 启动（本机无 Docker），compose 只起 MySQL/Redis；全栈 compose（backend/web 镜像）的运行时仍以 #150 与 CI 镜像构建为准。
+- 说明：本次全流程的后端以 jar 启动（本机无 Docker），compose 只起 MySQL/Redis；全栈 compose（backend/web 镜像）的运行时已由房国栋于 2026-11-18 单独验证，见 [`s4-compose-fullstack-verify.md`](s4-compose-fullstack-verify.md)（四容器、Nginx 80 反代、health=UP）。
 
 ## 四、结论
 
