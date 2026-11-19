@@ -1,17 +1,35 @@
 import type {
-  AdminUser, Bounty, Course, LeaderboardEntry, LedgerEntry, Me, Notification, Page, QuestionDetail,
-  QuestionSummary, ReputationProfile, Role, SearchResult,
+  AdminUser,
+  Bounty,
+  Course,
+  LeaderboardEntry,
+  LedgerEntry,
+  Me,
+  Notification,
+  Page,
+  QuestionDetail,
+  QuestionSummary,
+  ReputationProfile,
+  Role,
+  SearchResult,
 } from './types';
 
 /** 后端以 RFC 9457 Problem Details 返回错误，这里统一转成带业务码的异常。 */
 export class ApiError extends Error {
-  constructor(readonly status: number, readonly code: string, message: string) {
+  constructor(
+    readonly status: number,
+    readonly code: string,
+    message: string,
+  ) {
     super(message);
   }
 }
 
 function cookie(name: string): string | undefined {
-  return document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))?.split('=')[1];
+  return document.cookie
+    .split('; ')
+    .find((c) => c.startsWith(`${name}=`))
+    ?.split('=')[1];
 }
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -27,7 +45,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     if (token) headers['X-XSRF-TOKEN'] = decodeURIComponent(token);
   }
   const res = await fetch(`/api${path}`, {
-    method, headers, credentials: 'include',
+    method,
+    headers,
+    credentials: 'include',
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (res.status === 204) return undefined as T;
@@ -44,12 +64,16 @@ const get = <T>(path: string) => request<T>('GET', path);
 export const api = {
   csrf: () => get<{ token: string }>('/v1/auth/csrf'),
   register: (body: Record<string, string>) => request<{ id: number }>('POST', '/v1/auth/register', body),
-  login: (username: string, password: string) => request<Me>('POST', '/v1/auth/login', { username, password }),
+  login: (username: string, password: string) =>
+    request<Me>('POST', '/v1/auth/login', { username, password }),
   logout: () => request<void>('POST', '/v1/auth/logout'),
   me: () => get<Me>('/v1/auth/me'),
 
   questions: (page = 1, courseId?: number, size = 20) =>
-    get<Page<QuestionSummary>>(`/v1/questions?page=${page}&size=${size}${courseId ? `&courseId=${courseId}` : ''}`),  question: (id: number) => get<QuestionDetail>(`/v1/questions/${id}`),
+    get<Page<QuestionSummary>>(
+      `/v1/questions?page=${page}&size=${size}${courseId ? `&courseId=${courseId}` : ''}`,
+    ),
+  question: (id: number) => get<QuestionDetail>(`/v1/questions/${id}`),
   ask: (body: { courseId?: number; title: string; body: string; tags: string[] }) =>
     request<{ id: number }>('POST', '/v1/questions', body),
   editQuestion: (id: number, body: { title: string; body: string; tags: string[] }) =>
@@ -72,10 +96,18 @@ export const api = {
   myCourses: () => get<Course[]>('/v1/courses/mine'),
   joinCourse: (courseId: number) => request<void>('POST', `/v1/courses/${courseId}/join`, {}),
 
-  search: (q: string, params: {
-    tag?: string; sort?: string; unanswered?: boolean; bounty?: boolean;
-    courseId?: number; page?: number; size?: number;
-  } = {}) => {
+  search: (
+    q: string,
+    params: {
+      tag?: string;
+      sort?: string;
+      unanswered?: boolean;
+      bounty?: boolean;
+      courseId?: number;
+      page?: number;
+      size?: number;
+    } = {},
+  ) => {
     const search = new URLSearchParams({ page: String(params.page ?? 1) });
     // 关键词留空时只按筛选条件查询，不传空的 q（后端不会因此报 2 字符限制）
     if (q.trim()) search.set('q', q.trim());
@@ -88,7 +120,9 @@ export const api = {
     return get<Page<SearchResult>>(`/v1/search/questions?${search}`);
   },
   related: (questionId: number) =>
-    get<{ id: number; title: string; answerCount: number; accepted: boolean }[]>(`/v1/questions/${questionId}/related`),
+    get<{ id: number; title: string; answerCount: number; accepted: boolean }[]>(
+      `/v1/questions/${questionId}/related`,
+    ),
   popularTags: () => get<{ name: string; questionCount: number }[]>('/v1/tags/popular?limit=15'),
 
   leaderboard: (period: string) => get<LeaderboardEntry[]>(`/v1/leaderboard?period=${period}`),
@@ -97,7 +131,9 @@ export const api = {
     get<Page<LedgerEntry>>(`/v1/users/${userId}/reputation/ledger?page=${page}&size=${size}`),
   /** 问题最近一次悬赏；无悬赏时后端返回 204，这里统一转成 null */
   bountyOf: (questionId: number) =>
-    request<Bounty | undefined>('GET', `/v1/questions/${questionId}/bounty`).then((b) => b ?? null).catch(() => null),
+    request<Bounty | undefined>('GET', `/v1/questions/${questionId}/bounty`)
+      .then((b) => b ?? null)
+      .catch(() => null),
   bounty: (questionId: number, points: number, days: number) =>
     request<{ id: number }>('POST', `/v1/questions/${questionId}/bounty`, { points, days }),
 
@@ -111,7 +147,12 @@ export const api = {
     get<Page<AdminUser>>(`/v1/admin/users?verified=${verified}&page=${page}&size=${size}`),
   verifyUser: (userId: number) => request<void>('POST', `/v1/admin/users/${userId}/verify`, {}),
   createStaff: (body: {
-    username: string; displayName: string; email: string; password: string; role: Role; college?: string;
+    username: string;
+    displayName: string;
+    email: string;
+    password: string;
+    role: Role;
+    college?: string;
   }) => request<{ id: number }>('POST', '/v1/admin/users', body),
   changeRole: (userId: number, role: Role) =>
     request<void>('PUT', `/v1/admin/users/${userId}/role`, { role }),

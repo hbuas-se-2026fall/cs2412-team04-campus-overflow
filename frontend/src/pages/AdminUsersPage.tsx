@@ -49,7 +49,8 @@ export function AdminUsersPage() {
     let active = true;
     setLoading(true);
     setError('');
-    api.adminUsers(page, PAGE_SIZE, verified)
+    api
+      .adminUsers(page, PAGE_SIZE, verified)
       .then((result) => {
         if (active) setData(result);
       })
@@ -107,8 +108,12 @@ export function AdminUsersPage() {
       </div>
 
       <div className="tabs">
-        <button className={!verified ? 'active' : ''} onClick={() => switchTab(false)}>待认证学生</button>
-        <button className={verified ? 'active' : ''} onClick={() => switchTab(true)}>已认证用户</button>
+        <button className={!verified ? 'active' : ''} onClick={() => switchTab(false)}>
+          待认证学生
+        </button>
+        <button className={verified ? 'active' : ''} onClick={() => switchTab(true)}>
+          已认证用户
+        </button>
       </div>
 
       {notice && <p className="ok">{notice}</p>}
@@ -157,9 +162,15 @@ export function AdminUsersPage() {
           </div>
 
           <div className="pager">
-            <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>上一页</button>
-            <span className="muted">第 {data.page} / {totalPages} 页，共 {data.total} 人</span>
-            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>下一页</button>
+            <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+              上一页
+            </button>
+            <span className="muted">
+              第 {data.page} / {totalPages} 页，共 {data.total} 人
+            </span>
+            <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+              下一页
+            </button>
           </div>
         </>
       )}
@@ -209,7 +220,11 @@ function AdminUserRow({
     <tr>
       <td>
         {user.displayName}
-        {user.verified && <span className="verified" title="已认证">✔</span>}
+        {user.verified && (
+          <span className="verified" title="已认证">
+            ✔
+          </span>
+        )}
       </td>
       <td>{user.maskedUsername}</td>
       <td>{[user.college, user.className].filter(Boolean).join(' / ') || '—'}</td>
@@ -218,7 +233,9 @@ function AdminUserRow({
       <td>
         <div className="admin-actions">
           {!user.verified && (
-            <button disabled={busy} onClick={() => void run(() => onVerify(user))}>认证</button>
+            <button disabled={busy} onClick={() => void run(() => onVerify(user))}>
+              认证
+            </button>
           )}
           {isSelf ? (
             <span className="muted">当前账号</span>
@@ -230,7 +247,11 @@ function AdminUserRow({
                 disabled={busy}
                 aria-label={`${user.displayName} 的角色`}
               >
-                {ALL_ROLES.map((item) => <option key={item} value={item}>{roleLabel(item)}</option>)}
+                {ALL_ROLES.map((item) => (
+                  <option key={item} value={item}>
+                    {roleLabel(item)}
+                  </option>
+                ))}
               </select>
               <button
                 disabled={busy || role === user.role}
@@ -303,13 +324,22 @@ function CreateStaffForm({ onCreated }: { onCreated: () => void }) {
         </label>
         <label>
           初始密码
-          <input type="password" minLength={8} value={password}
-                 onChange={(e) => setPassword(e.target.value)} required />
+          <input
+            type="password"
+            minLength={8}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </label>
         <label>
           角色
           <select value={role} onChange={(e) => setRole(e.target.value as Role)}>
-            {STAFF_ROLES.map((item) => <option key={item} value={item}>{roleLabel(item)}</option>)}
+            {STAFF_ROLES.map((item) => (
+              <option key={item} value={item}>
+                {roleLabel(item)}
+              </option>
+            ))}
           </select>
         </label>
         <label>

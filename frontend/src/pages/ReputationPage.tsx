@@ -24,13 +24,16 @@ export function ReputationPage() {
   const loadProfile = useCallback(() => {
     setLoadingProfile(true);
     setProfileError('');
-    api.reputation(userId)
+    api
+      .reputation(userId)
       .then(setProfile)
       .catch((e: Error) => setProfileError(e.message))
       .finally(() => setLoadingProfile(false));
   }, [userId]);
 
-  useEffect(() => { loadProfile(); }, [loadProfile]);
+  useEffect(() => {
+    loadProfile();
+  }, [loadProfile]);
 
   const isSelf = me?.id === userId;
 
@@ -49,7 +52,9 @@ export function ReputationPage() {
         <h1>声誉档案</h1>
         <p className="error">{profileError || '无法加载该用户的信息'}</p>
         <div className="actions">
-          <button className="primary" onClick={loadProfile}>重试</button>
+          <button className="primary" onClick={loadProfile}>
+            重试
+          </button>
           <Link to="/leaderboard">去看排行榜</Link>
         </div>
       </div>
@@ -113,9 +118,7 @@ export function ReputationPage() {
       <UnearnedBadges owned={badgeCodes} />
 
       {/* ---- 积分流水：只有本人能看，分页 ---- */}
-      {isSelf ? <LedgerSection userId={userId} /> : (
-        <p className="muted">积分流水仅本人可见。</p>
-      )}
+      {isSelf ? <LedgerSection userId={userId} /> : <p className="muted">积分流水仅本人可见。</p>}
     </div>
   );
 }
@@ -162,16 +165,26 @@ function LedgerSection({ userId }: { userId: number }) {
     let cancelled = false;
     setLoading(true);
     setError('');
-    api.ledger(userId, page)
+    api
+      .ledger(userId, page)
       .then((p) => {
         if (cancelled) return;
         setItems(p.items);
         setTotal(p.total);
         setSize(p.size);
       })
-      .catch((e: Error) => { if (!cancelled) { setError(e.message); setItems([]); } })
-      .finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+      .catch((e: Error) => {
+        if (!cancelled) {
+          setError(e.message);
+          setItems([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [userId, page]);
 
   const totalPages = Math.max(1, Math.ceil(total / size));
@@ -196,7 +209,11 @@ function LedgerSection({ userId }: { userId: number }) {
         <>
           <table className="board">
             <thead>
-              <tr><th>时间</th><th>原因</th><th>变动</th></tr>
+              <tr>
+                <th>时间</th>
+                <th>原因</th>
+                <th>变动</th>
+              </tr>
             </thead>
             <tbody>
               {items.map((l) => (
@@ -212,9 +229,15 @@ function LedgerSection({ userId }: { userId: number }) {
           </table>
           {total > size && (
             <div className="pager">
-              <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>上一页</button>
-              <span className="muted">第 {page} / {totalPages} 页 · 共 {total} 条</span>
-              <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>下一页</button>
+              <button disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                上一页
+              </button>
+              <span className="muted">
+                第 {page} / {totalPages} 页 · 共 {total} 条
+              </span>
+              <button disabled={page >= totalPages} onClick={() => setPage((p) => p + 1)}>
+                下一页
+              </button>
             </div>
           )}
         </>

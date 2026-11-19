@@ -1,0 +1,13 @@
+{
+  "name": "campus-overflow",
+  "private": true,
+  "version": "1.0.0",
+  "description": "仓库根：仅用于托管 pre-commit 钩子（husky）。前端依赖与 lint-staged 配置在 frontend/ 下单独管理。",
+  "scripts": {
+    "prepare": "husky || true",
+    "lint-staged": "lint-staged"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

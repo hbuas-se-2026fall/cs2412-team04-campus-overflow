@@ -15,12 +15,15 @@ export function MyCoursesPage() {
   const load = useCallback(() => {
     setCourses(null);
     setError('');
-    api.myCourses()
+    api
+      .myCourses()
       .then(setCourses)
       .catch((e: Error) => setError(e.message));
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <div className="form-page">
@@ -41,7 +44,9 @@ export function MyCoursesPage() {
       {!error && courses !== null && courses.length === 0 && (
         <div className="empty">
           <p className="muted">你还没有加入任何课程。</p>
-          <Link className="primary" to="/courses">去课程目录看看</Link>
+          <Link className="primary" to="/courses">
+            去课程目录看看
+          </Link>
         </div>
       )}
 

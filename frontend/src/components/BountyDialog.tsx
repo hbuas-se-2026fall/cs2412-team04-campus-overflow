@@ -9,7 +9,11 @@ import type { Bounty } from '../types';
  * - 已有悬赏时展示倒计时（剩余时间），过期显示「已结束」，剩 1 小时内标红
  * - 定时器在卸载时清理，避免切页面后泄漏
  */
-export function BountyDialog({ questionId, canOpen, onChanged }: {
+export function BountyDialog({
+  questionId,
+  canOpen,
+  onChanged,
+}: {
   questionId: number;
   /** 后端 permissions.canManage 为 true 时才允许发起（教师在课程内才能悬赏） */
   canOpen: boolean;
@@ -27,7 +31,8 @@ export function BountyDialog({ questionId, canOpen, onChanged }: {
 
   const load = () => {
     setLoading(true);
-    api.bountyOf(questionId)
+    api
+      .bountyOf(questionId)
       .then(setBounty)
       .catch(() => setBounty(null))
       .finally(() => setLoading(false));
@@ -82,30 +87,41 @@ export function BountyDialog({ questionId, canOpen, onChanged }: {
 
   return (
     <div className="bounty-box">
-      {bounty ? (
-        <BountyStatus bounty={bounty} now={now} />
-      ) : (
-        <p className="muted">该问题还没有悬赏。</p>
-      )}
+      {bounty ? <BountyStatus bounty={bounty} now={now} /> : <p className="muted">该问题还没有悬赏。</p>}
 
       {canOpen && !open && (
-        <button onClick={() => { setOpen(true); setError(''); }}>发起悬赏</button>
+        <button
+          onClick={() => {
+            setOpen(true);
+            setError('');
+          }}
+        >
+          发起悬赏
+        </button>
       )}
 
       {open && (
         <div className="inline-form">
-          <label>积分（10–500）
-            <input type="number" min={10} max={500} value={points}
-                   onChange={(e) => setPoints(e.target.value)} />
+          <label>
+            积分（10–500）
+            <input
+              type="number"
+              min={10}
+              max={500}
+              value={points}
+              onChange={(e) => setPoints(e.target.value)}
+            />
           </label>
-          <label>有效天数（1–14）
-            <input type="number" min={1} max={14} value={days}
-                   onChange={(e) => setDays(e.target.value)} />
+          <label>
+            有效天数（1–14）
+            <input type="number" min={1} max={14} value={days} onChange={(e) => setDays(e.target.value)} />
           </label>
           <button className="primary" onClick={submit} disabled={busy}>
             {busy ? '提交中…' : '确定'}
           </button>
-          <button onClick={() => setOpen(false)} disabled={busy}>取消</button>
+          <button onClick={() => setOpen(false)} disabled={busy}>
+            取消
+          </button>
         </div>
       )}
 
@@ -168,12 +184,18 @@ function formatRemain(ms: number): string {
 function describe(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
-      case 'REP-1001': return '问题已关闭或已采纳，不能发起悬赏';
-      case 'REP-1002': return '可用悬赏积分不足';
-      case 'REP-1003': return '悬赏积分需在 10–500 之间';
-      case 'REP-1004': return '悬赏期限需在 1–14 天之间';
-      case 'QA-3001': return '只有课程教师/助教可以发起悬赏';
-      case 'QA-1020': return '该问题已关闭，无法发起悬赏';
+      case 'REP-1001':
+        return '问题已关闭或已采纳，不能发起悬赏';
+      case 'REP-1002':
+        return '可用悬赏积分不足';
+      case 'REP-1003':
+        return '悬赏积分需在 10–500 之间';
+      case 'REP-1004':
+        return '悬赏期限需在 1–14 天之间';
+      case 'QA-3001':
+        return '只有课程教师/助教可以发起悬赏';
+      case 'QA-1020':
+        return '该问题已关闭，无法发起悬赏';
       default:
         if (e.status === 403) return '你没有权限发起悬赏';
         if (e.status === 404) return '问题不存在或已被删除';
