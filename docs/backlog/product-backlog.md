@@ -99,7 +99,7 @@ PB-05（注册，3）+ PB-06（发布问题，5）+ PB-07（列表，3）+ PB-08
 | PB-06 | 发布问题 | `US-02.feature` |
 | PB-07 | 问题列表 | `US-03.feature` |
 | PB-08 | 问题详情 | `US-04.feature` |
-| PB-09 | 提交回答 | 待补 `US-09.feature` |
+| PB-09 | 提交回答 | `US-09-answer-question.feature` |
 | PB-10 | 采纳答案 | `US-08-accept-answer.feature` |
 | PB-11 | 投票 | `US-05-upvote-answer.feature` |
-| PB-15 | 评论 | 待补 |
+| PB-15 | 评论 | `US-15-comment.feature` |
