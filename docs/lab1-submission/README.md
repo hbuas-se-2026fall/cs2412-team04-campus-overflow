@@ -14,9 +14,10 @@
 - 默认分支：`develop`（集成分支；`main` 为发布分支）
 - 成员：5 人均已参与分支推送与 PR 协作
 - 分支保护：已配置，截图见 [`screenshots/branch-protection.png`](screenshots/branch-protection.png)
-  （截图为规则列表页，仅证明 `main`、`develop` 存在保护规则；规则内容以 2026-10-28 的 API 核验结果为准）
+  （截图为规则列表页，仅证明 `main`、`develop` 存在保护规则；规则内容以 **2026-11-19 复核**结果为准——
+  2026-10-28 首核，2026-11-17 14:15 增补仓库规则集 `develop required checks`）
 
-分支保护规则（2026-10-28 通过 GitHub API 核验）：
+分支保护规则（2026-10-28 首核，2026-11-19 用 API 复核）：
 
 | 分支 | 规则 | 实际配置 |
 | --- | --- | --- |
@@ -33,11 +34,33 @@
 | 两分支 | 新提交使旧 Approve 失效 | ✅ Dismiss stale approvals 已开启 |
 | 两分支 | 合并前必须解决会话 | ✅ 已开启 |
 
-设置入口：仓库 **Settings → Branches → Branch protection rules**（新版为 **Rules → Rulesets**）。
-当前仓库没有 Ruleset，仅使用经典分支保护规则。
+设置入口有两处，**本仓库两处都在用**：
 
-**核验方式**：2026-10-28 调用 GitHub API `GET /repos/{owner}/{repo}/branches/{branch}/protection`
-读取 `main`、`develop` 的实际配置，上表据此整理。
+1. 经典分支保护：**Settings → Branches → Branch protection rules**（负责 `main` 的 2 Approve、
+   `main`/`develop` 的 `enforce_admins`、强推/删除禁令、Dismiss stale approvals、合并前解决会话）；
+2. 仓库规则集：**Settings → Rules → Rulesets** —— 规则集 **`develop required checks`（ID `27436601`）**，
+   2026-11-17 14:15 由陈明哲启用（`enforcement=active`，`bypass_actors` 为空即管理员也不可绕过），
+   对 `refs/heads/develop` 要求两项必需检查：`后端构建与验证`、`前端构建`。
+
+> 更正（2026-11-19）：本文此前写"当前仓库没有 Ruleset，仅使用经典分支保护规则"，与事实不符——
+> 规则集 #27436601 已于 2026-11-17 启用，`develop` 的必需状态检查正是由它下发的
+> （对应缺陷 [`docs/qa/defects.md`](../qa/defects.md) BUG-003 的关闭依据）。当初的判断来自 2026-10-28
+> 只查了 `branches/{branch}/protection`、没查 `rulesets` 接口。
+
+**核验方式**：
+
+```bash
+# 经典保护（Approve 数、enforce_admins、强推/删除禁令）
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.github.com/repos/hbuas-se-2026fall/cs2412-team04-campus-overflow/branches/develop/protection"
+# 规则集（必需检查、bypass 名单、生效状态）
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "https://api.github.com/repos/hbuas-se-2026fall/cs2412-team04-campus-overflow/rulesets"
+```
+
+2026-11-19 复核结果：规则集列表返回 1 条（`27436601`，`develop required checks`，`active`）；
+`branches/develop/protection` 的 `required_status_checks.checks` 为 `后端构建与验证`、`前端构建`
+（`app_id=15368`，即 GitHub Actions），与上表一致。
 
 **生效验证**：直接向受保护分支推送会被拒绝，返回
 `GH006: Protected branch update failed ... Changes must be made through a pull request.`
