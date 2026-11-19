@@ -118,6 +118,7 @@
 > 并指向 [`product-backlog.md`](../backlog/product-backlog.md) 说明它在 V3 早期清单里存在、
 > 但未进入 Sprint 拆分。**不要现场点，会 404/500。**
 > 若需补做，先在 backlog 立 PBI 再排 Sprint，不宜在评审前临时加。
+> **不要再按「跑一次 `POST /collect` 看 2xx」的方式确认**——该接口未实现，请求一定失败。
 
 ---
 
@@ -222,8 +223,8 @@
 
 | 风险 | 影响 | 兜底方案 |
 | --- | --- | --- |
-| 收藏接口未实现 | US-06 演示时 500 | 改为展示接口契约 + 已实现部分，不现场点 |
-| 后端 `TODO(S2)` 桩未补齐 | 部分写操作报 500 | 演示前跑 `mvn -pl co-qa/co-qa-domain test`，红则只演只读场景 |
+| **收藏接口未实现（US-06，历史缺口）** | 现场点收藏会 404/500 | 按 §「US-06 当前状态」处理：**不参与现场演示**，只口头说明「未纳入 v1.0.0 范围」。<br>~~改用展示接口契约~~ 已过时——前端无入口，无可展示的契约页面 |
+| ~~后端 `TODO(S2)` 桩未补齐~~ **已清零（2026-11-18 复核）** | ~~部分写操作报 500~~ 无影响 | 全仓 `TODO(Sx)` **0 处**；`mvn -B clean test` = **27 模块 / 165 用例 / BUILD SUCCESS**（见 `docs/lab1-submission/logs/mvn-test-fangguodong-20261118.log`）。无需再跑只读降级方案 |
 | 中文搜索搜不到 | US-07 标签筛选正常但关键词搜不到 | 检查 `QuestionPostedEvent.plainText` 与 ngram 参数 |
 | 前端 `typecheck` 红 | CI 前端阶段失败 | 提交前必须跑 `npm run typecheck && npm run build` |
 | 演示机网络慢 | 页面转圈 | 提前把数据 seed 好，避免现场发数据 |

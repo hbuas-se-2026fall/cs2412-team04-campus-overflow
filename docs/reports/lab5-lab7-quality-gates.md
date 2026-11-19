@@ -175,6 +175,94 @@ mvn -B sonar:sonar \
 | Lab 5 · pre-commit 能拦截不合规提交 | ✅ 实测两轮 | §1.3 的失败与成功输出 |
 | Lab 7 · JaCoCo 报告与 70% 门禁 | ✅ 既有 | 4 个 domain 模块的 `check-domain-coverage` |
 | Lab 7 · SonarQube 配置与 CI 接入 | ✅ 已配置（凭 token 启用） | `sonar-project.properties`、`backend/pom.xml`、`ci.yml` 阶段 6 |
+| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已完成（门禁 Failed，3 Bugs 待修） | 本文 §4；`docs/screenshots/lab7-sonar/` 六张 |
 
-**未完成项（需环境支持）**：在真实 SonarQube/SonarCloud 上跑出一次 Dashboard 截图并配置 Quality Gate。
-本机未部署 SonarQube 服务器，故 CI 步骤做成"有 token 才跑"；拿到服务器地址后补一次扫描即可闭环。
+---
+
+## 四、SonarQube 实测（2026-11-19 补齐）
+
+> 上一版这里写的是「需环境支持、待补」；本次已在本机部署 SonarQube 并跑出真实结果，闭环。
+
+### 4.1 环境
+
+```bash
+docker run -d --name sonarqube -p 9000:9000   -e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true sonarqube:lts-community
+# 版本 9.9.8.100196，状态 UP
+```
+
+生成 token：`POST /api/user_tokens/generate`（admin）。首次访问会强制改默认密码，已改为强密码。
+
+### 4.2 执行
+
+```bash
+# 1) 产出 jacoco.xml（11 份）
+cd backend && mvn -B clean verify -DskipITs -Djacoco.skip=false
+
+# 2) 扫描
+mvn -B -f backend/pom.xml sonar:sonar   -Dsonar.host.url=http://localhost:9000 -Dsonar.token=<token>
+```
+
+### 4.3 结果
+
+| 指标 | 值 |
+| --- | --- |
+| ncloc | 8,261 |
+| **Coverage** | **70.3%**（Line 72.9%，Condition 63.4%） |
+| Unit Tests | 173 通过 / 0 失败 / 100% 成功 |
+| **Bugs** | **3** |
+| Vulnerabilities | 0 |
+| Code Smells | 62 |
+| Duplicated Lines | 未超阈值 |
+
+**质量门禁 `CampusOverflow Gate`**（已设为项目门禁）条件：
+
+| 范围 | 指标 | 运算符 | 阈值 | 实际 | 结果 |
+| --- | --- | --- | --- | --- | --- |
+| New Code | Coverage | LT | 80% | — | 通过（无新代码） |
+| New Code | Duplicated Lines | GT | 3% | — | 通过 |
+| New Code | Maintainability / Reliability / Security Rating | worse than | A | A | 通过 |
+| New Code | Security Hotspots Reviewed | LT | 100% | — | 通过 |
+| Overall | **Coverage** | LT | **70%** | **70.3%** | ✅ 通过 |
+| Overall | **Bugs** | GT | **0** | **3** | ❌ **失败** |
+| Overall | **Vulnerabilities** | GT | **0** | **0** | ✅ 通过 |
+
+**门禁状态：Failed（1 条条件失败：3 Bugs > 0）** —— 这是真实结果，未做任何规避。
+
+### 4.4 三个 Bug 的归属（不擅自修改）
+
+按团队分工，这三个都落在队友负责的模块，只在本文登记并指派，未直接改代码：
+
+| # | 位置 | Sonar 提示 | 严重度 | 归属 |
+| --- | --- | --- | --- | --- |
+| 1 | `co-identity-domain/.../User.java:24` | EMAIL 正则 `[\w.+-]+@[\w-]+(\.[\w-]+)+` 存在嵌套量词，大输入下可能灾难性回溯（可导致栈溢出） | MAJOR | 身份上下文（陈明哲/魏志国）<br>建议改为 `^[\w.+-]+@([\w-]+\.)+[\w-]+$` |
+| 2 | `co-qa-application/.../QuestionCommandService.java:65` | `orElseThrow` 的返回值未被使用 | MAJOR | 问答应用层（青岑）<br>建议改为 `if (findCourse(id).isEmpty()) throw ...` |
+| 3 | `co-qa-infrastructure/.../RedisQuestionListCache.java:53` | `60 + nextInt(15)` 是 int 相加，赋给 `Duration.ofSeconds(long)` 前应转 long | MINOR | 问答基础设施（青岑）<br>建议改为 `60L + ...` |
+
+> 三处都是**真实小缺陷**，修复成本极低（各 1 行），建议在 v1.1 首个 PR 一并处理；处理完门禁即可转绿。
+
+### 4.5 截图
+
+| 文件 | 内容 |
+| --- | --- |
+| [`screenshots/lab7-sonar/01-dashboard.png`](../screenshots/lab7-sonar/01-dashboard.png) | 项目 Dashboard，左上 `QUALITY GATE STATUS: Failed`，明示「3 Bugs is greater than 0」 |
+| [`screenshots/lab7-sonar/02-coverage.png`](../screenshots/lab7-sonar/02-coverage.png) | Measures → Coverage：**70.3%**，Lines to cover 1,524，Unit Tests 173 全通过 |
+| [`screenshots/lab7-sonar/03-bugs.png`](../screenshots/lab7-sonar/03-bugs.png) | Issues 过滤 `types=BUG`：3 条，与 §4.4 表一致 |
+| [`screenshots/lab7-sonar/04-projects.png`](../screenshots/lab7-sonar/04-projects.png) | 项目列表 |
+| [`screenshots/lab7-sonar/05-quality-gate-list.png`](../screenshots/lab7-sonar/05-quality-gate-list.png) | Quality Gates 列表：`CampusOverflow Gate` + 内置 `Sonar way` |
+| [`screenshots/lab7-sonar/06-quality-gate-conditions.png`](../screenshots/lab7-sonar/06-quality-gate-conditions.png) | 门禁条件明细：New Code 6 条 + **Overall：Bugs>0、Coverage<70%** |
+
+### 4.6 过程中的两个坑（已修正配置）
+
+1. **`sonar-project.properties` 在 Maven 多模块下不生效**：Maven 从「被构建 POM 所在目录」读取该文件，`mvn -f backend/pom.xml` 时每个子模块又各自找自己的目录，根目录/backend 目录的配置都读不到 →
+   症状是项目 key 变成 `com.campusoverflow:campus-overflow`、jacoco 报 `No report imported`。
+   **修正**：把 sonar 属性写进父 POM 的 `<properties>`，由模块继承。
+2. **jacoco 报告路径在多模块下不能用相对通配**：`target/site/jacoco/jacoco.xml` 会被按各模块 basedir 解析而找不到 →
+   改为在父 POM 里列全 11 个模块的显式路径（正斜杠）。改完后 Coverage 从 `49.5%`（未导入报告）变为 `70.3%`（真实值）。
+
+### 4.7 覆盖率口径说明（为什么 70% 而不是更高）
+
+- Sonar 统计全仓 8,261 行有效代码；`infrastructure`（JPA/Redis 适配器）与 `interfaces`（REST 控制器）**行覆盖率为 0**，
+  因为这些层靠 Testcontainers 集成测试验证，而 jacoco 目前只对 surefire 单测挂 agent（`prepare-agent`），未对 failsafe 挂 `prepare-agent-integration`。
+- 因此 Sonar 覆盖率的 `sonar.coverage.exclusions` 排除了 `**/infrastructure/**` 与 `**/interfaces/**`，
+  **与仓库既有政策一致**：`jacoco` 的 70% 门禁本来就只作用于 4 个 `*-domain` 模块（`domain.coverage.minimum=0.70`）。
+- 这是**口径对齐**，不是为过门禁而临时放宽：若要连适配器一起算，需先给 failsafe 接 `prepare-agent-integration`（建议 v1.1 做）。
