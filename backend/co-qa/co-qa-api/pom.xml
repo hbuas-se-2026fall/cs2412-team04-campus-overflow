@@ -16,5 +16,11 @@
             <groupId>com.campusoverflow</groupId>
             <artifactId>co-shared-kernel</artifactId>
         </dependency>
+        <!-- 仅测试作用域：事件字段顺序契约测试（EventFieldOrderContractTest）。生产依赖仍只有 JDK 与共享内核（FF-5） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>

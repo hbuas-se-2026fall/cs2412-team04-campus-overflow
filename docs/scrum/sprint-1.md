@@ -86,7 +86,7 @@
 | CI 在 `AnswerAndVoteServiceTest` 红 | PR #86 无法合并，S1 门禁不通过 | 定位为事件构造参数顺序错位，转 B 修；B 的 PR #89 已修复，合并后 qa 两模块 42 + 28 条全绿 | 已解除 |
 | 作者不能批准自己的 PR | PR 停在 `blocked` | 指定 E（@cmz666-BOT）评审；最终 @qing963666、@2123345397-star 两名非作者 `APPROVED` 后合并 | 已解除 |
 | 本机无 Docker，MySQL/Redis 起不来 | 端到端无法验证 | 用 MySQL 8.0.44 临时实例（3307）+ Redis 5.0.14 移植版启动，`spring.config.additional-location` 覆盖数据源 | 已解除 |
-| 事件字段顺序缺少契约测试 | 跨上下文消费方静默错位 | 建议在 `co-qa-api` 事件 record 上加构造顺序注释，并由 B 补契约测试 | 待办 |
+| 事件字段顺序缺少契约测试 | 跨上下文消费方静默错位 | 8 个 `co-qa-api` 事件 record 已加构造顺序 javadoc，并由 B 补契约测试 `EventFieldOrderContractTest`（8/8，反射钉死字段顺序，调整顺序须同步测试） | 已关闭（2026-11-19） |
 
 ## 六、评审前检查清单
 

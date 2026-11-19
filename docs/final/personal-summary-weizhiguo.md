@@ -21,7 +21,7 @@
 | D3 文档统一（4 上下文 / 30 事件） | PR #75：`event-storming.png` 重建、`glossary.md:25-27`、`context-map` | BUG-004 关闭 |
 | v0.1.0 / v0.2.0 / v0.3.0 发布 | `docs/release/v0.3.0.md`、PR #115（develop→main）、GitHub Releases 三份 | tag 与 Release Notes 齐全 |
 | E3/E4 环境与身份核查表 | `env-weizhiguo.png/txt`、`mvn-test-weizhiguo.png`、PR #123（核查表 5/5） | 三处表口径一致 |
-| Sprint 3 计划草案 | PR #124：`docs/scrum/sprint-3.md`（PO 代拟、SM=房国栋） | 已合并 |
+| Sprint 3 计划与执行收口 | PR #124（PO 代拟计划）→ #160（S3 执行记录收口，刘俊琒） | 已执行并收口 |
 | T1-15 qa.http 问题侧 | PR #101：发布/编辑/详情/删除问题请求 | 一键跑通 |
 
 ## 二、技术收获
