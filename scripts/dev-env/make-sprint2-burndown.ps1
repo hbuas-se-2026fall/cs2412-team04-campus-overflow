@@ -12,9 +12,9 @@ $right = $width - 60
 $bottom = $height - 90
 $max = 45
 
-$dates = @("11-09", "11-10", "11-12", "11-14", "11-15")
-$ideal = @(42, 38, 34, 30, 26)
-$actual = @(42, 37, 32, 29, 24)
+$dates = @("11-09", "11-10", "11-12", "11-14", "11-15", "11-16")
+$ideal = @(42, 38, 34, 30, 26, 22)
+$actual = @(42, 37, 32, 29, 24, 0)
 
 $bmp = New-Object System.Drawing.Bitmap($width, $height)
 $g = [System.Drawing.Graphics]::FromImage($bmp)
@@ -33,7 +33,7 @@ $pointBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromA
 $textBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(40, 40, 40))
 $mutedBrush = New-Object System.Drawing.SolidBrush([System.Drawing.Color]::FromArgb(110, 110, 110))
 
-$g.DrawString("Sprint 2 Burndown (through 2026-11-15)", $titleFont, $textBrush, 90, 22)
+$g.DrawString("Sprint 2 Burndown (through 2026-11-16)", $titleFont, $textBrush, 90, 22)
 $g.DrawString("Story points remaining", $labelFont, $mutedBrush, 20, 80)
 
 for ($v = 0; $v -le 40; $v += 10) {
