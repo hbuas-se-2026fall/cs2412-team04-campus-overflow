@@ -159,13 +159,19 @@
 | 404 | 地址栏改 `id=999999` | 「问题不存在」页 |
 | 无权限 | 未加入课程的学生打开课程内问题 | 「没有查看权限」页 |
 
-这四张截图放进 `docs/screenshots/s1-states/`。
+这四张截图已归档到 [`docs/screenshots/s1-states/`](../screenshots/s1-states/)（2026-11-18 实采）：
 
-> **现状（2026-11-18）**：该目录**尚未建立**，四态截图待补。
-> 过渡证据：S3 前端验收已归档 6 张同类状态截图（骨架屏/空态/422/通知已读），
-> 见 [`s3-front-search.png`](s3-front-search.png)、[`s3-front-search-422.png`](s3-front-search-422.png)、
-> [`s3-front-notifications.png`](s3-front-notifications.png)、[`s3-front-notifications-read.png`](s3-front-notifications-read.png)；
-> S1 四态截图建议在 S4 彩排当天用同一套 demo 数据补拍。
+| 状态 | 文件 | 构造方式 |
+| --- | --- | --- |
+| 空列表 | [`01-empty.png`](../screenshots/s1-states/01-empty.png) | 搜索不存在的关键词 |
+| 加载中 | [`02-loading-skeleton.png`](../screenshots/s1-states/02-loading-skeleton.png) | 拦截 `/api/v1/questions` 延迟 6 秒，骨架屏可见 |
+| 404 | [`03-notfound-404.png`](../screenshots/s1-states/03-notfound-404.png) | 访问 `/questions/999999` |
+| 无权限 | [`04-no-permission.png`](../screenshots/s1-states/04-no-permission.png) | 学生访问 `/admin` |
+
+> ⚠️ **一处与原设计的偏差（已核实）**：原计划用「未加入课程的学生打开课程内问题」触发无权限，
+> 但实测后端 `QuestionQueryService.detail()` **不校验课程成员身份**——全新注册、未加入任何课程的账号
+> 同样能读到课程内问题全文。故此状态改用前端路由守卫 `RequireAdmin` 的「无权限访问」页取证。
+> 若产品要求「课程内问题仅成员可见」，需后端补成员校验 + 前端补 403 分支，建议 v1.1 明确规则。
 
 ---
 
