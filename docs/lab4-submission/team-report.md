@@ -5,6 +5,7 @@
 > 团队：cs2412-team04  
 > 快照日期：2026-11-15  
 > 汇总人：青岑（C · 投票与评论，Sprint 2 SM）
+> 状态：历史 Lab4 报告（保留当时快照）。文中“六个限界上下文”为当时表述；V3 最终口径为 4 个限界上下文。T1-15 主链路已在 S3 通过 `SMOKE PASS`，见 [`docs/final/03-quality.md`](../final/03-quality.md) §3.3。
 
 ---
 
@@ -67,7 +68,7 @@ mvn spring-boot:run -pl co-bootstrap
 | T1-12 | 行走骨架与 tech-debt Issue | E 陈明哲 | 已完成 |
 | T1-13 | 前端权限按钮与错误码提示 | D 房国栋 | 已实现 |
 | T1-14 | CI 纳入 Q&A、覆盖率 0.70 | E 陈明哲 | 已开启 |
-| T1-15 | `http/qa.http` 问题侧/投票侧、演示与冒烟 | A、C、D、E | 投票/评论侧已完成，问题侧与冒烟串联待补齐 |
+| T1-15 | `http/qa.http` 问题侧/投票侧、演示与冒烟 | A、C、D、E | 投票/评论侧已完成；问题侧与冒烟已由 S3 T1-15 `SMOKE PASS` 覆盖（见 `docs/final/03-quality.md` §3.3） |
 | Step 1 | 骨架核对 | E 陈明哲 | 已完成 |
 | Step 3 | JPA/Flyway/异常/日志核对 | B、E | 已完成 |
 | Step 4 | POST /api/v1/questions 端到端 | B、D、E | 已完成，截图见 A 的 Lab 4 报告 |
