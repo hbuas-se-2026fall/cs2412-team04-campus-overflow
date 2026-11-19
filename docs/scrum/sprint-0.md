@@ -81,7 +81,7 @@
 - 演示：任一成员电脑启动系统 → 注册 → 登录 → 加入课程 → Swagger UI 可访问；主链路可用。
 - 评审结论：S0 目标基本达成，进入 S1（Q&A 核心）。
 - 未达标项与处理：
-  1. `develop` 必需状态检查为空（BUG-003）→ 转 S1 由 E 处理（后续已开 `enforce_admins` 与 1 个 Approve，必需检查仍待补）。
+  1. `develop` 必需状态检查为空（BUG-003）→ 转 S1 由 E 处理。**已在 2026-11-17 关闭**：仓库规则集 #27436601「develop required checks」对 `refs/heads/develop` 要求 `后端构建与验证`、`前端构建`，`bypass_actors` 为空；classic protection 保留 `enforce_admins=true` 与 1 个 Approve。核验依据（规则集配置、`checks[].app_id=15368`、PR #139/#140 的 check-runs 均为 success）见 [`defects.md`](../qa/defects.md) 的 BUG-003 行。
   2. v0.1.0 标签缺失 → 2026-11-16 补打并登记在本文件。
   3. 环境截图仅归档房国栋、青岑 2/5 → 其余成员按 `scripts/dev-env/collect-env.ps1` 补采，陈明哲的于 2026-11-16 归档。
 
@@ -91,7 +91,7 @@
 | --- | --- | --- |
 | 文档先行：DDD、团队约定、ADR 在写代码前就位 | S0 收尾没有形成「发布 PR + 标签」的固定动作 | 每个 Sprint 末固定 `develop → main` 发布 PR 并打标签（SM） |
 | 分支保护、模板、看板一次配齐 | 环境证据采集启动晚，只有 2/5 | 环境采集脚本随仓库下发，S1 前补齐（房国栋） |
-| CI 渐进门禁 + ADR-009 提前落地 | 分支保护缺少必需状态检查 | S1 补齐 `required_status_checks`（陈明哲） |
+| CI 渐进门禁 + ADR-009 提前落地 | 分支保护缺少必需状态检查 | S1 补齐 `required_status_checks`（陈明哲）｜**已闭环 2026-11-17**（规则集 #27436601） |
 
 ## 六、证据索引
 
