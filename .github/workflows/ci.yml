@@ -52,6 +52,24 @@ jobs:
           TESTCONTAINERS_RYUK_DISABLED: "true"
         run: mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 
+      # 阶段 6：SonarQube 扫描（Lab 7 Step 3）
+      # 未配置 SONAR_TOKEN 时跳过，不阻塞 PR；配置后自动启用且 qualitygate.wait=true 会等待门禁结果
+      - name: SonarQube 扫描
+        if: ${{ env.SONAR_TOKEN != '' }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+        run: |
+          mvn -B -f backend/pom.xml sonar:sonar             -Dsonar.host.url="${SONAR_HOST_URL:-https://sonarcloud.io}"             -Dsonar.token="${SONAR_TOKEN}"
+
+      - name: 归档 JaCoCo 覆盖率报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-reports
+          path: "backend/**/target/site/jacoco/**"
+          if-no-files-found: ignore
+
       - name: 归档测试报告
         if: always()
         uses: actions/upload-artifact@v4
@@ -70,6 +88,12 @@ jobs:
       - name: 安装依赖
         working-directory: frontend
         run: npm install --no-audit --no-fund
+      - name: ESLint
+        working-directory: frontend
+        run: npm run lint
+      - name: Prettier 格式检查
+        working-directory: frontend
+        run: npm run format:check
       - name: 类型检查
         working-directory: frontend
         run: npm run typecheck

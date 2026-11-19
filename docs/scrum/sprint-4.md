@@ -27,7 +27,7 @@
 
 ## 三、发布检查（T4-01）
 
-- [x] `develop` 最新 CI：后端构建与验证 / 前端构建 / 容器镜像三绿
+- [x] `develop` CI：后端构建与验证 / 前端构建绿；容器镜像由 `main`/PR→main 的 `images` job 覆盖
 - [x] 全仓 27 模块 `mvn verify -DskipITs -Djacoco.skip=false` 通过（2026-11-17，JDK 21）
 - [x] 覆盖率：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥0.70（口径：`docs/final/screenshots/coverage/*.csv` 的 LINE COVERED / TOTAL）
 - [x] T1-15 冒烟 `SMOKE PASS`；demo profile 数据可加载

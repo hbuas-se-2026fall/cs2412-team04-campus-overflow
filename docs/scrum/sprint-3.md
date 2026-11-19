@@ -3,6 +3,7 @@
 > Scrum Master：房国栋（D，角色卡 S3 既定）　PO：魏志国
 > 时间盒（计划）：2026-11-23 ～ 2026-12-04，10 个工作日；**实际执行：2026-11-16 ～ 2026-11-17（2 天，S2 提前收口后接续，窗口前移）**
 > 范围：PB-31～PB-39（Discovery / 搜索与通知，31 SP）；范围来源：[`docs/backlog/product-backlog.md`](../backlog/product-backlog.md)
+> **PB-40（禁用违规账号并下线，5 SP）属 S4 范围（T4-02，负责人魏志国）**，不计入 S3 的 31 SP；此处与 backlog「归属迭代」列一致。
 > 状态：**已执行并收口（2026-11-17）**；燃尽图 [`sprint-3-burndown.png`](sprint-3-burndown.png) 已归档
 > S3 目标（角色卡口径）：**移除全部行走骨架，`mvn verify` 全绿**；搜索、推荐、通知三处在界面可用。
 >
@@ -16,7 +17,7 @@
 | 议题 | 结论 | 备注 |
 | --- | --- | --- |
 | Sprint 目标 | 搜索能搜到中文、相关问题可推荐、通知中心可用；CI 恢复完整门禁 | 角色卡 S3 |
-| 迭代范围 | PB-31～PB-39（与文件开头及 backlog 归属一致；PB-40 禁用账号属 Sprint 4，已在 T4-02 交付）；骨架清理（`DiscoveryQueryService` 2 个、`SearchIndexProjector` 10 个 TODO） | `docs/ddd/` 与缺陷台账 |
+| 迭代范围 | PB-31～PB-39（31 SP）；骨架清理（`DiscoveryQueryService` 2 个、`SearchIndexProjector` 10 个 TODO） | `docs/ddd/` 与缺陷台账 |
 | 本次不做 | S4 发布项（v1.0.0、Grafana 面板、禁用账号）；新功能面不做扩张 | T4 系列留给 Sprint 4 |
 
 ## 二、当前基础（S2 期间已提前完成）
