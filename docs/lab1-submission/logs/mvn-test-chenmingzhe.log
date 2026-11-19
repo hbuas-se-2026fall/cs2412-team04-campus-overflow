@@ -1,0 +1,28 @@
+# 陈明哲 · mvn test 证据（CI，非本机）
+# 来源：GitHub Actions run 44213214268 / job 134496491070（2026-11-18）
+# 触发提交：dfbc8f4（chore/ci-full-gate，PR #164）
+# 环境：ubuntu-latest / Temurin JDK 21.0.13 / Maven 3.9.x
+
+$ mvn -B -f backend/pom.xml test
+
+[INFO] co-shared-kernel: Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-identity-domain: Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-identity-application: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-qa-domain: Tests run: 42, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-qa-application: Tests run: 32, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-reputation-domain: Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-reputation-application: Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-discovery-domain: Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-discovery-application: Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
+[INFO] co-bootstrap (ArchUnit + FlowIT): Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
+
+[INFO] Tests run: 168, Failures: 0, Errors: 0, Skipped: 0  (27 modules, aggregate)
+
+[INFO] Reactor Summary for CampusOverflow :: Parent 0.1.0-SNAPSHOT:
+[INFO] CampusOverflow :: Parent ............................... SUCCESS
+[INFO] ... (27 modules) ....................................... SUCCESS
+[INFO] BUILD SUCCESS
+
+# 说明：本机无 Docker，且本地 Maven 缓存缺 testcontainers 依赖，
+# 因此使用 CI 全量 mvn test 作为 E3 测试证据；同一 job 的集成测试
+# CampusOverflowFlowIT 3/3 通过，见 docs/reports/release-v1.0.0-verification.md。

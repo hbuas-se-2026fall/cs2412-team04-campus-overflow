@@ -24,15 +24,18 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 | --- | ---: | ---: | --- |
 | co-shared-kernel | 2 | — | — |
 | co-identity-domain | 9 | 75.74% | ✅ ≥70% |
-| co-qa-domain | 30 | 83.12% | ✅ |
-| co-qa-application | 28 | —（应用层不进门槛） | — |
-| co-reputation-domain | 18 | 81.93% | ✅ |
-| co-reputation-application | 21 | — | — |
+| co-identity-application | 3 | — | — |
+| co-qa-domain | 42 | 83.12% | ✅ |
+| co-qa-application | 32 | — | — |
+| co-reputation-domain | 20 | 81.93% | ✅ |
+| co-reputation-application | 36 | — | — |
 | co-discovery-domain | 6 | 78.26% | ✅ |
-| co-discovery-application | 6 | — | — |
-| co-bootstrap | ArchitectureTest | — | 分层约束 |
+| co-discovery-application | 14 | — | — |
+| co-bootstrap | 4（ArchUnit 1 + FlowIT 3） | — | 分层约束 + 端到端 |
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
+
+> 全量测试共 **168** 个用例（含 `CampusOverflowFlowIT` 3 个），数据来自 CI run 44213214268 的 surefire/failsafe XML；`@Test` 源码静态计数为 136 + 参数化展开/IT。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
@@ -72,6 +75,8 @@ BUG-003 于 2026-11-17 复核关闭：`main` 为 2 Approve + 后端/前端/容�
 - `v0.1.0` → `704cd60`（S0 基线，补打）
 - `v0.2.0` → `a381bb8`（S1 基线，补打）
 - `v0.3.0` → `a4114dc`（main，PR #115）：CI 后端/前端/容器镜像三阶段绿
+- `v0.9.0` → `579ea59`（S3 RC tag；正式内容随 v1.0.0 进 main）
+- `v1.0.0` → `10925c7`（main，PR #135；GitHub Release）
 
 详见 [`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md)。
 - 可观测性四面板与对账指标演练：[`docs/reports/t4-04-observability.md`](../reports/t4-04-observability.md)
@@ -82,9 +87,11 @@ BUG-003 于 2026-11-17 复核关闭：`main` 为 2 Approve + 后端/前端/容�
 # 全仓（27 模块）构建与测试
 mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false
 
-# 仅 CI 的 Sprint 范围
-mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false `
-  -pl "co-shared-kernel,co-identity/co-identity-domain,co-qa/co-qa-domain,co-qa/co-qa-application,co-reputation/co-reputation-domain,co-reputation/co-reputation-application,co-discovery/co-discovery-domain,co-discovery/co-discovery-application" -am
+# CI 阶段 2：全量单元测试
+mvn -B -f backend/pom.xml test
+
+# CI 阶段 5：集成测试硬门禁（需 Docker）
+mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false
 ```
 
 > 2026-11-16 实跑：全仓 27 个模块 `mvn verify -DskipITs -Djacoco.skip=false` → **BUILD SUCCESS**（含 ArchUnit 1 条）。
@@ -93,6 +100,6 @@ mvn -B -f backend/pom.xml verify -DskipITs -Djacoco.skip=false `
 
 | 风险 | 影响 | 处置 |
 | --- | --- | --- |
-| BUG-003 `required_status_checks` 为空 | 发布 PR 的 CI 失败不一定阻断合并 | 已于 2026-11-17 关闭：`main` 三项、`develop` 两项必需检查 + `enforce_admins`；改 CI 作业名后需同步核对，否则必需检查永远 pending |
+| BUG-003（已关闭） | 曾因 develop 无必需状态检查，CI 失败不一定阻断合并 | 2026-11-17 通过规则集 #27436601 启用 `后端构建与验证`/`前端构建`；`enforce_admins=true`，改作业名需同步规则集 |
 | 本地 JDK 25 下 JaCoCo 0.8.12 agent 不兼容 | 本机取证需 `-Djacoco.skip=true` | 统一用 JDK 21 取证；CI 固定 21 |
-| 集成测试仍允许失败 | 端到端问题可能漏过 CI | S4 彩排必须手工跑 T1-15 冒烟 + demo 走查 |
+| 集成测试已硬门禁 | 失败即阻断，不再漏过端到端问题 | 阶段 5 移除了 `continue-on-error`，Testcontainers 起 MySQL/Redis；见 ADR-009 |
