@@ -56,6 +56,10 @@
 - **阻塞解除**：B 的 `fix/lab4-answer-events`（PR #89）修掉事件构造参数顺序，`AnswerAndVoteServiceTest` 转绿；PR #86 于 11:00 合并进 `develop`（合并提交 `3f96258`），评审 @qing963666、@2123345397-star 均 `APPROVED`。
 - 合并后在 `develop` 重跑：`co-qa-domain` 42 条、`co-qa-application` 28 条，全部通过；PB-06 #32 自动关闭，#33 / #34 补关。
 
+> **收口说明（2026-11-19 补记）**：上表「魏志国 B · 阻塞：事件字段顺序待确认」是 **2026-11-05 站会开始时的快照**，当日已由上一条「阻塞解除」闭环（PR #89）。
+> 2026-11-19 又补了根治措施：8 个 `co-qa-api` 事件 record 加构造顺序 javadoc + `EventFieldOrderContractTest`（8/8，反射钉死顺序），
+> 详见 §五风险表「事件字段顺序缺少契约测试（已关闭）」。历史站会表格保留原始快照，不再改写。
+
 ## 三、燃尽图与数据
 
 口径：纵轴为 Sprint 1 **迭代范围 40 SP**（PB-06～PB-19）中尚未完成的部分；「完成」指任务卡代码合入 `develop` 且对应验收场景通过。承诺 P0 的 13 SP 含 Sprint 0 已交付的 PB-05（3 SP），不计入本图。
@@ -106,7 +110,7 @@ D3～D8 实际线持平的原因不是"没干活"，而是**S1 范围内已无�
 | CI 在 `AnswerAndVoteServiceTest` 红 | PR #86 无法合并，S1 门禁不通过 | 定位为事件构造参数顺序错位，转 B 修；B 的 PR #89 已修复，合并后 qa 两模块 42 + 28 条全绿 | 已解除 |
 | 作者不能批准自己的 PR | PR 停在 `blocked` | 指定 E（@cmz666-BOT）评审；最终 @qing963666、@2123345397-star 两名非作者 `APPROVED` 后合并 | 已解除 |
 | 本机无 Docker，MySQL/Redis 起不来 | 端到端无法验证 | 用 MySQL 8.0.44 临时实例（3307）+ Redis 5.0.14 移植版启动，`spring.config.additional-location` 覆盖数据源 | 已解除 |
-| 事件字段顺序缺少契约测试 | 跨上下文消费方静默错位 | 8 个 `co-qa-api` 事件 record 已加构造顺序 javadoc，并由 B 补契约测试 `EventFieldOrderContractTest`（8/8，反射钉死字段顺序，调整顺序须同步测试） | 已关闭（2026-11-19） |
+| 事件字段顺序缺少契约测试 | 跨上下文消费方静默错位 | 8 个 `co-qa-api` 事件 record 已加构造顺序 javadoc，并由 B 补契约测试 `EventFieldOrderContractTest`（8/8，反射钉死字段顺序，调整顺序须同步测试）；对应 §二 2026-11-05 站会表中的"事件字段顺序待确认"阻塞（当日由 PR #89 解除） | 已关闭（2026-11-19） |
 
 ## 六、评审前检查清单
 
