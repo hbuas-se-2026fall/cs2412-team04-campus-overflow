@@ -106,7 +106,7 @@ husky - pre-commit script failed (code 1)
 | 架构适应度函数 | ✅ 已有 | `ArchitectureTest`（FF-1~FF-6），CI 阶段 3 |
 | 集成测试硬门禁 | ✅ 已有 | CI 阶段 5，Testcontainers 起 MySQL + Redis |
 
-实测覆盖率（2026-11-17 发布口径）：qa 83.12% / identity 75.74% / reputation 80.72% / discovery 78.26%，均 ≥ 0.70。
+实测覆盖率（2026-11-17 发布口径）：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥ 0.70。
 
 ### 2.2 本次补齐
 
@@ -167,6 +167,11 @@ mvn -B sonar:sonar \
 
 ---
 
+
+### 2.4 同行评审清单
+
+新增 [`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md)：作者自检 7 项 + 评审人 9 维清单（需求/架构/正确性/测试/安全/数据/可观测/文档/CI）+ 评论前缀约定 + Approve 条件 + 评审记录模板。
+
 ## 三、结论
 
 | 项 | 状态 | 证据 |
@@ -174,12 +179,14 @@ mvn -B sonar:sonar \
 | Lab 5 · ESLint / Prettier / EditorConfig / Husky / alias / noUncheckedIndexedAccess | ✅ 全部落地 | 本文件 §1；`npm run lint`/`format:check`/`typecheck`/`build` 全绿 |
 | Lab 5 · pre-commit 能拦截不合规提交 | ✅ 实测两轮 | §1.3 的失败与成功输出 |
 | Lab 7 · JaCoCo 报告与 70% 门禁 | ✅ 既有 | 4 个 domain 模块的 `check-domain-coverage` |
+| Lab 7 · 同行评审清单 | ✅ 已入库 | [`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md) |
 | Lab 7 · SonarQube 配置与 CI 接入 | ✅ 已配置（凭 token 启用） | `sonar-project.properties`、`backend/pom.xml`、`ci.yml` 阶段 6 |
-| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已完成（门禁 Failed，3 Bugs 待修） | 本文 §4；`docs/screenshots/lab7-sonar/` 六张 |
+| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已跑通（修复前 Failed，3 Bugs 已修，重扫截图待补） | 本文 §4；`docs/screenshots/lab7-sonar/` 六张为修复前证据 |
+| Lab 7 · SonarQube 重扫截图 | ⬜ 待执行（需 SonarQube 机器） | 执行单 [`lab7-sonar-rescan.md`](lab7-sonar-rescan.md) |
 
 ---
 
-## 四、SonarQube 实测（2026-11-19 补齐）
+## 四、SonarQube 实测（2026-11-19 修复前基线）
 
 > 上一版这里写的是「需环境支持、待补」；本次已在本机部署 SonarQube 并跑出真实结果，闭环。
 
@@ -251,6 +258,8 @@ mvn -B -f backend/pom.xml sonar:sonar   -Dsonar.host.url=http://localhost:9000 -
 | [`screenshots/lab7-sonar/04-projects.png`](../screenshots/lab7-sonar/04-projects.png) | 项目列表 |
 | [`screenshots/lab7-sonar/05-quality-gate-list.png`](../screenshots/lab7-sonar/05-quality-gate-list.png) | Quality Gates 列表：`CampusOverflow Gate` + 内置 `Sonar way` |
 | [`screenshots/lab7-sonar/06-quality-gate-conditions.png`](../screenshots/lab7-sonar/06-quality-gate-conditions.png) | 门禁条件明细：New Code 6 条 + **Overall：Bugs>0、Coverage<70%** |
+
+> 以上为 2026-11-19 **修复前**（Failed）的六张证据；PR #197/#200 修复 3 个 Bug 后的重扫截图待补。
 
 ### 4.6 过程中的两个坑（已修正配置）
 
