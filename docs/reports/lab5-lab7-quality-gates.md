@@ -181,8 +181,8 @@ mvn -B sonar:sonar \
 | Lab 7 · JaCoCo 报告与 70% 门禁 | ✅ 既有 | 4 个 domain 模块的 `check-domain-coverage` |
 | Lab 7 · 同行评审清单 | ✅ 已入库 | [`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md) |
 | Lab 7 · SonarQube 配置与 CI 接入 | ✅ 已配置（凭 token 启用） | `sonar-project.properties`、`backend/pom.xml`、`ci.yml` 阶段 6 |
-| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已跑通（修复前 Failed，3 Bugs 已修，重扫截图待补） | 本文 §4；`docs/screenshots/lab7-sonar/` 六张为修复前证据 |
-| Lab 7 · SonarQube 重扫截图 | ⬜ 待执行（需 SonarQube 机器） | 执行单 [`lab7-sonar-rescan.md`](lab7-sonar-rescan.md) |
+| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已跑通（修复前 Failed → 复扫后剩 1 Bug，见 §4.6b） | `docs/screenshots/lab7-sonar/`（修复前）+ [`lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)（复扫） |
+| Lab 7 · SonarQube 重扫截图 | ✅ **已执行（2026-11-23）** | 六张见 [`screenshots/lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)；结果见 §4.6b |
 
 ---
 
@@ -259,7 +259,7 @@ mvn -B -f backend/pom.xml sonar:sonar   -Dsonar.host.url=http://localhost:9000 -
 | [`screenshots/lab7-sonar/05-quality-gate-list.png`](../screenshots/lab7-sonar/05-quality-gate-list.png) | Quality Gates 列表：`CampusOverflow Gate` + 内置 `Sonar way` |
 | [`screenshots/lab7-sonar/06-quality-gate-conditions.png`](../screenshots/lab7-sonar/06-quality-gate-conditions.png) | 门禁条件明细：New Code 6 条 + **Overall：Bugs>0、Coverage<70%** |
 
-> 以上为 2026-11-19 **修复前**（Failed）的六张证据；PR #197/#200 修复 3 个 Bug 后的重扫截图待补。
+> 以上为 2026-11-19 **修复前**（Failed）的六张证据。PR #197/#200 修复后的**复扫结果与截图已完成**，见 §4.6b 与 [`screenshots/lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)。
 
 ### 4.6 过程中的两个坑（已修正配置）
 
@@ -268,6 +268,49 @@ mvn -B -f backend/pom.xml sonar:sonar   -Dsonar.host.url=http://localhost:9000 -
    **修正**：把 sonar 属性写进父 POM 的 `<properties>`，由模块继承。
 2. **jacoco 报告路径在多模块下不能用相对通配**：`target/site/jacoco/jacoco.xml` 会被按各模块 basedir 解析而找不到 →
    改为在父 POM 里列全 11 个模块的显式路径（正斜杠）。改完后 Coverage 从 `49.5%`（未导入报告）变为 `70.3%`（真实值）。
+
+### 4.6b 复扫（2026-11-23，随 #197 / #200 修复后）
+
+修复落地后重跑 `mvn clean verify -DskipITs` + `sonar:sonar`，结果变化：
+
+| 指标 | 修复前（11-19） | **复扫（11-23）** | 说明 |
+| --- | --- | --- | --- |
+| Bugs | 3 | **1** | 降 2 个：#197 修了 `RedisQuestionListCache` 的 int→long；#200 修了 `QuestionCommandService` 的 `orElseThrow` |
+| Vulnerabilities | 0 | 0 | — |
+| Coverage | 70.3% | **70.3%** | 不变 |
+| Unit Tests | 173 | **173（100% 通过）** | 不变 |
+| ncloc | 8,261 | 8,260 | 少 1 行（`orElseThrow` 改写所致） |
+| **质量门禁** | Failed（3 Bugs） | **Failed（1 Bug）** | 仍失败，但只剩一项 |
+
+**剩余 1 个 Bug（未消除，需真正的修复）**：
+
+| 位置 | 规则 | 提示 | 归属 |
+| --- | --- | --- | --- |
+| `co-identity-domain/.../User.java:24` | `java:S5998` | Refactor this repetition that can lead to a stack overflow for large inputs. | 身份上下文（陈明哲/魏志国） |
+
+当前代码（#200 之后）：
+
+```java
+Pattern.compile("^[\\w.+-]+@([\\w-]+\\.)+[\\w-]+$")
+```
+
+**#200 只是把嵌套从 `([\\w-]+\\.[\\w-]+)+` 挪到了 `([\\w-]+\\.)+`，内层 `+` 仍套在外层 `+` 里，所以 S5998 依然报。**
+建议改成不含嵌套量词的形式，例如：
+
+```java
+// 外层用 *，且每次重复必须以字面量 '.' 开头（转义为 \\.），消除歧义
+Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*$")
+```
+
+> 该改动属身份上下文，建议由模块负责人提交并复扫确认（S5998 的判定以 Sonar 实际结果为准）。
+
+复扫截图见 [`screenshots/lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)：
+`01-dashboard.png`（门禁仍 Failed，明示 1 Bug）、`02-coverage.png`（70.3%）、
+`03-bugs.png`（**只剩 1 条，定位 User.java:24**）、`04~06`（项目与门禁配置）。
+
+> 原 `screenshots/lab7-sonar/` 保留为 11-19 首次扫描的证据，两者对照可见修复效果。
+
+---
 
 ### 4.7 覆盖率口径说明（为什么 70% 而不是更高）
 
