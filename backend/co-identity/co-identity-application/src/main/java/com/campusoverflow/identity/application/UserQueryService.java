@@ -3,6 +3,7 @@ package com.campusoverflow.identity.application;
 import com.campusoverflow.identity.domain.User;
 import com.campusoverflow.identity.domain.UserRepository;
 import com.campusoverflow.shared.domain.NotFoundException;
+import com.campusoverflow.shared.domain.UnauthorizedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,9 @@ public class UserQueryService {
     @Transactional(readOnly = true)
     public MeView me(long userId) {
         User u = users.findById(userId).orElseThrow(() -> new NotFoundException("ID-4001", "用户不存在"));
+        if (!u.canLogin()) {
+            throw new UnauthorizedException("AUTH-401", "账号已被禁用");
+        }
         return new MeView(u.id(), u.username(), u.displayName(), u.email(), u.role(), u.verified(), u.college(),
                 u.className(), courseService.myCourses(userId));
     }

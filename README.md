@@ -30,7 +30,7 @@ TeamX（cs2412-team04）《软件工程》课程项目。基于 Spring Boot + Re
 在仓库根目录：
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d mysql redis
+docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 ```
 
 默认端口：MySQL `3306`、Redis `6379`。
@@ -42,7 +42,7 @@ docker compose -f deploy/docker-compose.yml up -d mysql redis
 ```bash
 # Windows（管理员 PowerShell）
 net stop MySQL80
-docker compose -f deploy/docker-compose.yml up -d mysql redis
+docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 ```
 
 方式二，把容器端口映射到 3307，不动本机 MySQL。建一个本地覆盖文件
@@ -61,7 +61,7 @@ services:
 然后带上覆盖文件启动，并让后端连 3307：
 
 ```bash
-docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d mysql redis
+docker compose -f deploy/docker-compose.dev.yml -f deploy/docker-compose.local.yml up -d mysql redis
 
 # 从仓库根进入后端目录，再指定端口启动（默认 3306 见 application.yml 的 ${DB_PORT:3306}）
 cd backend
@@ -174,10 +174,22 @@ GitHub Actions 的 `CI` 流水线包含后端编译、全量单元测试、ArchU
 
 ## 5. Docker 一键部署
 
-完整环境（MySQL + Redis + 后端 + 前端 Nginx）：
+仓库提供两套 compose：
+
+- **本地开发** `deploy/docker-compose.dev.yml`：带默认密码、3306/6379 端口映射与 demo 数据，只在本机用；
+- **生产** `deploy/docker-compose.yml`：不带 demo、不暴露 MySQL/Redis 端口，密钥/密码必须由 `deploy/.env` 注入。
+
+生产部署：
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d --build
+cp deploy/.env.example deploy/.env      # 填入 DB_PASSWORD / MYSQL_ROOT_PASSWORD / CO_FIELD_KEY / CO_FIELD_MAC_KEY / GRAFANA_PASSWORD
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
+```
+
+本地开发（含 demo 数据）：
+
+```bash
+docker compose -f deploy/docker-compose.dev.yml up -d --build
 ```
 
 访问：
@@ -192,33 +204,34 @@ docker compose -f deploy/docker-compose.yml up -d --build
 加上监控（Prometheus + Grafana）：
 
 ```bash
-docker compose -f deploy/docker-compose.yml --profile observability up -d --build
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml --profile observability up -d --build
 ```
 
 | 服务 | 地址 | 默认凭据 |
 | --- | --- | --- |
 | Prometheus | <http://localhost:9090/> | — |
-| Grafana | <http://localhost:3000/> | `admin` / `admin`（可用 `GRAFANA_PASSWORD` 覆盖） |
+| Grafana | <http://localhost:3000/> | `admin` / `GRAFANA_PASSWORD`（生产必须显式设置） |
 
 常用环境变量：
 
 ```text
-DB_PASSWORD         MySQL campus 用户密码
-MYSQL_ROOT_PASSWORD MySQL root 密码
-SPRING_PROFILES    后端 profile，默认 prod,demo
-CO_FIELD_KEY       字段加密密钥，生产必须替换
-COOKIE_SECURE      HTTPS 部署时设为 true
-GRAFANA_PASSWORD   Grafana 管理员密码
+DB_PASSWORD          MySQL campus 用户密码（生产必填，无默认值）
+MYSQL_ROOT_PASSWORD  MySQL root 密码（生产必填，无默认值）
+CO_FIELD_KEY         字段加密 AES 密钥（Base64 32 字节，生产必填）
+CO_FIELD_MAC_KEY     字段摘要 HMAC 密钥（Base64 32 字节，生产必填）
+SPRING_PROFILES      后端 profile，生产默认 prod（禁止 demo）
+COOKIE_SECURE        HTTPS 部署时设为 true（默认 true）
+GRAFANA_PASSWORD     Grafana 管理员密码（生产必填）
 ```
 
 停止：
 
 ```bash
-docker compose -f deploy/docker-compose.yml down
-# 连数据卷一起清掉：docker compose -f deploy/docker-compose.yml down -v
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml down
+# 连数据卷一起清掉：docker compose --env-file deploy/.env -f deploy/docker-compose.yml down -v
 ```
 
-> `SPRING_PROFILES` 默认包含 `demo`，会写入演示数据；正式部署时去掉 `demo`。
+> 生产 compose 默认 `prod`，`EnvironmentGuard` 会拒绝 `prod+demo`、默认密钥与默认数据库密码启动；本地开发请用 `docker-compose.dev.yml`。
 
 ## 6. 项目结构
 

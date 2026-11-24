@@ -21,11 +21,8 @@ import java.util.regex.Pattern;
 public class User {
 
     private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9]{4,20}$");
-    // 邮箱：重复组每轮以字面量 '.' 开头，且组内不再嵌无界量词，消除 Sonar java:S5852（ReDoS）
-    // 与 java:S5998（Regex repetition that can lead to stack overflow）。
-    // 语义与原 "^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$" 等价：@ 后「一段 + . + 一段」，再接任意多「.一段」
-    // → a@b.c、a@b.c.d 通过；a@b、a@b.、a@.b 拒绝（2026-11-24 第二次修复，待 Sonar 复扫确认 S5998 归零）
-    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@[\\w-]+\\.[\\w-]+(\\.[\\w-]+)*$");
+    // 方案 A（2026-11-24）：单字符类、无重复分组，直接消除 Sonar S5998；域名结构由 checkEmail 廉价校验兜底。
+    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@[\\w.-]+$");
 
     private Long id;
     private final String username;
@@ -143,6 +140,10 @@ public class User {
 
     private static String checkEmail(String email) {
         if (email == null || email.length() > 100 || !EMAIL.matcher(email).matches()) {
+            throw new BusinessRuleException("ID-1003", "邮箱格式不正确");
+        }
+        String domain = email.substring(email.indexOf('@') + 1);
+        if (domain.startsWith(".") || domain.endsWith(".") || domain.contains("..") || !domain.contains(".")) {
             throw new BusinessRuleException("ID-1003", "邮箱格式不正确");
         }
         return email.toLowerCase();

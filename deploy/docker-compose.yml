@@ -13,14 +13,13 @@ services:
       - --innodb-ft-enable-stopword=0      # 避免 ngram 词元因包含停用词被丢弃
       - --default-time-zone=+00:00         # 全库统一 UTC
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_dev_pwd}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?MYSQL_ROOT_PASSWORD required}
       MYSQL_DATABASE: campus_overflow
       MYSQL_USER: campus
-      MYSQL_PASSWORD: ${DB_PASSWORD:-campus_dev_pwd}
-    ports: ["3306:3306"]
+      MYSQL_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
     volumes: ["mysql-data:/var/lib/mysql"]
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-root_dev_pwd}"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:?}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -29,7 +28,6 @@ services:
     image: redis:7-alpine
     container_name: co-redis
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
-    ports: ["6379:6379"]
     volumes: ["redis-data:/data"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -43,13 +41,14 @@ services:
       dockerfile: deploy/backend.Dockerfile
     container_name: co-backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES:-prod,demo}   # demo 会写入演示数据，正式使用时去掉
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES:-prod}   # 生产只启用 prod；本地开发用 docker-compose.dev.yml
       DB_HOST: mysql
       DB_USER: campus
-      DB_PASSWORD: ${DB_PASSWORD:-campus_dev_pwd}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD required}
       REDIS_HOST: redis
-      CO_FIELD_KEY: ${CO_FIELD_KEY:-GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I=}
-      COOKIE_SECURE: "false"                                   # 通过 HTTPS 发布时改为 true
+      CO_FIELD_KEY: ${CO_FIELD_KEY:?CO_FIELD_KEY required}
+      CO_FIELD_MAC_KEY: ${CO_FIELD_MAC_KEY:?CO_FIELD_MAC_KEY required}
+      COOKIE_SECURE: "${COOKIE_SECURE:-true}"
       TZ: UTC
     depends_on:
       mysql: { condition: service_healthy }
@@ -82,7 +81,7 @@ services:
     container_name: co-grafana
     profiles: ["observability"]
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
     depends_on: [prometheus]
     ports: ["3000:3000"]
     volumes:

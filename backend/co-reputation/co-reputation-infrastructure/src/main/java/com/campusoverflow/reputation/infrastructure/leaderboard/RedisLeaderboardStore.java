@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.data.redis.core.ZSetOperations.TypedTuple;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,15 @@ public class RedisLeaderboardStore implements LeaderboardStore {
 
     private final StringRedisTemplate redis;
 
+    /** 三个 ZSET 一次 Lua 原子更新：避免 week 成功、month 失败后重试导致 week 重复计分。 */
+    private static final RedisScript<Long> INCR_THREE = new DefaultRedisScript<>(
+            "for i = 1, 3 do "
+                    + "redis.call('ZINCRBY', KEYS[i], ARGV[1], ARGV[2]) "
+                    + "redis.call('EXPIRE', KEYS[i], ARGV[2 + i]) "
+                    + "end "
+                    + "return 1",
+            Long.class);
+
     public RedisLeaderboardStore(StringRedisTemplate redis) {
         this.redis = redis;
     }
@@ -24,14 +35,14 @@ public class RedisLeaderboardStore implements LeaderboardStore {
     @Override
     public void increment(long userId, int delta, Instant at) {
         String member = String.valueOf(userId);
-        incr("lb:week:" + AcademicTerm.weekKey(at), member, delta, Duration.ofDays(15));
-        incr("lb:month:" + AcademicTerm.monthKey(at), member, delta, Duration.ofDays(40));
-        incr("lb:term:" + AcademicTerm.termKey(at), member, delta, Duration.ofDays(200));
-    }
-
-    private void incr(String key, String member, int delta, Duration ttl) {
-        redis.opsForZSet().incrementScore(key, member, delta);
-        redis.expire(key, ttl);
+        redis.execute(INCR_THREE,
+                List.of("lb:week:" + AcademicTerm.weekKey(at),
+                        "lb:month:" + AcademicTerm.monthKey(at),
+                        "lb:term:" + AcademicTerm.termKey(at)),
+                String.valueOf(delta), member,
+                String.valueOf(Duration.ofDays(15).toSeconds()),
+                String.valueOf(Duration.ofDays(40).toSeconds()),
+                String.valueOf(Duration.ofDays(200).toSeconds()));
     }
 
     @Override

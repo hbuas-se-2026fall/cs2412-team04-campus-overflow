@@ -5,6 +5,7 @@ import com.campusoverflow.identity.application.LoginThrottle;
 import com.campusoverflow.identity.application.MeView;
 import com.campusoverflow.identity.application.RegisterUserCommand;
 import com.campusoverflow.identity.application.UserQueryService;
+import com.campusoverflow.identity.domain.Usernames;
 import com.campusoverflow.identity.application.UserRegistrationService;
 import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.ActorAware;
@@ -85,8 +86,9 @@ public class AuthController {
     @PostMapping("/login")
     public MeView login(@Valid @RequestBody LoginRequest req, HttpServletRequest request,
                         HttpServletResponse response) {
-        if (throttle.isBlocked(req.username())) {
-            authAudit.loginFailed(req.username(), "THROTTLED");
+        String canonicalUsername = Usernames.normalize(req.username());
+        if (throttle.isBlocked(canonicalUsername)) {
+            authAudit.loginFailed(canonicalUsername, "THROTTLED");
             throw new LockedException("登录失败次数过多，请 1 分钟后再试");
         }
         Authentication auth;
@@ -94,24 +96,24 @@ public class AuthController {
             auth = authenticationManager.authenticate(
                     UsernamePasswordAuthenticationToken.unauthenticated(req.username(), req.password()));
         } catch (AuthenticationException e) {
-            throttle.recordFailure(req.username());
+            throttle.recordFailure(canonicalUsername);
             authAudit.loginFailed(req.username(), e.getClass().getSimpleName());
             throw new BadCredentialsException("账号或密码错误");
         }
-        throttle.reset(req.username());
+        throttle.reset(canonicalUsername);
         // 防御会话固定攻击：认证成功后轮换会话 ID
         if (request.getSession(false) != null) {
             request.changeSessionId();
         }
         // 写入 principal-name 索引，禁用账号时可按用户名撤销全部会话
-        request.getSession(true).setAttribute(PRINCIPAL_NAME_INDEX, req.username());
+        request.getSession(true).setAttribute(PRINCIPAL_NAME_INDEX, auth.getName());
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
         securityContextRepository.saveContext(context, request, response);
 
         Actor actor = ((ActorAware) auth.getPrincipal()).toActor();
-        authAudit.loginSucceeded(actor.userId(), req.username());
+        authAudit.loginSucceeded(actor.userId(), canonicalUsername);
         return userQuery.me(actor.userId());
     }
 

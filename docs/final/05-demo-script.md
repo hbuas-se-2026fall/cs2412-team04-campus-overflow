@@ -2,7 +2,7 @@
 
 > 录制文件：**5 分钟版** [`demo-v1.0.0-5min.mp4`](demo-v1.0.0-5min.mp4)（5:00，1280×870，十段字幕分镜，见 §5.3）；早期 55 秒版 [`demo-v1.0.0.webm`](demo-v1.0.0.webm)（无旁白）
 > 目标：15 分钟内讲完六段，每人 ≥2 分钟；留 1 分钟给提问与异常分支。
-> 前置：`docker compose -f deploy/docker-compose.yml --profile observability up -d --build`，demo profile 已加载数据；用两个浏览器窗口（学生 A / 学生 B）。
+> 前置：`docker compose -f deploy/docker-compose.dev.yml up -d --build`（本地开发，demo 数据已加载）；生产环境请用 `deploy/docker-compose.yml` + `.env`；用两个浏览器窗口（学生 A / 学生 B）。
 
 ## 5.1 分段与计时
 

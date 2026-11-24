@@ -8,7 +8,7 @@
 
 按根目录 [`README.md`](../../README.md) 的「五分钟跑起来」启动：
 
-1. `docker compose -f deploy/docker-compose.yml up -d mysql redis`
+1. `docker compose -f deploy/docker-compose.dev.yml up -d mysql redis`
 2. 后端用 `demo` profile 启动；
 3. `cd frontend && npm run dev`；
 4. 打开终端打印的地址。若 `localhost:5173` 连不上，改用 `http://127.0.0.1:5173/`。

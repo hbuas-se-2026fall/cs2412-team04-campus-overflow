@@ -1,6 +1,7 @@
 package com.campusoverflow.qa.infrastructure.cache;
 
 import com.campusoverflow.qa.application.port.ViewCounter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -47,11 +48,30 @@ public class RedisViewCounter implements ViewCounter {
             }
             redis.rename(PENDING, flushing); // 原子地“摘走”当前批次，新增量写入新的 PENDING
             Map<Object, Object> entries = redis.opsForHash().entries(flushing);
-            List<Object[]> args = entries.entrySet().stream()
-                    .map(e -> new Object[] {Long.parseLong(e.getValue().toString()), Long.parseLong(e.getKey().toString())})
-                    .toList();
-            jdbc.batchUpdate("UPDATE qa_question SET view_count = view_count + ? WHERE id = ?", args);
-            redis.delete(flushing);
+            List<Object[]> args = new ArrayList<>();
+            for (Map.Entry<Object, Object> e : entries.entrySet()) {
+                try {
+                    args.add(new Object[] {Long.parseLong(e.getValue().toString()),
+                            Long.parseLong(e.getKey().toString())});
+                } catch (NumberFormatException bad) {
+                    log.warn("丢弃无法解析的浏览计数 {}={}", e.getKey(), e.getValue());
+                }
+            }
+            if (args.isEmpty()) {
+                redis.delete(flushing);
+                return;
+            }
+            try {
+                jdbc.batchUpdate("UPDATE qa_question SET view_count = view_count + ? WHERE id = ?", args);
+                redis.delete(flushing);
+            } catch (RuntimeException dbError) {
+                // 落库失败：把本批增量加回 PENDING 再删临时 key，避免浏览量永久丢失
+                for (Object[] arg : args) {
+                    redis.opsForHash().increment(PENDING, String.valueOf(arg[1]), (Long) arg[0]);
+                }
+                redis.delete(flushing);
+                log.warn("浏览计数落库失败，已回填 PENDING 等待下个周期重试: {}", dbError.getMessage());
+            }
         } catch (RuntimeException e) {
             log.warn("浏览计数落库失败，将在下个周期重试: {}", e.getMessage());
         }
