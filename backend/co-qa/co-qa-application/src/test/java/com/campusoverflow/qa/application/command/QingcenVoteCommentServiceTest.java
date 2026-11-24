@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.campusoverflow.qa.api.event.CommentPostedEvent;
 import com.campusoverflow.qa.api.event.VoteCastEvent;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryAnswers;
+import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryListCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryQuestions;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryVotes;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingEvents;
@@ -52,6 +53,7 @@ class QingcenVoteCommentServiceTest {
     private final InMemoryAnswers answers = new InMemoryAnswers();
     private final InMemoryVotes votes = new InMemoryVotes();
     private final InMemoryComments comments = new InMemoryComments();
+    private final InMemoryListCache cache = new InMemoryListCache();
     private final RecordingEvents events = new RecordingEvents();
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
@@ -64,7 +66,7 @@ class QingcenVoteCommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        voteService = new VoteService(votes, questions, answers, events, clock);
+        voteService = new VoteService(votes, questions, answers, events, cache, clock);
         commentService = new CommentService(comments, questions, answers, events, clock);
 
         question = questions.save(Question.post(ming.userId(), 100L,
@@ -86,6 +88,13 @@ class QingcenVoteCommentServiceTest {
         assertThat(voteEvents).hasSize(2);
         assertThat(voteEvents.get(1).oldValue()).isEqualTo(1);
         assertThat(voteEvents.get(1).newValue()).isEqualTo(-1);
+    }
+
+    @Test
+    void questionVoteInvalidatesQuestionListCache() {
+        voteService.cast(hong, TargetType.QUESTION, question.id(), 1);
+
+        assertThat(cache.invalidations).isEqualTo(1);
     }
 
     @Test
@@ -179,7 +188,7 @@ class QingcenVoteCommentServiceTest {
     @Test
     void concurrentVotesKeepSingleRecord() throws Exception {
         ConcurrentVotes concurrentVotes = new ConcurrentVotes();
-        VoteService service = new VoteService(concurrentVotes, questions, answers, events, clock);
+        VoteService service = new VoteService(concurrentVotes, questions, answers, events, cache, clock);
         CyclicBarrier bothRead = new CyclicBarrier(2);
         concurrentVotes.readBarrier = bothRead;
 
