@@ -24,7 +24,13 @@ export function NotificationsPage() {
   }, []);
 
   const readOne = async (id: number) => {
-    await api.readOne(id).catch(() => undefined);
+    // FE-10：接口失败时不能本地标已读，否则界面与后端不一致（刷新后又变回未读）
+    try {
+      await api.readOne(id);
+    } catch {
+      setError('标记已读失败，请重试');
+      return;
+    }
     setItems((prev) => prev?.map((n) => (n.id === id ? { ...n, read: true } : n)) ?? prev);
   };
 

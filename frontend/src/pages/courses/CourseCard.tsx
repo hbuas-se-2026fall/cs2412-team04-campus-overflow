@@ -12,7 +12,7 @@ interface Props {
 
 const ROLE_LABEL: Record<string, string> = {
   STUDENT: '学生',
-  TEACHING_ASSISTANT: '助教',
+  TA: '助教', // 与后端 CourseRole 枚举一致（FE-08；原写 TEACHING_ASSISTANT 会显示英文）
   TEACHER: '教师',
 };
 
