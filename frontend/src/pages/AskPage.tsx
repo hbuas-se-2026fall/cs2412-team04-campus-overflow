@@ -16,10 +16,13 @@ export function AskPage() {
   const [error, setError] = useState('');
   const [mode, setMode] = useState<BodyMode>('edit');
 
-  /** 没有加入任何课程时不允许发布：问题必须挂在课程下，同班同学才看得到 */
+  /**
+   * FE-03：US-02.feature 与 user-guide「所属课程（可选）」都允许不选课程发布公开问题，
+   * 因此这里不再用 hasCourse 硬性拦截；仍提示「未加入课程」以便用户知道可以先去加课。
+   */
   const hasCourse = (me?.courses?.length ?? 0) > 0;
   /** 标题与正文都填了才允许点击，减少无意义的 422 */
-  const canSubmit = hasCourse && title.trim().length > 0 && body.trim().length > 0;
+  const canSubmit = title.trim().length > 0 && body.trim().length > 0;
 
   const submit = async () => {
     try {
@@ -100,9 +103,10 @@ export function AskPage() {
       </label>
       {error && <p className="error">{error}</p>}
       {!hasCourse && (
-        <p className="error">
-          你还没有加入任何课程，问题需要挂在课程下才能发布。
-          <a href="/courses"> 去课程页加入 →</a>
+        <p className="muted">
+          你还没有加入任何课程，可以先到
+          <a href="/courses">课程页</a>
+          加入，加入后提问会自动关联课程；也可以直接发布公开问题。
         </p>
       )}
       <button className="primary" onClick={submit} disabled={!canSubmit}>

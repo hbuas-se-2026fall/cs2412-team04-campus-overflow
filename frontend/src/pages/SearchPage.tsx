@@ -34,6 +34,8 @@ export function SearchPage() {
   const [data, setData] = useState<Page<SearchResult> | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // 重试计数器：只改 URL 的 page 不会触发重新请求（FE-05）
+  const [reloadKey, setReloadKey] = useState(0);
   const [tags, setTags] = useState<{ name: string; questionCount: number }[]>([]);
 
   useEffect(() => {
@@ -82,7 +84,7 @@ export function SearchPage() {
     return () => {
       cancelled = true;
     };
-  }, [keyword, tag, sort, unanswered, bounty, page]);
+  }, [keyword, tag, sort, unanswered, bounty, page, reloadKey]);
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.size)) : 1;
 
@@ -181,7 +183,7 @@ export function SearchPage() {
         {error && (
           <div className="empty">
             <p className="error">搜索失败：{error}</p>
-            <button onClick={() => update({ page: undefined }, false)}>重试</button>
+            <button onClick={() => setReloadKey((k) => k + 1)}>重试</button>
           </div>
         )}
 
@@ -209,7 +211,7 @@ export function SearchPage() {
                     <span className={q.accepted ? 'accepted' : ''}>
                       <b>{q.answerCount}</b> 回答
                     </span>
-                    <span>{q.viewCount} 浏览</span>
+                    {typeof q.viewCount === 'number' && <span>{q.viewCount} 浏览</span>}
                   </div>
                   <div className="qmain">
                     <Link className="qtitle" to={`/questions/${q.id}`}>

@@ -179,7 +179,9 @@ export function QuestionDetailPage() {
                     删除问题
                   </button>
                 )}
-                {canManage && <BountyDialog questionId={q.id} canOpen={canManage} onChanged={load} />}
+                {/* FE-06：后端 GET /questions/{id}/bounty 是公开的，user-guide 也说详情页显示悬赏，
+                    因此组件对所有人渲染；"能否发起"由 canOpen(=canManage) 单独控制 */}
+                <BountyDialog questionId={q.id} canOpen={canManage} onChanged={load} />
               </div>
 
               <CommentList

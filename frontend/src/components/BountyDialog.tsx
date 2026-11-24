@@ -89,7 +89,8 @@ export function BountyDialog({
     <div className="bounty-box">
       {bounty ? <BountyStatus bounty={bounty} now={now} /> : <p className="muted">该问题还没有悬赏。</p>}
 
-      {canOpen && !open && (
+      {/* FE-09：已有进行中的悬赏时不再显示「发起悬赏」（后端同一问题只允许一个 OPEN） */}
+      {canOpen && !open && bounty?.status !== 'OPEN' && (
         <button
           onClick={() => {
             setOpen(true);
@@ -161,7 +162,7 @@ function statusLabel(status: string): string {
   const map: Record<string, string> = {
     OPEN: '进行中',
     AWARDED: '已发放',
-    CLOSED: '已关闭（积分已退回）',
+    // FE-09：后端只产生 OPEN / AWARDED / EXPIRED，CLOSED 不会出现，删掉避免死映射
     EXPIRED: '已过期（积分已退回）',
   };
   return map[status] ?? status;

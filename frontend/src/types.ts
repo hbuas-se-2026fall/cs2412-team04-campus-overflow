@@ -105,8 +105,13 @@ export interface QuestionDetail {
   answers: Answer[];
 }
 
-export interface SearchResult extends QuestionSummary {
+/**
+ * 搜索结果。FE-01：后端 SearchResultView 目前不返回 viewCount，
+ * 所以用 Omit 去掉该字段并声明为可选，逼着渲染处判空。
+ */
+export interface SearchResult extends Omit<QuestionSummary, 'viewCount'> {
   bountyOpen: boolean;
+  viewCount?: number;
 }
 export interface LeaderboardEntry {
   rank: number;

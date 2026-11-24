@@ -159,6 +159,8 @@ function LedgerSection({ userId }: { userId: number }) {
   const [total, setTotal] = useState(0);
   const [size, setSize] = useState(20);
   const [error, setError] = useState('');
+  // 重试计数器：setPage(p => p) 不改变 state，不会触发重新请求（FE-05）
+  const [reloadKey, setReloadKey] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -185,7 +187,7 @@ function LedgerSection({ userId }: { userId: number }) {
     return () => {
       cancelled = true;
     };
-  }, [userId, page]);
+  }, [userId, page, reloadKey]);
 
   const totalPages = Math.max(1, Math.ceil(total / size));
 
@@ -195,7 +197,7 @@ function LedgerSection({ userId }: { userId: number }) {
       {error && (
         <div>
           <p className="error">流水加载失败：{error}</p>
-          <button onClick={() => setPage((p) => p)}>重试</button>
+          <button onClick={() => setReloadKey((k) => k + 1)}>重试</button>
         </div>
       )}
       {loading && !error && <p className="muted">加载中…</p>}
