@@ -215,6 +215,20 @@ class QuestionCommandServiceTest {
     }
 
     @Test
+    @DisplayName("删除：作者路径用数据库条件原子检查回答数，避免快照竞态")
+    void authorDeleteUsesAtomicAnswerCountGate() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+        // 模拟“读取问题快照后、删除提交前”并发落下的回答。
+        questions.answerCountDeltas.put(id, 1);
+
+        assertThatThrownBy(() -> service.delete(ming, id))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("已有回答");
+        assertThat(questions.findById(id).orElseThrow().isDeleted()).isFalse();
+    }
+
+    @Test
     @DisplayName("删除：别人的问题删不掉；已有回答时作者也删不掉，但课程管理者可以")
     void deleteHonoursAuthorAndAnswerCountRules() {
         long id = service.post(ming, command("红黑树插入后为什么必须旋转？",

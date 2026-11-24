@@ -13,6 +13,7 @@ import com.campusoverflow.qa.domain.TagRepository;
 import com.campusoverflow.qa.domain.Tags;
 import com.campusoverflow.qa.domain.Title;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -125,12 +126,22 @@ public class QuestionCommandService {
     public void delete(Actor actor, long questionId) {
         Question question = load(questionId);
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
+        Instant now = clock.instant();
 
-        question.softDelete(actor, managesCourse, clock.instant());
-        questions.save(question);
+        // 管理者直接改快照；作者路径先只校验权限，再用 SQL 条件原子收口，
+        // 避免“读到无回答、随后并发回答”的窗口，也不在失败时留下被污染的内存快照。
+        if (managesCourse) {
+            question.softDelete(actor, true, now);
+            questions.save(question);
+        } else {
+            question.ensureDeletableBy(actor, false);
+            if (!questions.softDeleteIfUnanswered(questionId, now)) {
+                throw new BusinessRuleException("QA-1013", "已有回答的问题不能由提问者删除");
+            }
+        }
 
         // 读模型靠这个事件把行标记为已删除，否则列表里还能看到它
-        events.publish(new ContentDeletedEvent(EventIds.next(), clock.instant(), "QUESTION", questionId, questionId));
+        events.publish(new ContentDeletedEvent(EventIds.next(), now, "QUESTION", questionId, questionId));
         listCache.invalidateAll();
         audit.record("QUESTION_DELETED", actor.userId(), "QUESTION", String.valueOf(questionId), null);
     }

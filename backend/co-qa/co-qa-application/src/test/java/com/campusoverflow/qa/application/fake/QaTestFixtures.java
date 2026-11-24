@@ -25,7 +25,9 @@ import com.campusoverflow.shared.event.IntegrationEvent;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
+import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,6 +69,19 @@ public final class QaTestFixtures {
             }
             store.put(question.id(), question);
             return question;
+        }
+
+        @Override
+        public boolean softDeleteIfUnanswered(long questionId, Instant now) {
+            Question question = store.get(questionId);
+            int count = question == null
+                    ? 0
+                    : question.answerCount() + answerCountDeltas.getOrDefault(questionId, 0);
+            if (question == null || question.isDeleted() || count > 0) {
+                return false;
+            }
+            question.softDelete(new Actor(0, "system", Role.ADMIN), true, now);
+            return true;
         }
 
         @Override
