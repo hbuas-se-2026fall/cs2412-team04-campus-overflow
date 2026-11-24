@@ -13,6 +13,7 @@ import com.campusoverflow.qa.domain.TagRepository;
 import com.campusoverflow.qa.domain.Tags;
 import com.campusoverflow.qa.domain.Title;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -126,8 +127,15 @@ public class QuestionCommandService {
         Question question = load(questionId);
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
 
-        question.softDelete(actor, managesCourse, clock.instant());
-        questions.save(question);
+        var now = clock.instant();
+        question.softDelete(actor, managesCourse, now);
+        if (!managesCourse) {
+            if (!questions.softDeleteIfNoAnswers(questionId, now)) {
+                throw new BusinessRuleException("QA-1013", "已有回答的问题不能由提问者删除");
+            }
+        } else {
+            questions.save(question);
+        }
 
         // 读模型靠这个事件把行标记为已删除，否则列表里还能看到它
         events.publish(new ContentDeletedEvent(EventIds.next(), clock.instant(), "QUESTION", questionId, questionId));

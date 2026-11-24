@@ -48,6 +48,12 @@
 - 文档中的 `@Size(max=254)` 改为真实的 **100**（注册 DTO 与领域 `checkEmail` 均为 100）；
 - `AdminUserController.CreateStaffRequest` 补 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50）。
 
+### QA-03 删除问题与回答并发窗口
+
+- 新增 `QuestionRepository.softDeleteIfNoAnswers(id, now)`：`UPDATE ... SET deleted_at=:now WHERE id=:id AND answer_count=0 AND deleted_at IS NULL`；
+- `QuestionCommandService.delete`：作者删除走条件 UPDATE，返回 0 即抛 `QA-1013`；课程管理者仍可删除有回答的问题（走原 `save`）；
+- 这样即使回答在“读 answerCount”和“写 deletedAt”之间落库，删除也会失败而不是产生“问题已删、回答已落库”。
+
 ### CACHE-02 浏览量落库失败丢失
 
 `RedisViewCounter.flush()`：
@@ -73,10 +79,6 @@
 
 `GET /api/v1/courses/*/members` 当前允许匿名，返回 `displayName/role/userId`。需 PO 确认名单是否公开；若不公开，要求登录 + 课程成员，并同步 Nginx 限制。
 
-### QA-03 删除问题与回答并发窗口
-
-`Question.softDelete` 用内存 `answerCount` 判空，ADR-008 已记录「删除与回答并发可能造成问题已删、回答已落库」。本次未改（需按 ADR 的 `UPDATE ... WHERE answer_count = 0` 条件更新改造 domain/repository 与测试），继续登记为已知风险；建议 v1.1 首 PR 处理。
-
 ## 三、验证
 
 | 范围 | 命令 | 结果 |
@@ -90,5 +92,5 @@
 
 1. CI 全量 + Testcontainers；若通过，合并 develop 并同步 main；
 2. 在 SonarQube 机器复扫，确认 `S5998` 归零、Gate PASSED，补 `lab7-sonar-rescan` 截图；
-3. PO 对 QA-02、PRIV-01 拍板；QA-03 登记 v1.1；
+3. PO 对 QA-02、PRIV-01 拍板；
 4. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。

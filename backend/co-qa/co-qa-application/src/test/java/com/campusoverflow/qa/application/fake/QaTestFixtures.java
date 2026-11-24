@@ -78,6 +78,11 @@ public final class QaTestFixtures {
         public void adjustScore(long questionId, int delta) {
             scoreDeltas.merge(questionId, delta, Integer::sum);
         }
+
+        @Override
+        public boolean softDeleteIfNoAnswers(long questionId, java.time.Instant now) {
+            return true;
+        }
     }
 
     public static class InMemoryAnswers implements AnswerRepository {

@@ -56,6 +56,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
         jpa.adjustScore(questionId, delta);
     }
 
+    @Override
+    public boolean softDeleteIfNoAnswers(long questionId, java.time.Instant now) {
+        return jpa.softDeleteIfNoAnswers(questionId, now) > 0;
+    }
+
     static Question toDomain(QuestionJpaEntity e) {
         return Question.reconstitute(e.getId(), e.getAuthorId(), e.getCourseId(), new Title(e.getTitle()),
                 new MarkdownBody(e.getBody()), Tags.of(List.copyOf(e.getTags())), e.getAcceptedAnswerId(), e.getScore(),

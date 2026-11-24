@@ -12,4 +12,7 @@ public interface QuestionRepository {
 
     /** 原子地调整得分。 */
     void adjustScore(long questionId, int delta);
+
+    /** 仅当 answer_count = 0 时原子软删除，返回是否删除成功（ADR-008 并发窗口修复）。 */
+    boolean softDeleteIfNoAnswers(long questionId, java.time.Instant now);
 }
