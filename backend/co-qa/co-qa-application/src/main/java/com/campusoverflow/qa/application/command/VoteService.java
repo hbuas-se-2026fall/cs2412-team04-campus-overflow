@@ -1,6 +1,7 @@
 package com.campusoverflow.qa.application.command;
 
 import com.campusoverflow.qa.api.event.VoteCastEvent;
+import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.AnswerRepository;
 import com.campusoverflow.qa.domain.Question;
@@ -30,14 +31,16 @@ public class VoteService {
     private final QuestionRepository questions;
     private final AnswerRepository answers;
     private final IntegrationEventPublisher events;
+    private final QuestionListCache listCache;
     private final Clock clock;
 
     public VoteService(VoteRepository votes, QuestionRepository questions, AnswerRepository answers,
-                       IntegrationEventPublisher events, Clock clock) {
+                       IntegrationEventPublisher events, QuestionListCache listCache, Clock clock) {
         this.votes = votes;
         this.questions = questions;
         this.answers = answers;
         this.events = events;
+        this.listCache = listCache;
         this.clock = clock;
     }
 
@@ -79,6 +82,8 @@ public class VoteService {
 
         if (type == TargetType.QUESTION) {
             questions.adjustScore(targetId, delta);
+            // 列表摘要包含问题得分；投票后必须作废旧缓存，否则最多 75 秒内仍显示旧票数。
+            listCache.invalidateAll();
         } else {
             answers.adjustScore(targetId, delta);
         }

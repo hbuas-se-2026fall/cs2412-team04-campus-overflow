@@ -55,7 +55,7 @@ class AnswerAndVoteServiceTest {
     @BeforeEach
     void setUp() {
         answerService = new AnswerCommandService(questions, answers, identity, events, cache, audit, clock);
-        voteService = new VoteService(votes, questions, answers, events, clock);
+        voteService = new VoteService(votes, questions, answers, events, cache, clock);
         Question q = questions.save(Question.post(ming.userId(), 100L, new Title("红黑树插入后为什么必须旋转？"),
                 MarkdownBody.ofQuestion("变色为什么不够？希望有直观解释，最好能给出一个反例。"),
                 Tags.of(List.of("数据结构", "红黑树")), NOW));
@@ -113,5 +113,13 @@ class AnswerAndVoteServiceTest {
     void cannotVoteOnOwnContent() {
         assertThatThrownBy(() -> voteService.cast(ming, TargetType.QUESTION, questionId, 1))
                 .isInstanceOf(BusinessRuleException.class);
+    }
+
+    @Test
+    @DisplayName("问题投票后列表缓存失效，避免列表票数停留在旧值")
+    void questionVoteInvalidatesListCache() {
+        voteService.cast(hong, TargetType.QUESTION, questionId, 1);
+
+        assertThat(cache.invalidations).isEqualTo(1);
     }
 }
