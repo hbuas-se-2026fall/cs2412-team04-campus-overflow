@@ -59,6 +59,7 @@ public class BountyService {
         boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == null;
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
 
+        // 前置检查只用于友好错误；并发下的单 OPEN 由 rep_bounty.uk_bounty_open_question 兜底。
         if (bounties.findOpenByQuestion(questionId).isPresent()) {
             throw new ConflictException("REP-2002", "该问题已有进行中的悬赏");
         }
