@@ -1,6 +1,7 @@
 package com.campusoverflow.identity.infrastructure.security;
 
 import com.campusoverflow.identity.application.LoginThrottle;
+import com.campusoverflow.identity.domain.Usernames;
 import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -40,6 +41,6 @@ public class RedisLoginThrottle implements LoginThrottle {
     }
 
     private static String key(String username) {
-        return "id:login-fail:" + username;
+        return "id:login-fail:" + Usernames.normalize(username);
     }
 }
