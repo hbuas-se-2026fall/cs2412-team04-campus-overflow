@@ -1,0 +1,8 @@
+# 生产 profile：所有密钥/密码必须由环境注入，不提供默认值
+spring:
+  datasource:
+    password: ${DB_PASSWORD}
+co:
+  security:
+    field-key: ${CO_FIELD_KEY}
+    field-mac-key: ${CO_FIELD_MAC_KEY}

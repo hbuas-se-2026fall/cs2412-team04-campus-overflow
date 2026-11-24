@@ -1,6 +1,7 @@
 package com.campusoverflow.bootstrap.security;
 
 import com.campusoverflow.identity.application.UserSessionRevoker;
+import com.campusoverflow.identity.domain.Usernames;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.session.FindByIndexNameSessionRepository;
 import org.springframework.session.Session;
@@ -29,6 +30,6 @@ public class SpringSessionUserSessionRevoker implements UserSessionRevoker {
         if (repository == null) {
             return;
         }
-        repository.findByPrincipalName(username).keySet().forEach(repository::deleteById);
+        repository.findByPrincipalName(Usernames.normalize(username)).keySet().forEach(repository::deleteById);
     }
 }

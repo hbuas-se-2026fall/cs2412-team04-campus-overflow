@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -57,6 +58,9 @@ class CampusOverflowFlowIT {
 
     @Autowired
     ObjectMapper json;
+
+    @Autowired
+    JdbcTemplate jdbc;
 
     @Test
     void 提问到采纳的完整链路会异步结算声誉并更新搜索与通知() throws Exception {
@@ -135,6 +139,22 @@ class CampusOverflowFlowIT {
         mvc.perform(post("/api/v1/auth/login").contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"2026001\",\"password\":\"Campus2026\"}"))
                 .andExpect(status().isForbidden());
+    }
+
+
+    @Test
+    void 大小写变体登录后禁用账号旧会话立即失效且不能重新登录() throws Exception {
+        long id = register("ITCase01", "大小写测试", "it-case@campus.edu.cn");
+        MockHttpSession session = login("itcase01"); // 与存储的 ITCase01 大小写不同，DB 排序规则视为同一账号
+        mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isOk());
+
+        jdbc.update("UPDATE id_user SET status = 'DISABLED' WHERE id = ?", id);
+
+        mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.code").value("AUTH-401"));
+        mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"username\":\"itcase01\",\"password\":\"Campus2026\"}"))
+                .andExpect(status().isUnauthorized());
     }
 
     private long register(String username, String displayName, String email) throws Exception {

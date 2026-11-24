@@ -21,9 +21,8 @@ import java.util.regex.Pattern;
 public class User {
 
     private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9]{4,20}$");
-    // 邮箱：每段域名后强制要求 '.' 分隔，避免 [\w-]+ 相邻产生的指数级回溯（Sonar java:S5852 / ReDoS，2026-11-19 修复）。
-    // 语义等价于原 "^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$"：@ 后至少「一段 + .」再接一段，即 a@b.c / a@b.c.d
-    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@([\\w-]+\\.)+[\\w-]+$");
+    // 方案 A（2026-11-24）：单字符类、无重复分组，直接消除 Sonar S5998；域名结构由 checkEmail 廉价校验兜底。
+    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@[\\w.-]+$");
 
     private Long id;
     private final String username;
@@ -141,6 +140,10 @@ public class User {
 
     private static String checkEmail(String email) {
         if (email == null || email.length() > 100 || !EMAIL.matcher(email).matches()) {
+            throw new BusinessRuleException("ID-1003", "邮箱格式不正确");
+        }
+        String domain = email.substring(email.indexOf('@') + 1);
+        if (domain.startsWith(".") || domain.endsWith(".") || domain.contains("..") || !domain.contains(".")) {
             throw new BusinessRuleException("ID-1003", "邮箱格式不正确");
         }
         return email.toLowerCase();

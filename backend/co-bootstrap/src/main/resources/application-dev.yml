@@ -1,0 +1,9 @@
+# 本地/测试专用默认值：生产 profile 不会加载本文件（见 application-prod.yml 与 EnvironmentGuard）
+spring:
+  datasource:
+    password: ${DB_PASSWORD:campus_dev_pwd}
+co:
+  security:
+    # 仅开发/测试使用；生产必须通过 CO_FIELD_KEY / CO_FIELD_MAC_KEY 注入
+    field-key: ${CO_FIELD_KEY:GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I=}
+    field-mac-key: ${CO_FIELD_MAC_KEY:ZGV2LW1hYy1rZXktMzItYnl0ZXMtZm9yLWRldi1vayE=}
