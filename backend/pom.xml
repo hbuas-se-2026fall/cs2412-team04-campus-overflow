@@ -37,6 +37,16 @@
         <jacoco.version>0.8.12</jacoco.version>
         <!-- SonarQube 扫描插件（Lab 7 Step 3） -->
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
+        <!-- SonarQube 扫描口径：多模块下 sonar-project.properties 不会被子模块读取，
+             必须写在父 POM 的 properties 里由各模块继承 -->
+        <sonar.projectKey>campus-overflow</sonar.projectKey>
+        <sonar.projectName>CampusOverflow</sonar.projectName>
+        <sonar.projectVersion>1.0.0</sonar.projectVersion>
+        <!-- 各模块自己的 jacoco.xml，路径相对模块 basedir -->
+        <sonar.coverage.jacoco.xmlReportPaths>co-bootstrap/target/site/jacoco/jacoco.xml,co-discovery/co-discovery-application/target/site/jacoco/jacoco.xml,co-discovery/co-discovery-domain/target/site/jacoco/jacoco.xml,co-identity/co-identity-application/target/site/jacoco/jacoco.xml,co-identity/co-identity-domain/target/site/jacoco/jacoco.xml,co-qa/co-qa-api/target/site/jacoco/jacoco.xml,co-qa/co-qa-application/target/site/jacoco/jacoco.xml,co-qa/co-qa-domain/target/site/jacoco/jacoco.xml,co-reputation/co-reputation-application/target/site/jacoco/jacoco.xml,co-reputation/co-reputation-domain/target/site/jacoco/jacoco.xml,co-shared-kernel/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+        <sonar.coverage.exclusions>**/co-bootstrap/**,**/infrastructure/**,**/interfaces/**,**/*Application.java,**/*Config.java,**/dto/**,**/api/**/*Event.java</sonar.coverage.exclusions>
+        <sonar.sourceEncoding>UTF-8</sonar.sourceEncoding>
+        <sonar.scm.provider>git</sonar.scm.provider>
         <!-- 覆盖 Spring Boot 3.4.5 BOM 的 testcontainers 1.20.x：其内置 docker-java 默认 Docker API 1.32，
              GitHub runner 的 daemon 要求 ≥1.40（否则 "Could not find a valid Docker environment"）；
              1.21.x 的 docker-java 默认 API 已升级，CampusOverflowFlowIT 才能在 CI 上运行（V3 §8.3） -->

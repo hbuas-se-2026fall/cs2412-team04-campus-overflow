@@ -192,16 +192,16 @@ public Question save(Question q) {
 2. **③ 是 ADR 的核心**。`score / answerCount` 故意不搬——它们只由 `adjustScore / adjustAnswerCount` 的原子 SQL 维护。否则一次"编辑标题"的 `save` 就会把并发投票累加出来的分数写回旧值，这类 bug 在压测里表现为"票数偶尔少 1"，极难复现。
 3. **② 的代价**：tags 是值对象的集合，只能 clear + addAll 整体替换，每次保存都产生一轮子表 delete/insert。数据量在校园场景可接受，但这是"领域模型干净"换来的真实成本，ADR 里写的"每个聚合约 40 行映射样板"就指这类代码。
 
-### 10.4 本人复核发现（两处口径偏差 + 一条待确认）
+### 10.4 本人复核发现（两处口径偏差 + 一条约定，均已回写 ADR-008）
 
 复核不是照抄 ADR，下面三条是逐行比对这个实现与 ADR 文本后发现的差异：
 
-1. **ADR「后果」里写的"需要显式处理乐观锁版本号的搬运"，在本实现里没有发生**。`toDomain` 把 `e.getVersion()` 读进领域对象，但 `save` 从不回写；版本号完全由 JPA 实体自己维护，领域对象上的 `version` 是只读快照。好处是映射代码简单，代价是**领域层感知不到并发冲突**——冲突以 `ObjectOptimisticLockingFailureException` 在适配器层抛出。这个"感知不到"由一处兜底补齐：`GlobalExceptionHandler.optimisticLock` 把它翻译成 `409 / SYS-409-CONCURRENT /「内容已被他人修改，请刷新后重试」`。也就是说 ADR 描述的"搬运版本号"被"统一在边界翻译异常"替代了，这个替代关系 ADR 里没写，值得补一句。
-2. **`view_count` 是同一类计数器的第二种实现，且不在 `QuestionRepository` 端口上**。它走 `RedisViewCounter`：先在 Redis 里累加（`qa:views:pending`），再批量 `UPDATE qa_question SET view_count = view_count + ? WHERE id = ?`。只读 `QuestionRepository` 的人会以为浏览数也走整行回写。建议在 ADR-008 补一句"计数器有两种落地：即时原子 SQL（score/answerCount）与缓冲批量累加（viewCount）"。
-3. **待确认**：`Question` 持有 `score / answerCount / viewCount` 三个只读字段，意味着聚合内的计数器值可能与库中最新值不一致（并发原子更新后内存对象仍是旧值）。目前所有对外展示都走 `JdbcQaReadModel` 的读模型、不读聚合的计数器，所以没出问题；但这条约束应写进约定，否则后续有人在命令侧读 `question.score()` 做业务判断就会踩坑。
+1. **ADR 初版「后果」里写的"需要显式处理乐观锁版本号的搬运"，在本实现里没有发生**（该句已在 2026-11-19 回写时改正）。`toDomain` 把 `e.getVersion()` 读进领域对象，但 `save` 从不回写；版本号完全由 JPA 实体自己维护，领域对象上的 `version` 是只读快照。好处是映射代码简单，代价是**领域层感知不到并发冲突**——冲突以 `ObjectOptimisticLockingFailureException` 在适配器层抛出。这个"感知不到"由一处兜底补齐：`GlobalExceptionHandler.optimisticLock` 把它翻译成 `409 / SYS-409-CONCURRENT /「内容已被他人修改，请刷新后重试」`。也就是说 ADR 描述的"搬运版本号"被"统一在边界翻译异常"替代了，这个替代关系原 ADR 没写。**→ 已于 2026-11-19 回写 ADR-008「后果 · 实现注记 1」。**
+2. **`view_count` 是同一类计数器的第二种实现，且不在 `QuestionRepository` 端口上**。它走 `RedisViewCounter`：先在 Redis 里累加（`qa:views:pending`），再批量 `UPDATE qa_question SET view_count = view_count + ? WHERE id = ?`。只读 `QuestionRepository` 的人会以为浏览数也走整行回写。建议在 ADR-008 补一句"计数器有两种落地：即时原子 SQL（score/answerCount）与缓冲批量累加（viewCount）"。**→ 已于 2026-11-19 回写 ADR-008「后果 · 实现注记 2」。**
+3. **已写入约定**：`Question` 持有 `score / answerCount / viewCount` 三个只读字段，意味着聚合内的计数器值可能与库中最新值不一致（并发原子更新后内存对象仍是旧值）。目前对外展示都走 `JdbcQaReadModel` 的读模型、不读聚合的计数器，所以没出问题；但这条约束必须写进约定，否则后续有人在命令侧读 `question.score()` 做业务判断就会踩坑。**→ 已于 2026-11-19 作为"约定"写入 ADR-008「后果 · 实现注记 3」**：展示走读模型；并记下现存的一处"聚合内读计数器"——`Question.softDelete` 的 `answerCount > 0` 拦删是快照判断，存在毫秒级窄窗口，要强一致得把条件下推成 `UPDATE ... WHERE answer_count = 0`。
 
 ### 10.5 我的理解与结论
 
 - **理解**：ADR-008 换来的不是"代码好看"，而是**把并发正确性从"小心写代码"变成"接口上做不到错"**——端口没有 `setScore`，就没有读-改-写的入口；领域层没有框架注解，`QuestionTest` 就永远是毫秒级。
-- **结论**：ADR-008 的决策在本实现中成立，两处口径偏差（版本号搬运、浏览数计数器）不改变决策本身，但需要回写进 ADR 的「后果」一节，避免后来者按文档去找不存在的代码。
+- **结论**：ADR-008 的决策在本实现中成立，两处口径偏差（版本号搬运、浏览数计数器）不改变决策本身，**已于 2026-11-19 回写进 ADR-008「后果」一节**（正面/负面之后新增「实现注记」三条，第 3 条为约定），避免后来者按文档去找不存在的代码。
 - **署名**：刘俊琒，2026-11-19，已逐条复核 §10.2～§10.4 所列代码位置。
