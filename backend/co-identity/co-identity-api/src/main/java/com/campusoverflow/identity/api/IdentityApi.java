@@ -3,6 +3,7 @@ package com.campusoverflow.identity.api;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Identity 上下文的开放主机服务（OHS）。其他上下文只能通过本接口查询用户与课程信息，
@@ -24,4 +25,10 @@ public interface IdentityApi {
      * 管理员；或该课程的教师/助教。courseId 为 null（未关联课程的问题）时，全局教师角色亦可。
      */
     boolean canManageCourse(long userId, Long courseId);
+
+    /** 该用户是否为课程成员（学生、助教或教师）。 */
+    boolean isCourseMember(long userId, long courseId);
+
+    /** 该用户加入的课程 ID 集合；用于构建课程问题的可见范围。 */
+    Set<Long> courseIdsOfUser(long userId);
 }

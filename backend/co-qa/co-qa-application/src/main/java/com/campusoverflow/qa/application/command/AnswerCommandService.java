@@ -12,6 +12,7 @@ import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -48,6 +49,7 @@ public class AnswerCommandService {
     @Transactional
     public long submit(Actor actor, long questionId, String body) {
         Question question = loadQuestion(questionId);
+        requireCanParticipate(question, actor);
 
         Answer answer = Answer.submit(question, actor.userId(), MarkdownBody.ofAnswer(body), clock.instant());
         answers.save(answer);
@@ -144,5 +146,14 @@ public class AnswerCommandService {
         return answers.findById(id)
                 .filter(a -> !a.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+    }
+
+    /** 课程问题只有课程成员可以回答；公开问题对所有登录用户开放。 */
+    private void requireCanParticipate(Question question, Actor actor) {
+        if (question.courseId() == null || actor.isAdmin()
+                || identity.isCourseMember(actor.userId(), question.courseId())) {
+            return;
+        }
+        throw new ForbiddenException("QA-3007", "只有课程成员可以回答该课程的问题");
     }
 }

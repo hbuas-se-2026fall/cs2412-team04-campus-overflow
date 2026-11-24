@@ -7,10 +7,14 @@ import com.campusoverflow.discovery.domain.search.SearchQuery;
 import com.campusoverflow.discovery.domain.search.SearchSort;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
+import com.campusoverflow.shared.security.Actor;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,15 +41,18 @@ public class SearchController {
                                                @RequestParam(defaultValue = "false") boolean unanswered,
                                                @RequestParam(defaultValue = "false") boolean bounty,
                                                @RequestParam(defaultValue = "1") int page,
-                                               @RequestParam(defaultValue = "20") int size) {
+                                               @RequestParam(defaultValue = "20") int size,
+                                               @Parameter(hidden = true) Optional<Actor> actor) {
         SearchSort s = sort == null || sort.isBlank() ? null : SearchSort.valueOf(sort.toUpperCase(Locale.ROOT));
-        return discovery.search(new SearchQuery(q, courseId, tag, s, unanswered, bounty, new PageRequest(page, size)));
+        return discovery.search(new SearchQuery(q, courseId, tag, s, unanswered, bounty,
+                new PageRequest(page, size), false, Set.of()), actor.orElse(null));
     }
 
     @Operation(summary = "相关问题（标签 Jaccard 相似度）")
     @GetMapping("/questions/{questionId}/related")
     public List<RelatedQuestionView> related(@PathVariable long questionId,
-                                             @RequestParam(defaultValue = "5") int limit) {
-        return discovery.related(questionId, limit);
+                                             @RequestParam(defaultValue = "5") int limit,
+                                             @Parameter(hidden = true) Optional<Actor> actor) {
+        return discovery.related(questionId, limit, actor.orElse(null));
     }
 }

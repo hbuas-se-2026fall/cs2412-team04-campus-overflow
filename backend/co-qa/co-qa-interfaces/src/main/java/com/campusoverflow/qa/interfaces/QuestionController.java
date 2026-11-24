@@ -48,8 +48,9 @@ public class QuestionController {
     @GetMapping
     public PageResult<QuestionSummaryView> list(@RequestParam(required = false) Long courseId,
                                                 @RequestParam(defaultValue = "1") int page,
-                                                @RequestParam(defaultValue = "20") int size) {
-        return queries.list(courseId, new PageRequest(page, size));
+                                                @RequestParam(defaultValue = "20") int size,
+                                                @Parameter(hidden = true) Optional<Actor> actor) {
+        return queries.list(courseId, new PageRequest(page, size), actor.orElse(null));
     }
 
     @Operation(summary = "发布问题")

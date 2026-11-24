@@ -44,7 +44,7 @@ class AnswerAndVoteServiceTest {
     private final RecordingAudit audit = new RecordingAudit();
     private final StubIdentity identity = new StubIdentity()
             .withUser(1, "小明", Role.STUDENT).withUser(2, "小红", Role.STUDENT).withUser(9, "王老师", Role.TEACHER)
-            .withCourseManager(9);
+            .withCourseMember(1, 100L).withCourseMember(2, 100L).withCourseManager(9);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
     private final Actor hong = new Actor(2, "小红", Role.STUDENT);
@@ -56,7 +56,7 @@ class AnswerAndVoteServiceTest {
     @BeforeEach
     void setUp() {
         answerService = new AnswerCommandService(questions, answers, identity, events, cache, audit, clock);
-        voteService = new VoteService(votes, questions, answers, events, cache, clock);
+        voteService = new VoteService(votes, questions, answers, identity, events, cache, clock);
         Question q = questions.save(Question.post(ming.userId(), 100L, new Title("红黑树插入后为什么必须旋转？"),
                 MarkdownBody.ofQuestion("变色为什么不够？希望有直观解释，最好能给出一个反例。"),
                 Tags.of(List.of("数据结构", "红黑树")), NOW));
@@ -104,6 +104,18 @@ class AnswerAndVoteServiceTest {
         Question question = questions.findById(questionId).orElseThrow();
         assertThat(question.acceptedAnswerId()).isNull();
         assertThat(question.isAccepted(answerId)).isFalse();
+    }
+
+    @Test
+    @DisplayName("课程问题的回答和投票要求课程成员身份")
+    void nonMemberCannotAnswerOrVoteInCourse() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> answerService.submit(outsider, questionId,
+                "这段回答本身长度足够，但提交者没有加入该课程。"))
+                .isInstanceOf(ForbiddenException.class);
+        assertThatThrownBy(() -> voteService.cast(outsider, TargetType.QUESTION, questionId, 1))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
