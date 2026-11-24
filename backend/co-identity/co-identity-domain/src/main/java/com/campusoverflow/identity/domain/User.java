@@ -21,9 +21,11 @@ import java.util.regex.Pattern;
 public class User {
 
     private static final Pattern USERNAME = Pattern.compile("^[A-Za-z0-9]{4,20}$");
-    // 邮箱：每段域名后强制要求 '.' 分隔，避免 [\w-]+ 相邻产生的指数级回溯（Sonar java:S5852 / ReDoS，2026-11-19 修复）。
-    // 语义等价于原 "^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$"：@ 后至少「一段 + .」再接一段，即 a@b.c / a@b.c.d
-    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@([\\w-]+\\.)+[\\w-]+$");
+    // 邮箱：重复组每轮以字面量 '.' 开头，且组内不再嵌无界量词，消除 Sonar java:S5852（ReDoS）
+    // 与 java:S5998（Regex repetition that can lead to stack overflow）。
+    // 语义与原 "^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)+$" 等价：@ 后「一段 + . + 一段」，再接任意多「.一段」
+    // → a@b.c、a@b.c.d 通过；a@b、a@b.、a@.b 拒绝（2026-11-24 第二次修复，待 Sonar 复扫确认 S5998 归零）
+    private static final Pattern EMAIL = Pattern.compile("^[\\w.+-]+@[\\w-]+\\.[\\w-]+(\\.[\\w-]+)*$");
 
     private Long id;
     private final String username;
