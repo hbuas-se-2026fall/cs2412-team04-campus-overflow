@@ -5,6 +5,7 @@ import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import com.campusoverflow.qa.domain.Tags;
 import com.campusoverflow.qa.domain.Title;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -44,6 +45,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
             q.assignId(saved.getId());
         }
         return q;
+    }
+
+    @Override
+    public boolean softDeleteIfUnanswered(long questionId, Instant now) {
+        return jpa.softDeleteIfUnanswered(questionId, now) == 1;
     }
 
     @Override
