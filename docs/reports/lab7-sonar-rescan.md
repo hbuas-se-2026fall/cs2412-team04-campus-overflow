@@ -1,7 +1,7 @@
 # Lab 7 · SonarQube 重扫证据与执行单
 
-> 责任人：房国栋 / 陈明哲　状态：**✅ 已执行完毕（2026-11-23）**——配置、CI 接入、Bug 修复、本机 SonarQube 重扫与六张截图全部完成
-> 实测结果以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**、Coverage 70.3%、Quality Gate 仍 Failed（剩 `User.java:24` 的 `java:S5998`）
+> 责任人：房国栋 / 陈明哲　状态：**✅ 已执行两轮复扫（2026-11-23 / 2026-11-24）**——配置、CI 接入、Bug 修复、本机 SonarQube 扫描与截图全部完成
+> 实测结果以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**（两轮复扫均为 1）、Coverage 70.5%、Quality Gate **仍 Failed**（剩 `User.java` 的 `java:S5998`）
 > 关联：`sonar-project.properties`、`backend/pom.xml`（sonar-maven-plugin）、`.github/workflows/ci.yml` 阶段 6
 > 同行评审清单：[`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md)
 
@@ -107,6 +107,51 @@ Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*$")
 ```
 
 > 属身份上下文（陈明哲/魏志国），由模块负责人提交并复扫确认；改完后 Bugs 归零，门禁即可 PASSED。
+
+---
+
+### 5.2 第二轮复扫（2026-11-24，随 PR #207 二次修正正则后）
+
+#207 把 EMAIL 正则改为「至少一段点域名」的写法：
+
+```java
+Pattern.compile("^[\\w.+-]+@[\\w-]+\\.[\\w-]+(\\.[\\w-]+)*$")
+```
+
+复扫结果（SonarQube 9.9.8，`2026-11-24 15:31` 分析）：
+
+| 指标 | 11-23 | **11-24** |
+| --- | --- | --- |
+| Bugs | 1 | **1** |
+| Coverage | 70.3% | **70.5%** |
+| Unit Tests | 173 | **174** |
+| Vulnerabilities | 0 | 0 |
+| 门禁 | Failed | **Failed（仍卡 Bugs）** |
+
+**`java:S5998` 仍然报，位置由 L24 移到 L28。**
+
+原因：该规则把「**含 `+` 的分组再被 `*` 修饰**」也判定为重复歧义——`([\\w-]+` 在内层 `+`，`(\\.[\\w-]+)*` 在外层 `*`。
+所以**只在「外层 `+` / 外层 `*` / 分组内顺序」之间反复挪写法，无法消除这条规则**。
+
+#### 两个可选处置（建议模块负责人二选一）
+
+**方案 A：改成不含任何重复分组**（一定过规则，语义略松）
+
+```java
+Pattern.compile("^[\\w.+-]+@[\\w.-]+$")   // 单字符类，无分组
+```
+
+- 代价：`a@.b`、`a@b..c` 这类畸形域名也会通过；
+- 建议配套：在 `Guard`/`User` 里补一条廉价校验（域名不含 `..`、不以 `.` 开头结尾），代码比正则更可读。
+
+**方案 B：保留当前正则，在 SonarQube 里把该问题标记为 `Won't Fix` 并写明理由**
+
+- 理由模板：`EMAIL` 由 DTO 的 `@Size(max=254)` 限制长度，且仅用于注册/登录表单，
+  输入规模受控（≤254 字符），S5998 描述的「大输入导致栈溢出」在本场景不构成实际风险；
+- 效果：该 issue 从 Bugs 指标中移除，门禁即可 PASSED；
+- 注意：这是**显式处置**，需在评审记录里写清，不能当作已修复。
+
+> 两种方案都能让门禁转绿；**关键区别是「改代码」还是「改判定」**，需 PO/模块负责人在评审时定。
 
 ---
 
