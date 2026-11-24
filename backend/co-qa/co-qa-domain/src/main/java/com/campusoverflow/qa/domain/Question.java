@@ -115,6 +115,17 @@ public class Question {
         this.updatedAt = this.deletedAt;
     }
 
+    /**
+     * 已采纳回答被删除后释放采纳关系。课程管理者可以删除已采纳回答（用于处理违规内容），
+     * 但问题不能因此永久停留在“已采纳却没有答案”的状态。
+     */
+    public void clearAcceptedAnswer(long answerId, Instant now) {
+        if (acceptedAnswerId != null && acceptedAnswerId == answerId) {
+            this.acceptedAnswerId = null;
+            this.updatedAt = Objects.requireNonNull(now, "now");
+        }
+    }
+
     public void ensureOpenForAnswers() {
         ensureNotDeleted();
     }

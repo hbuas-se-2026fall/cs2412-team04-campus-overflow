@@ -16,6 +16,9 @@ public interface SearchIndex {
 
     void markAccepted(long questionId, Instant at);
 
+    /** 已采纳回答被删除后清除 accepted 标记（只在 Q&A 确认该问题已无采纳答案时调用）。 */
+    void clearAccepted(long questionId, Instant at);
+
     void setBountyOpen(long questionId, boolean open);
 
     void markDeleted(long questionId);
