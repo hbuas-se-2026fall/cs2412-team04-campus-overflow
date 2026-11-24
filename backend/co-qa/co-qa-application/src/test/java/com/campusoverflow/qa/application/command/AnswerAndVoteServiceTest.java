@@ -43,7 +43,8 @@ class AnswerAndVoteServiceTest {
     private final CountingCache cache = new CountingCache();
     private final RecordingAudit audit = new RecordingAudit();
     private final StubIdentity identity = new StubIdentity()
-            .withUser(1, "小明", Role.STUDENT).withUser(2, "小红", Role.STUDENT).withUser(9, "王老师", Role.TEACHER);
+            .withUser(1, "小明", Role.STUDENT).withUser(2, "小红", Role.STUDENT).withUser(9, "王老师", Role.TEACHER)
+            .withCourseManager(9);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
     private final Actor hong = new Actor(2, "小红", Role.STUDENT);
@@ -90,6 +91,19 @@ class AnswerAndVoteServiceTest {
         assertThat(accepted.get(0).answerAuthorId()).isEqualTo(hong.userId());
         assertThat(accepted.get(0).acceptedById()).isEqualTo(ming.userId());
         assertThat(audit.actions).contains("ANSWER_ACCEPTED");
+    }
+
+    @Test
+    @DisplayName("管理者删除已采纳回答后释放采纳关系，问题可以重新采纳")
+    void deletingAcceptedAnswerReleasesQuestionAcceptance() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+        answerService.accept(ming, questionId, answerId);
+
+        answerService.delete(new Actor(9, "王老师", Role.TEACHER), answerId);
+
+        Question question = questions.findById(questionId).orElseThrow();
+        assertThat(question.acceptedAnswerId()).isNull();
+        assertThat(question.isAccepted(answerId)).isFalse();
     }
 
     @Test

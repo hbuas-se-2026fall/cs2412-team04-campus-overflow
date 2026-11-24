@@ -67,6 +67,14 @@ public class JdbcSearchIndex implements SearchIndex {
     }
 
     @Override
+    public void clearAccepted(long questionId, Instant at) {
+        jdbc.update("""
+                UPDATE dis_search_doc SET accepted = FALSE, last_activity_at = GREATEST(last_activity_at, :at)
+                WHERE question_id = :id
+                """, new MapSqlParameterSource().addValue("id", questionId).addValue("at", UtcTime.toDb(at)));
+    }
+
+    @Override
     public void setBountyOpen(long questionId, boolean open) {
         jdbc.update("UPDATE dis_search_doc SET bounty_open = :open WHERE question_id = :id",
                 new MapSqlParameterSource().addValue("id", questionId).addValue("open", open));

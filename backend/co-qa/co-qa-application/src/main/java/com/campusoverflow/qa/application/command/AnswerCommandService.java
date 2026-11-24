@@ -17,6 +17,7 @@ import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
 import com.campusoverflow.shared.security.Actor;
 import java.time.Clock;
+import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -78,13 +79,21 @@ public class AnswerCommandService {
         Question question = loadQuestion(answer.questionId());
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
+        boolean accepted = question.isAccepted(answer.id());
+        Instant now = clock.instant();
         // 修正 4：最后一个参数改为 Instant
-        answer.softDelete(actor, manages, question.isAccepted(answer.id()), clock.instant());
+        answer.softDelete(actor, manages, accepted, now);
         answers.save(answer);
         questions.adjustAnswerCount(question.id(), -1);
 
+        if (accepted) {
+            // 管理者删除已采纳回答后，释放采纳关系；否则问题会永久卡在“已采纳但无答案”。
+            question.clearAcceptedAnswer(answer.id(), now);
+            questions.save(question);
+        }
+
         events.publish(new ContentDeletedEvent(
-                com.campusoverflow.shared.event.EventIds.next(), clock.instant(),
+                com.campusoverflow.shared.event.EventIds.next(), now,
                 "ANSWER", answerId, question.id()
         ));
 

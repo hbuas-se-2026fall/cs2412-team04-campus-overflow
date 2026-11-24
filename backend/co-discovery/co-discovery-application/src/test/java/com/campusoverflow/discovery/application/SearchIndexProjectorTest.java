@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchIndex;
+import com.campusoverflow.qa.api.QaQueryApi;
+import com.campusoverflow.qa.api.QuestionRef;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.ContentDeletedEvent;
@@ -18,6 +20,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
 
@@ -28,7 +31,10 @@ class SearchIndexProjectorTest {
     private final FakeIndex index = new FakeIndex();
     private final Set<String> seen = new HashSet<>();
     private final ProcessedEventStore processed = (eventId, consumer) -> seen.add(eventId + ":" + consumer);
-    private final SearchIndexProjector projector = new SearchIndexProjector(index, processed);
+    private Long acceptedAnswerId = 50L;
+    private final QaQueryApi qa = questionId ->
+            Optional.of(new QuestionRef(questionId, 1L, 100L, "title", acceptedAnswerId, false));
+    private final SearchIndexProjector projector = new SearchIndexProjector(index, processed, qa);
 
     @Test
     void questionPostedTwiceInsertsOnlyOnce() {
@@ -68,6 +74,25 @@ class SearchIndexProjectorTest {
     }
 
     @Test
+    void deletingAcceptedAnswerClearsAcceptedFlagWhenQuestionHasNoAcceptedAnswer() {
+        acceptedAnswerId = null;
+        ContentDeletedEvent answerDeleted = new ContentDeletedEvent("e11", NOW, "ANSWER", 50L, 7L);
+
+        projector.on(answerDeleted);
+
+        assertThat(index.clearedAccepted).containsExactly(7L);
+    }
+
+    @Test
+    void deletingNonAcceptedAnswerKeepsAcceptedFlag() {
+        ContentDeletedEvent answerDeleted = new ContentDeletedEvent("e12", NOW, "ANSWER", 51L, 7L);
+
+        projector.on(answerDeleted);
+
+        assertThat(index.clearedAccepted).isEmpty();
+    }
+
+    @Test
     void questionVoteAndBountyUpdatesAreIdempotent() {
         VoteCastEvent questionVote = new VoteCastEvent("e6", NOW, "QUESTION", 7L, 3L, 4L, 7L, 0, 1);
         VoteCastEvent answerVote = new VoteCastEvent("e7", NOW, "ANSWER", 50L, 3L, 4L, 7L, 0, 1);
@@ -91,6 +116,7 @@ class SearchIndexProjectorTest {
         final List<SearchDocument> inserted = new ArrayList<>();
         final List<Integer> answerCountDeltas = new ArrayList<>();
         final List<Long> accepted = new ArrayList<>();
+        final List<Long> clearedAccepted = new ArrayList<>();
         final List<Long> deleted = new ArrayList<>();
         final List<Integer> scoreDeltas = new ArrayList<>();
         final List<Boolean> bountyStates = new ArrayList<>();
@@ -103,6 +129,7 @@ class SearchIndexProjectorTest {
         }
         @Override public void adjustScore(long questionId, int delta) { scoreDeltas.add(delta); }
         @Override public void markAccepted(long questionId, Instant at) { accepted.add(questionId); }
+        @Override public void clearAccepted(long questionId, Instant at) { clearedAccepted.add(questionId); }
         @Override public void setBountyOpen(long questionId, boolean open) { bountyStates.add(open); }
         @Override public void markDeleted(long questionId) { deleted.add(questionId); }
         @Override public List<String> findTags(long questionId) { return List.of(); }

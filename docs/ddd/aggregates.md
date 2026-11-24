@@ -29,7 +29,7 @@
 | 删除问题 | 提问者（无回答时）/管理者 | QuestionDeleted | Question | 有回答时提问者不可删 |
 | 发布回答 | 登录用户 | AnswerPosted | Answer | 问题必须存在且未删除 |
 | 编辑回答 | 回答作者/管理者 | AnswerEdited | Answer | 仅作者或管理者 |
-| 删除回答 | 回答作者/管理者 | AnswerDeleted | Answer | 被采纳的回答作者不可删 |
+| 删除回答 | 回答作者/管理者 | AnswerDeleted | Answer | 被采纳的回答作者不可删；管理者删除时问题释放采纳关系 |
 | 采纳回答 | 提问者/课程教师 | AnswerAccepted | Question | 只能采纳一个，终态 |
 | 加精回答 | 课程教师 | AnswerEndorsed | Answer | 只能加精一次 |
 | 投出/修改投票 | 登录用户 | VoteCast | Vote | 不能给自己投票，值 ±1 |

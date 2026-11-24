@@ -8,6 +8,7 @@ import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchIndex;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
+import com.campusoverflow.qa.api.QaQueryApi;
 import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.qa.api.event.QuestionEditedEvent;
 import com.campusoverflow.qa.api.event.QuestionPostedEvent;
@@ -32,10 +33,12 @@ public class SearchIndexProjector {
 
     private final SearchIndex index;
     private final ProcessedEventStore processed;
+    private final QaQueryApi qa;
 
-    public SearchIndexProjector(SearchIndex index, ProcessedEventStore processed) {
+    public SearchIndexProjector(SearchIndex index, ProcessedEventStore processed, QaQueryApi qa) {
         this.index = index;
         this.processed = processed;
+        this.qa = qa;
     }
 
     private boolean firstTime(IntegrationEvent e) {
@@ -80,6 +83,12 @@ public class SearchIndexProjector {
             index.markDeleted(e.questionId());
         } else if ("ANSWER".equalsIgnoreCase(e.targetType())) {
             index.adjustAnswerCount(e.questionId(), -1, e.occurredAt());
+            // 删除的可能是已采纳回答；Q&A 已在同一业务事务中清空 acceptedAnswerId。
+            // 只有确认问题当前没有采纳答案时才清除搜索投影，避免误清正常采纳状态。
+            if (qa.findQuestion(e.questionId()).map(q -> !q.deleted() && q.acceptedAnswerId() == null)
+                    .orElse(false)) {
+                index.clearAccepted(e.questionId(), e.occurredAt());
+            }
         }
     }
 
