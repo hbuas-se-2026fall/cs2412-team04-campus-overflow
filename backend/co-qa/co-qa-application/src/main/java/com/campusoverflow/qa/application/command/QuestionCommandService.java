@@ -146,6 +146,9 @@ public class QuestionCommandService {
             }
         }
 
+        // 删除成功后回收标签用量；失败路径不会走到这里。
+        tags.adjustUsage(question.tags().names(), -1);
+
         // 读模型靠这个事件把行标记为已删除，否则列表里还能看到它
         events.publish(new ContentDeletedEvent(EventIds.next(), now, "QUESTION", questionId, questionId));
         listCache.invalidateAll();
