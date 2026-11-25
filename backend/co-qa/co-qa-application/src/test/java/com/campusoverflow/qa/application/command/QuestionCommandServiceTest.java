@@ -48,6 +48,7 @@ class QuestionCommandServiceTest {
             .withUser(1, "小明", Role.STUDENT)
             .withUser(2, "小红", Role.STUDENT)
             .withUser(9, "王老师", Role.TEACHER)
+            .withCourseMember(1, COURSE_ID)
             .withCourseManager(9);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
@@ -102,6 +103,19 @@ class QuestionCommandServiceTest {
 
         assertThat(cache.invalidations).isEqualTo(1);
         assertThat(audit.actions).containsExactly("QUESTION_POSTED");
+    }
+
+    @Test
+    @DisplayName("发布：未加入课程的学生不能向该课程发帖")
+    void nonMemberCannotPostInCourse() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.post(outsider, command("未加入课程还想发课程问题",
+                "这段正文长度超过二十个字符，用来验证课程成员校验。", List.of("java"))))
+                .isInstanceOf(ForbiddenException.class);
+
+        assertThat(questions.saves).isZero();
+        assertThat(events.published).isEmpty();
     }
 
     @Test

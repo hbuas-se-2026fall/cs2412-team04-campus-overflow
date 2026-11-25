@@ -1,5 +1,6 @@
 package com.campusoverflow.qa.application.command;
 
+import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.qa.api.event.CommentPostedEvent;
 import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.AnswerRepository;
@@ -26,21 +27,25 @@ public class CommentService {
     private final CommentRepository comments;
     private final QuestionRepository questions;
     private final AnswerRepository answers;
+    private final IdentityApi identity;
     private final IntegrationEventPublisher events;
     private final Clock clock;
 
     public CommentService(CommentRepository comments, QuestionRepository questions, AnswerRepository answers,
-                          IntegrationEventPublisher events, Clock clock) {
+                          IdentityApi identity, IntegrationEventPublisher events, Clock clock) {
         this.comments = comments;
         this.questions = questions;
         this.answers = answers;
+        this.identity = identity;
         this.events = events;
         this.clock = clock;
     }
 
     @Transactional
     public long post(Actor actor, PostCommentCommand cmd) {
-        long questionId = resolveQuestionId(cmd.targetType(), cmd.targetId());
+        Question question = resolveQuestion(cmd.targetType(), cmd.targetId());
+        requireCanParticipate(question, actor);
+        long questionId = question.id();
 
         Comment parent = null;
         if (cmd.parentId() != null) {
@@ -75,19 +80,29 @@ public class CommentService {
         comments.delete(comment);
     }
 
-    private long resolveQuestionId(TargetType type, long targetId) {
+    private Question resolveQuestion(TargetType type, long targetId) {
         if (type == TargetType.QUESTION) {
-            Question question = questions.findById(targetId)
+            return questions.findById(targetId)
                     .filter(q -> !q.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
-            return question.id();
         }
         if (type == TargetType.ANSWER) {
             Answer answer = answers.findById(targetId)
                     .filter(a -> !a.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
-            return answer.questionId();
+            return questions.findById(answer.questionId())
+                    .filter(q -> !q.isDeleted())
+                    .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
         }
         throw new BusinessRuleException("QA-4003", "不支持的评论目标");
+    }
+
+    /** 课程问题及其回答只允许课程成员评论；公开问题不受限制。 */
+    private void requireCanParticipate(Question question, Actor actor) {
+        if (question.courseId() == null || actor.isAdmin()
+                || identity.isCourseMember(actor.userId(), question.courseId())) {
+            return;
+        }
+        throw new ForbiddenException("QA-3007", "只有课程成员可以评论该课程的问题");
     }
 }

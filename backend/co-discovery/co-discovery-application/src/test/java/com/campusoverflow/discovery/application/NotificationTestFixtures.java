@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 /** 通知侧手写测试替身：不依赖 Spring / 数据库。 */
@@ -121,6 +122,16 @@ final class NotificationTestFixtures {
         @Override
         public boolean canManageCourse(long userId, Long courseId) {
             return false;
+        }
+
+        @Override
+        public boolean isCourseMember(long userId, long courseId) {
+            return false;
+        }
+
+        @Override
+        public Set<Long> courseIdsOfUser(long userId) {
+            return Set.of();
         }
     }
 

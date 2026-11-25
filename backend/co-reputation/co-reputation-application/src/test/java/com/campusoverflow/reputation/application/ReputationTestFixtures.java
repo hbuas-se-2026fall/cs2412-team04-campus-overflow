@@ -407,6 +407,16 @@ public class ReputationTestFixtures {
         public void grantCourseManager(long userId) {
             courseManagers.add(userId);
         }
+
+        @Override
+        public boolean isCourseMember(long userId, long courseId) {
+            return users.containsKey(userId);
+        }
+
+        @Override
+        public Set<Long> courseIdsOfUser(long userId) {
+            return Set.of();
+        }
     }
 
     /** Q&A 查询替身。 */

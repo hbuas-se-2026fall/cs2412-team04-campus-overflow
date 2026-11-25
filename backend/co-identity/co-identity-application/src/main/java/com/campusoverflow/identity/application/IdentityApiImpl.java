@@ -10,6 +10,7 @@ import com.campusoverflow.shared.security.Role;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
@@ -68,6 +69,18 @@ public class IdentityApiImpl implements IdentityApi {
             return role == Role.TEACHER;
         }
         return courses.findMember(courseId, userId).map(m -> m.role().canManage()).orElse(false);
+    }
+
+    @Override
+    public boolean isCourseMember(long userId, long courseId) {
+        return courses.findMember(courseId, userId).isPresent();
+    }
+
+    @Override
+    public Set<Long> courseIdsOfUser(long userId) {
+        return courses.findMembershipsOfUser(userId).stream()
+                .map(m -> m.courseId())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     private static UserSummary toSummary(User u) {
