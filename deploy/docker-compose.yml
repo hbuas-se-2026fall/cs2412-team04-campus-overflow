@@ -48,12 +48,16 @@ services:
       REDIS_HOST: redis
       CO_FIELD_KEY: ${CO_FIELD_KEY:?CO_FIELD_KEY required}
       CO_FIELD_MAC_KEY: ${CO_FIELD_MAC_KEY:?CO_FIELD_MAC_KEY required}
-      COOKIE_SECURE: "${COOKIE_SECURE:-true}"
+      # HTTP 部署必须 false：Secure Cookie 在 http:// 下浏览器不会回传，登录后会立刻丢会话。
+      # 只有 Nginx 启用 TLS、全程 https:// 访问时才设为 true（见 README「生产部署」）。
+      COOKIE_SECURE: "${COOKIE_SECURE:-false}"
       TZ: UTC
     depends_on:
       mysql: { condition: service_healthy }
       redis: { condition: service_healthy }
-    ports: ["8080:8080"]
+    # 生产不把后端 8080 映射到 host：所有流量必须经 Nginx（同源 /api/、/actuator/health）。
+    # 直出 8080 会绕过 Nginx 的 client_max_body_size 与 actuator 端点白名单。
+    # 诊断请在容器内执行：docker compose -f deploy/docker-compose.yml exec backend wget -qO- http://localhost:8080/actuator/health
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
       interval: 10s
