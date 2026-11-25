@@ -13,6 +13,7 @@ import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
@@ -56,6 +57,16 @@ public class BountyService {
     public long open(Actor actor, long questionId, int points, int days) {
         QuestionRef question = qa.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+
+        // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，与 docs/final/user-guide.md
+        // 「发起悬赏需要教师/助教且必须是该课程的问题」保持一致。
+        // 公开问题（courseId == null）没有课程归属，教师无从"管理该课程"，一律拒绝——
+        // 否则 IdentityApiImpl.canManageCourse(userId, null) 会对任意全局 TEACHER 返回 true，
+        // 等于放开给全校教师，与文档矛盾且无法审计归属。
+        if (question.courseId() == null) {
+            throw new BusinessRuleException("REP-2003", "公开问题不支持悬赏，请选择课程问题");
+        }
+
         boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == null;
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
 
