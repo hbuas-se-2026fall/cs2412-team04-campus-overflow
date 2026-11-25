@@ -146,7 +146,10 @@ public class QuestionCommandService {
             }
         }
 
-        // 删除成功后回收标签用量；失败路径不会走到这里。
+        // 删除成功后回收标签用量：post 时 +1、edit 时按差集调整，删除必须 -1，
+        // 否则 qa_tag.question_count 永久虚高、热门标签排序失真。
+        // 放在两条删除分支之后，保证只有真删成功（含作者路径的条件更新）才减计数；
+        // 仓储 UPSERT 用 GREATEST(..., 0) 兜底，历史脏数据不会减成负数。
         tags.adjustUsage(question.tags().names(), -1);
 
         // 读模型靠这个事件把行标记为已删除，否则列表里还能看到它
