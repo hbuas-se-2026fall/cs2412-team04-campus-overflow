@@ -23,7 +23,7 @@
 ## 三、分支命名
 
 - main、develop 为受保护分支，禁止直接 push。
-- 功能分支命名：`feature/<姓名拼音>-<主题>`，例如 `feature/chenmingzhe-codeowners`。
+- 功能分支命名：`feature/<issue>-<英文描述>`（V3 §7.2），例如 `feature/128-observability`；历史 `feature/<拼音>-<主题>` 分支保留。
 - 杂项/配置类用 `chore/<主题>`，文档类用 `docs/<主题>`。
 - 分支合并后立即删除，保持仓库整洁。
 
@@ -32,7 +32,7 @@
 - Commit message 格式：`<type>: <描述>`，type 取 `feat / fix / docs / test / refactor / chore`。
 - 描述简洁说明“做了什么”，中文或英文均可，全组保持一致。
 - 小步提交，单个 PR 尽量不超过 400 行。
-- 每个 PR 至少 1 人 Approve（LGTM）后由 SM 合并；新代码必须带单元测试。
+- `develop` 至少 1 人、`main` 至少 2 人 Approve（含 SM/PO）后由 SM 合并；新代码必须带单元测试（V3 §7.1.5）。
 - 禁止提交明文密码、密钥、node_modules/ 与构建产物。
 
 ## 五、全员签字

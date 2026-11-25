@@ -16,6 +16,7 @@ import com.campusoverflow.qa.application.command.QuestionCommandService;
 import com.campusoverflow.qa.application.command.VoteService;
 import com.campusoverflow.qa.domain.TargetType;
 import com.campusoverflow.reputation.application.BountyService;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.util.List;
@@ -24,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -32,6 +35,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Profile("demo")
+@Order(Ordered.LOWEST_PRECEDENCE)
 public class DemoDataSeeder implements ApplicationRunner {
 
     public static final String PASSWORD = "Campus2026";
@@ -129,7 +133,7 @@ public class DemoDataSeeder implements ApplicationRunner {
                 我在 Service 里写了 `public void a() { b(); }`，其中 `b()` 上标了 `@Transactional`，
                 但是抛异常后数据并没有回滚。换成从另一个 Bean 调用 `b()` 就正常了，这是为什么？
                 """, List.of("java", "spring-boot", "事务")));
-        bounties.open(teacher, q2, 50, 7);
+        openBountyWithRetry(teacher, q2, 50, 7);
 
         questions.post(hong, new PostQuestionCommand(courseId, "MySQL 的 ngram 全文索引是如何支持中文检索的？",
                 """
@@ -139,4 +143,27 @@ public class DemoDataSeeder implements ApplicationRunner {
 
         log.info("演示数据初始化完成：管理员 admin01 / 教师 T2001 / 助教 TA3001 / 学生 2023001-2023003，密码 {}", PASSWORD);
     }
+    /**
+     * 悬赏依赖异步 UserRegistered 事件创建声誉账户；演示环境启动时用短重试避免 REP-1002
+     * （账户尚未初始化）导致整个 seeder 失败、留下半初始化数据。
+     */
+    private void openBountyWithRetry(Actor teacher, long questionId, int amount, int days) {
+        for (int i = 0; i < 50; i++) {
+            try {
+                bounties.open(teacher, questionId, amount, days);
+                return;
+            } catch (BusinessRuleException e) {
+                if (!"REP-1002".equals(e.code()) || i == 49) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(100L);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                }
+            }
+        }
+    }
+
 }

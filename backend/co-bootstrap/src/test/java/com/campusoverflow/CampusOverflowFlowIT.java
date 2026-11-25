@@ -152,6 +152,10 @@ class CampusOverflowFlowIT {
 
         mvc.perform(get("/api/v1/auth/me").session(session)).andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value("AUTH-401"));
+        mvc.perform(post("/api/v1/questions").session(session).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"禁用后不应还能提问的标题\",\"body\":\"这段正文足够长，用于验证被禁用账号的旧会话不能继续写接口。\",\"tags\":[\"测试\"]}"))
+                .andExpect(status().isUnauthorized());
         mvc.perform(post("/api/v1/auth/login").with(csrf()).contentType(MediaType.APPLICATION_JSON)
                         .content("{\"username\":\"itcase01\",\"password\":\"Campus2026\"}"))
                 .andExpect(status().isUnauthorized());

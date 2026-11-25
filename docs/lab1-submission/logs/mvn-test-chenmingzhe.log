@@ -1,28 +1,73 @@
-# 陈明哲 · mvn test 证据（CI，非本机）
-# 来源：GitHub Actions run 44213214268 / job 134496491070（2026-11-18）
-# 触发提交：dfbc8f4（chore/ci-full-gate，PR #164）
-# 环境：ubuntu-latest / Temurin JDK 21.0.13 / Maven 3.9.x
+# 陈明哲 · 全量 mvn test 证据（GitHub Actions 原始日志摘录）
+# 来源：run 45517081755 / job 138879178175（develop ec27055，2026-11-25T00:18Z）
+# 页面：https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/actions/runs/45517081755
+# 说明：这是 `mvn -B -f backend/pom.xml test` 阶段（含全部模块单测；FlowIT 属 verify 阶段，不在此段）
 
-$ mvn -B -f backend/pom.xml test
-
-[INFO] co-shared-kernel: Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-identity-domain: Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-identity-application: Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-qa-domain: Tests run: 42, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-qa-application: Tests run: 32, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-reputation-domain: Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-reputation-application: Tests run: 36, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-discovery-domain: Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-discovery-application: Tests run: 14, Failures: 0, Errors: 0, Skipped: 0
-[INFO] co-bootstrap (ArchUnit + FlowIT): Tests run: 4, Failures: 0, Errors: 0, Skipped: 0
-
-[INFO] Tests run: 168, Failures: 0, Errors: 0, Skipped: 0  (27 modules, aggregate)
-
+[INFO] CampusOverflow :: Parent                                           [pom]
+[INFO] CampusOverflow :: Shared Kernel                                    [jar]
+[INFO] CampusOverflow :: Identity 身份与认证                                   [pom]
+[INFO] CampusOverflow :: Q&A 问答核心                                         [pom]
+[INFO] CampusOverflow :: Reputation 声誉与激励                                 [pom]
+[INFO] CampusOverflow :: Discovery
+[INFO] CampusOverflow :: Bootstrap（启动
+[INFO] Building CampusOverflow :: Parent 0.1.0-SNAPSHOT                  [1/27]
+[INFO] Building CampusOverflow :: Shared Kernel 0.1.0-SNAPSHOT           [2/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-shared-kernel ---
+[INFO] Building CampusOverflow :: Identity 身份与认证 0.1.0-SNAPSHOT          [3/27]
+[INFO] Building Identity 身份与认证 :: api（发布语言） 0.1.0-SNAPSHOT               [4/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-api ---
+[INFO] Building Identity 身份与认证 :: domain（纯 Java） 0.1.0-SNAPSHOT          [5/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-domain ---
+[INFO] Building Identity 身份与认证 :: application（用例编排） 0.1.0-SNAPSHOT       [6/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-application ---
+[INFO] Building Identity 身份与认证 :: infrastructure（持
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-infrastructure ---
+[INFO] Building Identity 身份与认证 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT    [8/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-interfaces ---
+[INFO] Building CampusOverflow :: Q&A 问答核心 0.1.0-SNAPSHOT                [9/27]
+[INFO] Building Q&A 问答核心 :: api（发布语言） 0.1.0-SNAPSHOT                    [10/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-api ---
+[INFO] Building Q&A 问答核心 :: domain（纯 Java） 0.1.0-SNAPSHOT               [11/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-domain ---
+[INFO] Building Q&A 问答核心 :: application（用例编排） 0.1.0-SNAPSHOT            [12/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-application ---
+[INFO] Building Q&A 问答核心 :: infrastructure（持
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-infrastructure ---
+[INFO] Building Q&A 问答核心 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT         [14/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-interfaces ---
+[INFO] Building CampusOverflow :: Reputation 声誉与激励 0.1.0-SNAPSHOT       [15/27]
+[INFO] Building Reputation 声誉与激励 :: api（发布语言） 0.1.0-SNAPSHOT            [16/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-api ---
+[INFO] Building Reputation 声誉与激励 :: domain（纯 Java） 0.1.0-SNAPSHOT       [17/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-domain ---
+[INFO] Building Reputation 声誉与激励 :: application（用例编排） 0.1.0-SNAPSHOT    [18/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-application ---
+[INFO] Building Reputation 声誉与激励 :: infrastructure（持
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-infrastructure ---
+[INFO] Building Reputation 声誉与激励 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT [20/27]
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-interfaces ---
+[INFO] Building CampusOverflow :: Discovery
+[INFO] Building Discovery
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-api ---
+[INFO] Building Discovery
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-domain ---
+[INFO] Building Discovery
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-application ---
+[INFO] Building Discovery
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-infrastructure ---
+[INFO] Building Discovery
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-interfaces ---
+[INFO] Building CampusOverflow :: Bootstrap（启动
+[INFO] --- surefire:3.5.3:test (default-test) @ co-bootstrap ---
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.154 s -- in com.campusoverflow.architecture.ArchitectureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
 [INFO] Reactor Summary for CampusOverflow :: Parent 0.1.0-SNAPSHOT:
-[INFO] CampusOverflow :: Parent ............................... SUCCESS
-[INFO] ... (27 modules) ....................................... SUCCESS
+[INFO] CampusOverflow :: Parent ........................... SUCCESS [  0.121 s]
+[INFO] CampusOverflow :: Shared Kernel .................... SUCCESS [  0.235 s]
+[INFO] CampusOverflow :: Identity 身份与认证 ................... SUCCESS [  0.003 s]
+[INFO] CampusOverflow :: Q&A 问答核心 ......................... SUCCESS [  0.002 s]
+[INFO] CampusOverflow :: Reputation 声誉与激励 ................. SUCCESS [  0.002 s]
+[INFO] CampusOverflow :: Discovery
+[INFO] CampusOverflow :: Bootstrap（启动
 [INFO] BUILD SUCCESS
-
-# 说明：本机无 Docker，且本地 Maven 缓存缺 testcontainers 依赖，
-# 因此使用 CI 全量 mvn test 作为 E3 测试证据；同一 job 的集成测试
-# CampusOverflowFlowIT 3/3 通过，见 docs/reports/release-v1.0.0-verification.md。
+[INFO] Total time:  4.529 s

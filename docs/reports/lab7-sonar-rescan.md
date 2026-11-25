@@ -1,7 +1,7 @@
 # Lab 7 · SonarQube 重扫证据与执行单
 
-> 责任人：房国栋 / 陈明哲　状态：**✅ 已执行两轮复扫（2026-11-23 / 2026-11-24）**——配置、CI 接入、Bug 修复、本机 SonarQube 扫描与截图全部完成
-> 实测结果以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**（两轮复扫均为 1）、Coverage 70.5%、Quality Gate **仍 Failed**（剩 `User.java` 的 `java:S5998`）
+> 责任人：房国栋 / 陈明哲　状态：**已执行两轮复扫（2026-11-23 / 2026-11-24），但扫描的是 #209 之前的代码；#209 改为方案 A 后尚未复扫**
+> 最近一次实测以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**、Coverage 70.5%、Quality Gate **Failed**（`User.java` 的 `java:S5998`）。#209 已按方案 A 改代码，**最终代码未再扫描**；因此当前事实仍是 Failed，不能写成已修复。
 > 关联：`sonar-project.properties`、`backend/pom.xml`（sonar-maven-plugin）、`.github/workflows/ci.yml` 阶段 6
 > 同行评审清单：[`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md)
 
@@ -59,7 +59,7 @@ curl -X POST ".../api/qualitygates/select" -d "gateName=...&projectKey=campus-ov
 | 文件 | 内容 |
 | --- | --- |
 | `01-dashboard.png` | 项目 Dashboard：`QUALITY GATE STATUS: Failed`，明示「1 Bugs is greater than 0」 |
-| `02-coverage.png` | Measures → Coverage：**70.3%**、Lines to cover 1,524、Unit Tests 173 全通过 |
+| `02-coverage.png` | Measures → Coverage：**70.3% / 173 单测**（11-23 扫描；11-24 复扫为 70.5% / 174，截图未覆盖最终代码） |
 | `03-bugs.png` | Issues 过滤 `types=BUG`：**仅 1 条**，定位 `co-identity/.../User.java L24` |
 | `04-projects.png` | 项目列表 |
 | `05-quality-gate-list.png` | Quality Gates：`CampusOverflow Gate` + 内置 `Sonar way` |
@@ -158,6 +158,6 @@ Pattern.compile("^[\\w.+-]+@[\\w.-]+$")   // 单字符类，无分组
 
 ## 六、结论
 
-重扫**已执行**，证据齐备。三大指标里 Coverage（70.3%）与 Vulnerabilities（0）达标，
-Bugs 由 3 降到 1，**门禁仍 Failed，原因是 #200 的修复未真正消除 `S5998`**——
-这是本轮最有价值的发现：如果只看「#200 已修复」的说明而不复扫，会误以为门禁已绿。
+重扫**已执行两轮**，但均对应 #209 之前的代码。最近结果 Coverage 70.5%、Vulnerabilities 0、**Bugs 1**，门禁 **Failed**。
+#209 已按方案 A 把正则改为 `^[\w.+-]+@[\w.-]+$` 并补域名校验，但**最终代码尚未重新扫描**——
+在拿到新的 SonarQube 截图前，Lab 7 的结论只能是「已定位、代码已改、待复扫」，不能写 PASSED。

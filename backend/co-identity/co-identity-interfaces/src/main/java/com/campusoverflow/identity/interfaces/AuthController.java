@@ -106,7 +106,7 @@ public class AuthController {
             request.changeSessionId();
         }
         // 写入 principal-name 索引，禁用账号时可按用户名撤销全部会话
-        request.getSession(true).setAttribute(PRINCIPAL_NAME_INDEX, auth.getName());
+        request.getSession(true).setAttribute(PRINCIPAL_NAME_INDEX, Usernames.normalize(auth.getName()));
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(auth);
         SecurityContextHolder.setContext(context);
