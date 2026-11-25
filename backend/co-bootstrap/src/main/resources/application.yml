@@ -126,7 +126,9 @@ server:
   servlet:
     session:
       cookie:
-        secure: true
+        # 跟随部署环境：HTTP 部署设 false（否则 Secure Cookie 不被浏览器回传，登录后丢会话）；
+        # HTTPS 部署必须设 true。与 deploy/docker-compose.yml 的 COOKIE_SECURE 保持一致。
+        secure: ${COOKIE_SECURE:false}
 springdoc:
   swagger-ui:
     enabled: false                 # 生产环境关闭在线文档
