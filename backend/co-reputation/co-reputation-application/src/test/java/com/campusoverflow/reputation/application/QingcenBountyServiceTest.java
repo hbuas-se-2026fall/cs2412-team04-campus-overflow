@@ -101,6 +101,17 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void openRejectsPublicQuestionWithoutCourse() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, null, "没有关联课程的公开问题", null, false)));
+
+        assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
+                .isInstanceOf(com.campusoverflow.shared.domain.BusinessRuleException.class)
+                .hasMessageContaining("公开问题");
+        verifyNoInteractions(sponsor);
+    }
+
+    @Test
     void openRejectsWhenQuestionAlreadyHasOpenBounty() {
         seedBounty(50, 7);
 

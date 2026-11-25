@@ -13,6 +13,7 @@ import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
@@ -56,6 +57,9 @@ public class BountyService {
     public long open(Actor actor, long questionId, int points, int days) {
         QuestionRef question = qa.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+        if (question.courseId() == null) {
+            throw new BusinessRuleException("REP-1007", "公开问题不能发起悬赏，请选择所属课程的问题");
+        }
         boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == null;
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
 
