@@ -4,6 +4,7 @@ import com.campusoverflow.identity.api.event.UserRegisteredEvent;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerEndorsedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.qa.api.event.VoteCastEvent;
 import com.campusoverflow.reputation.domain.BadgePolicy;
 import com.campusoverflow.reputation.domain.BadgeType;
@@ -94,5 +95,14 @@ public class ReputationEventHandlers {
     @Transactional
     public void on(AnswerEndorsedEvent e) {
         badges.grant(e.answerAuthorId(), BadgeType.TEACHER_ENDORSED);
+    }
+
+    /** 问题被删除：关闭仍 OPEN 的悬赏并退款，避免发起人积分一直冻结到自然到期。 */
+    @EventListener
+    @Transactional
+    public void on(ContentDeletedEvent e) {
+        if ("QUESTION".equalsIgnoreCase(e.targetType())) {
+            bounties.closeForDeletedQuestion(e.targetId());
+        }
     }
 }
