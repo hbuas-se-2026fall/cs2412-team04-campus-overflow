@@ -121,21 +121,35 @@ public class BountyService {
                 "question=" + questionId + ",points=" + bounty.points());
     }
 
-    /** 到期未采纳的悬赏：关闭并退回冻结积分。由定时任务调用。 */
-    @Transactional
+    /**
+     * 到期未采纳的悬赏：关闭并退回冻结积分。由定时任务调用。
+     *
+     * <p>单条历史脏数据（账户不存在、冻结额不一致）不应阻断整批退款；
+     * 捕获业务异常继续处理其余悬赏，其他持久化异常仍让事务整体回滚。</p>
+     */
+    @Transactional(noRollbackFor = {BusinessRuleException.class, NotFoundException.class})
     public int expireDue() {
         Instant now = clock.instant();
         List<Bounty> due = bounties.findDue(now, 100);
+        int closed = 0;
         for (Bounty bounty : due) {
-            ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
-                    .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
-            closeAndRefund(bounty, sponsor, now);
+            try {
+                ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
+                        .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
+                closeAndRefund(bounty, sponsor, now);
+                closed++;
+            } catch (BusinessRuleException | NotFoundException ignored) {
+                // 单条脏数据跳过；其余悬赏继续退款。
+            }
         }
-        return due.size();
+        return closed;
     }
 
     @Transactional(readOnly = true)
     public Optional<BountyView> latest(long questionId) {
+        qa.findQuestion(questionId)
+                .filter(question -> !question.deleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已被删除"));
         return bounties.findLatestByQuestion(questionId).map(b -> new BountyView(
                 b.id(), b.questionId(), b.sponsorId(),
                 identity.findUser(b.sponsorId()).map(UserSummary::displayName).orElse("未知用户"),

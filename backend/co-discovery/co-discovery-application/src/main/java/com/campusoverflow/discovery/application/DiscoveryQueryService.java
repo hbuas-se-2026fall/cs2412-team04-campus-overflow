@@ -7,7 +7,9 @@ import com.campusoverflow.discovery.domain.search.SearchPort;
 import com.campusoverflow.discovery.domain.search.SearchQuery;
 import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.identity.api.UserSummary;
+import com.campusoverflow.qa.api.QaQueryApi;
 import com.campusoverflow.shared.domain.ForbiddenException;
+import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageResult;
 import com.campusoverflow.shared.security.Actor;
 import java.util.List;
@@ -24,11 +26,13 @@ public class DiscoveryQueryService {
     private final SearchPort search;
     private final SearchIndex index;
     private final IdentityApi identity;
+    private final QaQueryApi qa;
 
-    public DiscoveryQueryService(SearchPort search, SearchIndex index, IdentityApi identity) {
+    public DiscoveryQueryService(SearchPort search, SearchIndex index, IdentityApi identity, QaQueryApi qa) {
         this.search = search;
         this.index = index;
         this.identity = identity;
+        this.qa = qa;
     }
 
     private static final int CANDIDATE_LIMIT = 50;
@@ -59,8 +63,11 @@ public class DiscoveryQueryService {
         return related(questionId, limit, null);
     }
 
-    /** 相关问题也按课程可见范围过滤，避免从搜索/详情侧绕过成员校验。 */
+    /** 相关问题也按课程可见范围过滤；过滤条件下推到候选查询，避免先 LIMIT 50 再过滤导致漏结果。 */
     public List<RelatedQuestionView> related(long questionId, int limit, Actor viewerOrNull) {
+        qa.findQuestion(questionId)
+                .filter(question -> !question.deleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已被删除"));
         if (limit <= 0) {
             return List.of();
         }
@@ -71,12 +78,9 @@ public class DiscoveryQueryService {
         int ownTagCount = ownTags.size();
         boolean allCourses = viewerOrNull != null && viewerOrNull.isAdmin();
         Set<Long> visibleCourseIds = viewerOrNull == null ? Set.of() : identity.courseIdsOfUser(viewerOrNull.userId());
-        List<SearchIndex.RelatedCandidate> visibleCandidates =
-                index.findCandidatesSharingTags(questionId, ownTags, CANDIDATE_LIMIT).stream()
-                        .filter(candidate -> allCourses || candidate.courseId() == null
-                                || visibleCourseIds.contains(candidate.courseId()))
-                        .toList();
-        return RelatedQuestionPolicy.rank(visibleCandidates, ownTagCount, limit).stream()
+        List<SearchIndex.RelatedCandidate> candidates = index.findCandidatesSharingTags(
+                questionId, ownTags, allCourses, visibleCourseIds, CANDIDATE_LIMIT);
+        return RelatedQuestionPolicy.rank(candidates, ownTagCount, limit).stream()
                 .map(candidate -> new RelatedQuestionView(candidate.questionId(), candidate.title(),
                         candidate.answerCount(), candidate.accepted(),
                         RelatedQuestionPolicy.jaccard(candidate.sharedTags(), ownTagCount, candidate.tagCount())))

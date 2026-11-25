@@ -205,6 +205,14 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void latestRejectsMissingQuestion() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.latest(QUESTION_ID))
+                .isInstanceOf(com.campusoverflow.shared.domain.NotFoundException.class);
+    }
+
+    @Test
     void settledBountyIsNotReturnedByExpireDue() {
         Bounty bounty = seedBounty(50, 1);
         service.settleOnAccept(QUESTION_ID, 50L, 3L, "event-1");
