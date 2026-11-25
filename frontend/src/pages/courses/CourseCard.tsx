@@ -80,7 +80,13 @@ export function CourseCard({ course, authenticated, onJoined }: Props) {
             {joining ? '加入中…' : '加入课程'}
           </button>
         )}
-        <button onClick={() => navigate(`/?courseId=${course.id}`)}>查看课程问题</button>
+        {joined ? (
+          <button onClick={() => navigate(`/?courseId=${course.id}`)}>查看课程问题</button>
+        ) : (
+          <button disabled title="加入课程后才能查看课程内问题">
+            加入后查看课程问题
+          </button>
+        )}
       </div>
     </li>
   );

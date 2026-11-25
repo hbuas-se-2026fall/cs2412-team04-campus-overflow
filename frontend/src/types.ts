@@ -106,8 +106,8 @@ export interface QuestionDetail {
 }
 
 /**
- * 搜索结果。FE-01：后端 SearchResultView 目前不返回 viewCount，
- * 所以用 Omit 去掉该字段并声明为可选，逼着渲染处判空。
+ * 搜索结果。搜索页不展示浏览数，后端 SearchResultView 也不需要 viewCount；
+ * 保留可选字段以兼容未来后端补字段，渲染处始终按“有值才显示”处理。
  */
 export interface SearchResult extends Omit<QuestionSummary, 'viewCount'> {
   bountyOpen: boolean;

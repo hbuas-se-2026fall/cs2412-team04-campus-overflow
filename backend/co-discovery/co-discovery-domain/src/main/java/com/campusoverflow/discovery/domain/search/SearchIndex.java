@@ -28,7 +28,7 @@ public interface SearchIndex {
     /** 与给定标签至少共享一个标签的候选问题（排除自身与已删除）。 */
     List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, int limit);
 
-    record RelatedCandidate(long questionId, String title, int sharedTags, int tagCount, int score,
+    record RelatedCandidate(long questionId, String title, Long courseId, int sharedTags, int tagCount, int score,
                             int answerCount, boolean accepted) {
     }
 }

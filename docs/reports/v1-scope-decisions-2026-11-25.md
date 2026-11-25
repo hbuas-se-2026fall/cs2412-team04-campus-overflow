@@ -21,8 +21,8 @@
 | --- | --- |
 | 冲突 | `BountyService.open` 把 `question.courseId()`（公开问题为 `null`）传给 `canManageCourse`；`IdentityApiImpl` 对 `courseId == null` 直接返回 `role == TEACHER` → **任意全局 TEACHER 都能对公开问题发起悬赏**；而 `docs/final/user-guide.md:110` 写「必须是该课程的问题」 |
 | **决策** | **以文档为准**：悬赏必须是课程问题，公开问题（`courseId == null`）一律拒绝 |
-| 实现 | `BountyService.open` 在取到 `QuestionRef` 后**前置**校验：`courseId == null` → `BusinessRuleException("REP-2003", "公开问题不支持悬赏，请选择课程问题")`；随后才做 questionOpen / canManageCourse / 单 OPEN 检查 |
-| 测试 | `QingcenBountyServiceTest.openRejectsBountyOnPublicQuestion`（公开问题 → REP-2003 且不触碰账户） |
+| 实现 | `BountyService.open` 在取到 `QuestionRef` 后**前置**校验：`courseId == null` → `BusinessRuleException("REP-1007", "公开问题不能发起悬赏，请选择所属课程的问题")`；随后才做 questionOpen / canManageCourse / 单 OPEN 检查 |
+| 测试 | `QingcenBountyServiceTest.openRejectsBountyOnPublicQuestion`（公开问题 → REP-1007 且不触碰账户） |
 | 说明 | 教师若确实想悬赏某个公开问题，应先把问题关联课程——当前编辑接口不支持改课程，属 **v1.1 候选**（届时在 Issue 中登记） |
 
 ## 执行与复核

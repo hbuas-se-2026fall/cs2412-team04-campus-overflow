@@ -14,31 +14,35 @@ import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ForbiddenException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class DiscoveryDomainTest {
 
     @Test
     void searchQueryStripsOperatorsAndPicksDefaultSort() {
-        SearchQuery q = new SearchQuery("  +红黑树 -旋转*  ", null, " Java ", null, false, false, null);
+        SearchQuery q = new SearchQuery("  +红黑树 -旋转*  ", null, " Java ", null, false, false, null,
+                false, Set.of());
         assertThat(q.terms()).containsExactly("红黑树", "旋转");
         assertThat(q.sort()).isEqualTo(SearchSort.RELEVANCE);
         assertThat(q.tag()).isEqualTo("java");
 
-        SearchQuery noKeyword = new SearchQuery("   ", null, null, SearchSort.RELEVANCE, false, false, null);
+        SearchQuery noKeyword = new SearchQuery("   ", null, null, SearchSort.RELEVANCE, false, false, null,
+                false, Set.of());
         assertThat(noKeyword.keyword()).isNull();
         assertThat(noKeyword.sort()).isEqualTo(SearchSort.NEWEST);
     }
 
     @Test
     void searchQueryDeduplicatesTermsAndCapsAtFive() {
-        SearchQuery q = new SearchQuery("红黑树 红黑树 旋转 结构 算法 查找 排序", null, null, null, false, false, null);
+        SearchQuery q = new SearchQuery("红黑树 红黑树 旋转 结构 算法 查找 排序", null, null, null, false, false, null,
+                false, Set.of());
         assertThat(q.terms()).containsExactly("红黑树", "旋转", "结构", "算法", "查找");
     }
 
     @Test
     void singleCharacterTermsAreRejectedBecauseOfNgramTokenSize() {
-        assertThatThrownBy(() -> new SearchQuery("树", null, null, null, false, false, null))
+        assertThatThrownBy(() -> new SearchQuery("树", null, null, null, false, false, null, false, Set.of()))
                 .isInstanceOf(BusinessRuleException.class);
     }
 
@@ -46,9 +50,9 @@ class DiscoveryDomainTest {
     void jaccardRanking() {
         assertThat(RelatedQuestionPolicy.jaccard(2, 3, 3)).isEqualTo(0.5);
         List<RelatedCandidate> ranked = RelatedQuestionPolicy.rank(List.of(
-                new RelatedCandidate(1, "A", 1, 5, 99, 3, true),   // J = 1/7
-                new RelatedCandidate(2, "B", 2, 2, 0, 0, false),   // J = 2/3
-                new RelatedCandidate(3, "C", 2, 3, 5, 1, true)     // J = 2/4
+                new RelatedCandidate(1, "A", null, 1, 5, 99, 3, true),   // J = 1/7
+                new RelatedCandidate(2, "B", null, 2, 2, 0, 0, false),   // J = 2/3
+                new RelatedCandidate(3, "C", null, 2, 3, 5, 1, true)     // J = 2/4
         ), 3, 2);
         assertThat(ranked).extracting(RelatedCandidate::questionId).containsExactly(2L, 3L);
     }

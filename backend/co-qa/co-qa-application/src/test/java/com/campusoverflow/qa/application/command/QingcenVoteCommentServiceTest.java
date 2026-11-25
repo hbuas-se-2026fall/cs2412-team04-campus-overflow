@@ -10,6 +10,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryListCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryQuestions;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryVotes;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingEvents;
+import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
 import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.Comment;
 import com.campusoverflow.qa.domain.CommentRepository;
@@ -55,6 +56,11 @@ class QingcenVoteCommentServiceTest {
     private final InMemoryComments comments = new InMemoryComments();
     private final InMemoryListCache cache = new InMemoryListCache();
     private final RecordingEvents events = new RecordingEvents();
+    private final StubIdentity identity = new StubIdentity()
+            .withUser(1, "小明", Role.STUDENT)
+            .withUser(2, "小红", Role.STUDENT)
+            .withCourseMember(1, 100L)
+            .withCourseMember(2, 100L);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
     private final Actor hong = new Actor(2, "小红", Role.STUDENT);
@@ -66,8 +72,8 @@ class QingcenVoteCommentServiceTest {
 
     @BeforeEach
     void setUp() {
-        voteService = new VoteService(votes, questions, answers, events, cache, clock);
-        commentService = new CommentService(comments, questions, answers, events, clock);
+        voteService = new VoteService(votes, questions, answers, identity, events, cache, clock);
+        commentService = new CommentService(comments, questions, answers, identity, events, clock);
 
         question = questions.save(Question.post(ming.userId(), 100L,
                 new Title("红黑树插入后为什么必须旋转？"),
@@ -88,6 +94,17 @@ class QingcenVoteCommentServiceTest {
         assertThat(voteEvents).hasSize(2);
         assertThat(voteEvents.get(1).oldValue()).isEqualTo(1);
         assertThat(voteEvents.get(1).newValue()).isEqualTo(-1);
+    }
+
+    @Test
+    void nonMemberCannotCommentOrVoteInCourse() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> commentService.post(outsider,
+                new PostCommentCommand(TargetType.QUESTION, question.id(), null, "路人想评论课程问题")))
+                .isInstanceOf(ForbiddenException.class);
+        assertThatThrownBy(() -> voteService.cast(outsider, TargetType.ANSWER, answer.id(), 1))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -188,7 +205,7 @@ class QingcenVoteCommentServiceTest {
     @Test
     void concurrentVotesKeepSingleRecord() throws Exception {
         ConcurrentVotes concurrentVotes = new ConcurrentVotes();
-        VoteService service = new VoteService(concurrentVotes, questions, answers, events, cache, clock);
+        VoteService service = new VoteService(concurrentVotes, questions, answers, identity, events, cache, clock);
         CyclicBarrier bothRead = new CyclicBarrier(2);
         concurrentVotes.readBarrier = bothRead;
 
