@@ -23,6 +23,7 @@ import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.event.IntegrationEvent;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -117,6 +118,19 @@ class QingcenBountyServiceTest {
 
         assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
                 .isInstanceOf(ConflictException.class);
+        verifyNoInteractions(sponsor);
+    }
+
+    @Test
+    void openRejectsBountyOnPublicQuestion() {
+        // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，
+        // 与 docs/final/user-guide.md「必须是该课程的问题」一致。
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, null, "不挂课程的公开提问", null, false)));
+
+        assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("公开问题");
         verifyNoInteractions(sponsor);
     }
 
