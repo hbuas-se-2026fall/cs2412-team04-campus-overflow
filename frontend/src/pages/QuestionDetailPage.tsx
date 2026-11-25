@@ -85,13 +85,12 @@ export function QuestionDetailPage() {
   if (state === 'forbidden') {
     return (
       <div className="state-page">
-        <h1>没有查看权限</h1>
-        <p className="muted">{error || '这个问题仅对课程成员开放。'}</p>
+        <h1>没有操作权限</h1>
+        <p className="muted">{error || '当前账号没有权限执行此操作。'}</p>
         <div className="actions">
-          <Link className="primary" to="/courses">
-            去课程页加入
+          <Link className="primary" to="/">
+            返回问题列表
           </Link>
-          <Link to="/">返回列表</Link>
         </div>
       </div>
     );

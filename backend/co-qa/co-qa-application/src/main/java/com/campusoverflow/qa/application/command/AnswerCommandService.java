@@ -108,8 +108,13 @@ public class AnswerCommandService {
         Question question = loadQuestion(questionId);
         Answer answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
+        Long currentAcceptedId = question.acceptedAnswerId();
+        boolean currentAcceptedVisible = currentAcceptedId == null
+                || answers.findById(currentAcceptedId)
+                        .filter(existing -> existing.questionId() == questionId && !existing.isDeleted())
+                        .isPresent();
 
-        question.accept(answer, actor, manages);
+        question.accept(answer, actor, manages, currentAcceptedVisible);
         questions.save(question);
 
         events.publish(new AnswerAcceptedEvent(

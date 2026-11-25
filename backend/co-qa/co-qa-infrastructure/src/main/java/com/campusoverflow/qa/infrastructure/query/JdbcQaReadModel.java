@@ -26,9 +26,19 @@ import org.springframework.stereotype.Component;
 @Component
 public class JdbcQaReadModel implements QaReadModel {
 
+    /**
+     * 历史脏数据容错：accepted_answer_id 可能指向已删除的回答。列表/详情统一只暴露
+     * “仍指向本问题且回答未删除”的有效采纳 ID，避免详情可重新采纳、列表却仍显示已采纳。
+     */
     private static final String QUESTION_COLUMNS = """
-            id, author_id, course_id, title, %s AS body, accepted_answer_id, score, answer_count, view_count,
-            created_at, updated_at
+            id, author_id, course_id, title, %s AS body,
+            CASE WHEN accepted_answer_id IS NOT NULL AND EXISTS (
+                SELECT 1 FROM qa_answer a
+                WHERE a.id = qa_question.accepted_answer_id
+                  AND a.question_id = qa_question.id
+                  AND a.deleted_at IS NULL
+            ) THEN accepted_answer_id ELSE NULL END AS accepted_answer_id,
+            score, answer_count, view_count, created_at, updated_at
             """;
 
     private final NamedParameterJdbcTemplate jdbc;
@@ -38,21 +48,13 @@ public class JdbcQaReadModel implements QaReadModel {
     }
 
     @Override
-    public PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses,
-                                                  Collection<Long> visibleCourseIds, PageRequest page) {
+    public PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page) {
         StringBuilder where = new StringBuilder(" WHERE deleted_at IS NULL");
         MapSqlParameterSource p = new MapSqlParameterSource()
                 .addValue("limit", page.size()).addValue("offset", page.offset());
         if (courseId != null) {
             where.append(" AND course_id = :courseId");
             p.addValue("courseId", courseId);
-        } else if (!allCourses) {
-            where.append(" AND (course_id IS NULL");
-            if (visibleCourseIds != null && !visibleCourseIds.isEmpty()) {
-                where.append(" OR course_id IN (:visibleCourseIds)");
-                p.addValue("visibleCourseIds", visibleCourseIds);
-            }
-            where.append(")");
         }
         Long total = jdbc.queryForObject("SELECT COUNT(*) FROM qa_question" + where, p, Long.class);
         List<QuestionRow> rows = jdbc.query("SELECT " + QUESTION_COLUMNS.formatted("LEFT(body, 600)")

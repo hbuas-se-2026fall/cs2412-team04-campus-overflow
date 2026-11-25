@@ -1,7 +1,6 @@
 package com.campusoverflow.discovery.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchHit;
@@ -13,10 +12,8 @@ import com.campusoverflow.discovery.domain.search.SearchSort;
 import com.campusoverflow.identity.api.CourseSummary;
 import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.identity.api.UserSummary;
-import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
-import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import java.util.Collection;
@@ -42,7 +39,7 @@ class DiscoveryQueryServiceTest {
                 new StubIdentity().withUser(3, "小红", Role.STUDENT));
 
         PageResult<SearchResultView> result = service.search(new SearchQuery("红黑树", null, null,
-                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20), false, Set.of()));
+                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20)));
 
         assertThat(result.total()).isEqualTo(1);
         SearchResultView view = result.items().get(0);
@@ -56,20 +53,7 @@ class DiscoveryQueryServiceTest {
     }
 
     @Test
-    void searchRejectsNonMemberCourseFilter() {
-        DiscoveryQueryService service = new DiscoveryQueryService(
-                query -> PageResult.empty(1, 20),
-                new EmptyIndex(),
-                new StubIdentity().withUser(3, "小红", Role.STUDENT));
-        Actor outsider = new Actor(3, "小红", Role.STUDENT);
-
-        assertThatThrownBy(() -> service.search(new SearchQuery("红黑树", 100L, null,
-                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20), false, Set.of()), outsider))
-                .isInstanceOf(ForbiddenException.class);
-    }
-
-    @Test
-    void searchPassesMemberCourseScopeToSearchPort() {
+    void searchAllowsAnyCourseFilter() {
         AtomicReference<SearchQuery> captured = new AtomicReference<>();
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> {
@@ -77,18 +61,16 @@ class DiscoveryQueryServiceTest {
                     return PageResult.empty(1, 20);
                 },
                 new EmptyIndex(),
-                new StubIdentity().withUser(3, "小红", Role.STUDENT).withCourseMember(3, 200L));
-        Actor member = new Actor(3, "小红", Role.STUDENT);
+                new StubIdentity());
 
-        service.search(new SearchQuery("红黑树", null, null, SearchSort.RELEVANCE, false, false,
-                new PageRequest(1, 20), false, Set.of()), member);
+        service.search(new SearchQuery("红黑树", 100L, null, SearchSort.RELEVANCE, false, false,
+                new PageRequest(1, 20)));
 
-        assertThat(captured.get().allCourses()).isFalse();
-        assertThat(captured.get().visibleCourseIds()).containsExactly(200L);
+        assertThat(captured.get().courseId()).isEqualTo(100L);
     }
 
     @Test
-    void relatedFiltersCourseCandidatesForOutsider() {
+    void relatedReturnsAllMatchingCandidates() {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> PageResult.empty(1, 20),
                 new EmptyIndex(
@@ -96,12 +78,11 @@ class DiscoveryQueryServiceTest {
                         List.of(
                                 new SearchIndex.RelatedCandidate(1, "公开问题", null, 1, 2, 10, 1, false),
                                 new SearchIndex.RelatedCandidate(2, "课程问题", 100L, 1, 2, 5, 1, false))),
-                new StubIdentity().withUser(3, "路人", Role.STUDENT));
-        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+                new StubIdentity());
 
-        List<RelatedQuestionView> result = service.related(99, 10, outsider);
+        List<RelatedQuestionView> result = service.related(99, 10);
 
-        assertThat(result).extracting(RelatedQuestionView::id).containsExactly(1L);
+        assertThat(result).extracting(RelatedQuestionView::id).containsExactly(1L, 2L);
     }
 
     @Test

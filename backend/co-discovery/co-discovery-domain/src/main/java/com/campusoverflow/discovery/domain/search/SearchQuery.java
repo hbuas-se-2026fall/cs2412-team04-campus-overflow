@@ -5,18 +5,15 @@ import com.campusoverflow.shared.page.PageRequest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * 搜索条件（值对象）。关键词规范化：去除全文检索运算符，按空白切分为词项，最多 5 个。
  * MySQL ngram 分词粒度为 2（ngram_token_size=2），因此单个词项至少 2 个字符。
  *
- * <p>allCourses / visibleCourseIds 是当前查看者的课程可见范围：管理员为 true；
- * 其他用户只能看到公开问题与 visibleCourseIds 中的课程问题。</p>
+ * <p>v1.0 采用站内公开口径：课程只作筛选条件，不构成可见性边界。</p>
  */
 public record SearchQuery(String keyword, Long courseId, String tag, SearchSort sort, boolean unansweredOnly,
-                          boolean bountyOnly, PageRequest page, boolean allCourses,
-                          Set<Long> visibleCourseIds) {
+                          boolean bountyOnly, PageRequest page) {
 
     private static final int MAX_TERMS = 5;
 
@@ -39,7 +36,6 @@ public record SearchQuery(String keyword, Long courseId, String tag, SearchSort 
             sort = SearchSort.NEWEST;
         }
         page = page == null ? new PageRequest(1, 20) : page;
-        visibleCourseIds = visibleCourseIds == null ? Set.of() : Set.copyOf(visibleCourseIds);
     }
 
     public List<String> terms() {

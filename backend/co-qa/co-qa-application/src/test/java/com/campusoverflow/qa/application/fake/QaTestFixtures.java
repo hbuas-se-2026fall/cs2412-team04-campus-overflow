@@ -299,16 +299,23 @@ public final class QaTestFixtures {
         public PageRequest lastPage;
 
         @Override
-        public PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses,
-                                                       Collection<Long> visibleCourseIds, PageRequest page) {
+        public PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page) {
             listCalls.add(courseId);
             lastPage = page;
             List<QuestionRow> filtered = questions.stream()
                     .filter(row -> courseId == null || courseId.equals(row.courseId()))
-                    .filter(row -> courseId != null || allCourses
-                            || row.courseId() == null || visibleCourseIds.contains(row.courseId()))
+                    .map(this::withEffectiveAccepted)
                     .toList();
             return new PageResult<>(filtered, filtered.size(), page.page(), page.size());
+        }
+
+        /** 与 JdbcQaReadModel 的 SQL 口径一致：采纳 ID 只有仍指向未删除回答时才有效。 */
+        private QuestionRow withEffectiveAccepted(QuestionRow row) {
+            boolean visible = row.acceptedAnswerId() != null && answers.stream()
+                    .anyMatch(a -> a.id() == row.acceptedAnswerId());
+            return new QuestionRow(row.id(), row.authorId(), row.courseId(), row.title(), row.body(), row.tags(),
+                    visible ? row.acceptedAnswerId() : null, row.score(), row.answerCount(), row.viewCount(),
+                    row.createdAt(), row.updatedAt());
         }
 
         @Override

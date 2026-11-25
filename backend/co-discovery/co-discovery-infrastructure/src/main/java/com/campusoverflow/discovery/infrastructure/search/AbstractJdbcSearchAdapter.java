@@ -38,13 +38,6 @@ abstract class AbstractJdbcSearchAdapter implements SearchPort {
         if (q.courseId() != null) {
             where.append(" AND d.course_id = :courseId");
             p.addValue("courseId", q.courseId());
-        } else if (!q.allCourses()) {
-            where.append(" AND (d.course_id IS NULL");
-            if (!q.visibleCourseIds().isEmpty()) {
-                where.append(" OR d.course_id IN (:visibleCourseIds)");
-                p.addValue("visibleCourseIds", q.visibleCourseIds());
-            }
-            where.append(")");
         }
         if (q.tag() != null) {
             where.append(" AND EXISTS (SELECT 1 FROM dis_question_tag t WHERE t.question_id = d.question_id AND t.tag = :tag)");

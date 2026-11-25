@@ -6,7 +6,6 @@ import com.campusoverflow.qa.application.port.ContentRenderer;
 import com.campusoverflow.qa.application.port.QaReadModel;
 import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.qa.application.port.ViewCounter;
-import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
@@ -54,25 +53,17 @@ public class QuestionQueryService {
     /**
      * 列表：先看缓存，未命中再查读模型；作者信息一次批量补齐后回填缓存。
      *
-     * <p>课程问题仅课程成员可见；公开问题（course_id 为空）始终可见。未登录用户只看公开问题。
-     * 缓存 key 带 viewerId，避免把某成员可见的课程列表返回给未加入课程的人。</p>
+     * <p>v1.0 采用站内公开口径：所有未删除问题对访问者可见，课程只作分类，不构成可见性边界。
+     * 缓存 key 仍带 viewerId，因为权限相关字段（如管理员操作入口）按查看者不同。</p>
      */
     public PageResult<QuestionSummaryView> list(Long courseId, PageRequest page, Actor viewerOrNull) {
-        boolean allCourses = viewerOrNull != null && viewerOrNull.isAdmin();
-        Set<Long> visibleCourseIds = viewerOrNull == null
-                ? Set.of()
-                : identity.courseIdsOfUser(viewerOrNull.userId());
-        if (courseId != null && !allCourses && !visibleCourseIds.contains(courseId)) {
-            throw new ForbiddenException("QA-3006", "无权查看该课程的问题");
-        }
-
         Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
         Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, viewerId, page);
         if (cached.isPresent()) {
             return cached.get();
         }
 
-        PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);
+        PageResult<QuestionRow> rows = readModel.listQuestions(courseId, page);
         List<Long> authorIds = rows.items().stream().map(QuestionRow::authorId).distinct().toList();
         Map<Long, UserSummary> authors = authorIds.isEmpty() ? Map.of() : identity.findUsers(authorIds);
 
@@ -85,7 +76,6 @@ public class QuestionQueryService {
     public QuestionDetailView detail(long questionId, Actor actorOrNull) {
         QuestionRow row = readModel.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
-        requireCanView(row, actorOrNull);
 
         List<AnswerRow> answerRows = readModel.findAnswers(questionId);
         List<CommentRow> commentRows = readModel.findComments(questionId);
@@ -132,21 +122,6 @@ public class QuestionQueryService {
                 myVotes.getOrDefault("QUESTION:" + questionId, 0),
                 row.createdAt(), row.updatedAt(), permissionsOf(row, effectiveAcceptedId, actorOrNull, managesCourse),
                 questionComments, answers);
-    }
-
-    /** 课程问题：管理员、作者或课程成员可见；公开问题不受限制。 */
-    private void requireCanView(QuestionRow row, Actor actorOrNull) {
-        if (row.courseId() == null) {
-            return;
-        }
-        if (actorOrNull == null) {
-            throw new ForbiddenException("QA-3006", "无权查看此内容");
-        }
-        if (actorOrNull.isAdmin() || actorOrNull.is(row.authorId())
-                || identity.isCourseMember(actorOrNull.userId(), row.courseId())) {
-            return;
-        }
-        throw new ForbiddenException("QA-3006", "无权查看此内容");
     }
 
     /** 热门标签：limit 一律夹在 1–50，防止被传 100000 拖垮查询。 */

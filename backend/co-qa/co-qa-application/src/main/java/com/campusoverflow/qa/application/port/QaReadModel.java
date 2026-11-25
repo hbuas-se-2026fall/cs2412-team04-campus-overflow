@@ -17,11 +17,10 @@ import java.util.Optional;
  */
 public interface QaReadModel {
     /**
-     * 列表查询。courseId 非空时只查该课程；为空时按可见范围返回“公开问题 + 可见课程问题”。
-     * allCourses=true 表示管理员可见全部课程；否则 visibleCourseIds 为当前用户的课程集合。
+     * 列表查询。courseId 非空时只查该课程；为空时返回全部未删除问题。
+     * v1.0 采用站内公开口径：课程只作分类，不构成可见性边界。
      */
-    PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses, Collection<Long> visibleCourseIds,
-                                           PageRequest page);
+    PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page);
 
     Optional<QuestionRow> findQuestion(long questionId);
 

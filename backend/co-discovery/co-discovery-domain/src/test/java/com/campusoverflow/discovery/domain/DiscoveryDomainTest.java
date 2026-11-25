@@ -14,35 +14,31 @@ import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ForbiddenException;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 class DiscoveryDomainTest {
 
     @Test
     void searchQueryStripsOperatorsAndPicksDefaultSort() {
-        SearchQuery q = new SearchQuery("  +红黑树 -旋转*  ", null, " Java ", null, false, false, null,
-                false, Set.of());
+        SearchQuery q = new SearchQuery("  +红黑树 -旋转*  ", null, " Java ", null, false, false, null);
         assertThat(q.terms()).containsExactly("红黑树", "旋转");
         assertThat(q.sort()).isEqualTo(SearchSort.RELEVANCE);
         assertThat(q.tag()).isEqualTo("java");
 
-        SearchQuery noKeyword = new SearchQuery("   ", null, null, SearchSort.RELEVANCE, false, false, null,
-                false, Set.of());
+        SearchQuery noKeyword = new SearchQuery("   ", null, null, SearchSort.RELEVANCE, false, false, null);
         assertThat(noKeyword.keyword()).isNull();
         assertThat(noKeyword.sort()).isEqualTo(SearchSort.NEWEST);
     }
 
     @Test
     void searchQueryDeduplicatesTermsAndCapsAtFive() {
-        SearchQuery q = new SearchQuery("红黑树 红黑树 旋转 结构 算法 查找 排序", null, null, null, false, false, null,
-                false, Set.of());
+        SearchQuery q = new SearchQuery("红黑树 红黑树 旋转 结构 算法 查找 排序", null, null, null, false, false, null);
         assertThat(q.terms()).containsExactly("红黑树", "旋转", "结构", "算法", "查找");
     }
 
     @Test
     void singleCharacterTermsAreRejectedBecauseOfNgramTokenSize() {
-        assertThatThrownBy(() -> new SearchQuery("树", null, null, null, false, false, null, false, Set.of()))
+        assertThatThrownBy(() -> new SearchQuery("树", null, null, null, false, false, null))
                 .isInstanceOf(BusinessRuleException.class);
     }
 

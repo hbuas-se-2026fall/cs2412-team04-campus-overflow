@@ -81,14 +81,23 @@ public class Question {
         this.updatedAt = Objects.requireNonNull(now, "now");
     }
 
-    /** 采纳最佳答案。 */
+    /** 采纳最佳答案（默认要求当前采纳关系仍有效）。 */
     public void accept(Answer answer, Actor actor, boolean actorManagesCourse) {
+        accept(answer, actor, actorManagesCourse, true);
+    }
+
+    /**
+     * 采纳最佳答案。currentAcceptedAnswerVisible=false 表示库里的 accepted_answer_id
+     * 是历史脏数据（指向已删除/不存在的回答），此时先清空旧关系再采纳，避免读侧已放开
+     * canAccept、写侧却仍抛 QA-2002。
+     */
+    public void accept(Answer answer, Actor actor, boolean actorManagesCourse, boolean currentAcceptedAnswerVisible) {
         Objects.requireNonNull(answer, "answer");
         ensureNotDeleted();
         if (actor.userId() != authorId && !actorManagesCourse) {
             throw new ForbiddenException("QA-3001", "只有提问者或课程管理者可以采纳回答");
         }
-        if (acceptedAnswerId != null) {
+        if (acceptedAnswerId != null && currentAcceptedAnswerVisible) {
             throw new ConflictException("QA-2002", "问题已经采纳过回答");
         }
         if (id == null || answer.questionId() != id) {

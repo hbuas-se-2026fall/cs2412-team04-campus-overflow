@@ -94,6 +94,21 @@ class AnswerAndVoteServiceTest {
     }
 
     @Test
+    @DisplayName("历史脏数据：accepted_answer_id 指向不存在回答时仍可重新采纳")
+    void acceptsWhenStoredAcceptedAnswerNoLongerExists() {
+        Question stale = Question.reconstitute(100L, ming.userId(), 100L,
+                new Title("历史脏数据下的采纳问题"), MarkdownBody.ofQuestion("accepted 指向已删除回答，详情已允许重新采纳。"),
+                Tags.of(List.of("数据结构")), 999L, 0, 0, 0, NOW, NOW, null, 0);
+        questions.save(stale);
+        long answerId = answerService.submit(hong, 100L, "新的回答应该可以被采纳，并替换失效的旧采纳 ID。");
+
+        answerService.accept(ming, 100L, answerId);
+
+        assertThat(questions.findById(100L).orElseThrow().acceptedAnswerId()).isEqualTo(answerId);
+        assertThat(events.ofType(AnswerAcceptedEvent.class)).hasSize(1);
+    }
+
+    @Test
     @DisplayName("管理者删除已采纳回答后释放采纳关系，问题可以重新采纳")
     void deletingAcceptedAnswerReleasesQuestionAcceptance() {
         long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
