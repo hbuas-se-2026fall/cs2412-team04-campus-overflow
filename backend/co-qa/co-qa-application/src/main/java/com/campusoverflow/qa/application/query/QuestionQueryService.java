@@ -94,6 +94,12 @@ public class QuestionQueryService {
         boolean managesCourse = actorOrNull != null && identity.canManageCourse(actorOrNull.userId(), row.courseId());
 
         List<Long> answerIds = answerRows.stream().map(AnswerRow::id).toList();
+        // 历史脏数据容错：accepted_answer_id 可能仍指向一条已被删除的回答（写入侧修复前留下的）。
+        // 只有采纳 ID 仍在可见回答列表里才算已采纳，否则按未采纳处理，避免出现“已采纳但无回答可展示”
+        // 的幽灵标记，并让提问者重新获得 canAccept。新数据写入侧已清空，这里只兜旧数据。
+        Long effectiveAcceptedId = row.acceptedAnswerId() != null && answerIds.contains(row.acceptedAnswerId())
+                ? row.acceptedAnswerId()
+                : null;
         Map<String, Integer> myVotes = actorOrNull == null
                 ? Map.of()
                 : readModel.findMyVotes(actorOrNull.userId(), questionId, answerIds);
@@ -110,7 +116,8 @@ public class QuestionQueryService {
         }
 
         List<AnswerView> answers = answerRows.stream()
-                .map(answer -> toAnswerView(answer, row, users, myVotes, answerComments, actorOrNull, managesCourse))
+                .map(answer -> toAnswerView(answer, effectiveAcceptedId, users, myVotes, answerComments,
+                        actorOrNull, managesCourse))
                 .sorted(Comparator.comparing(AnswerView::accepted).reversed()
                         .thenComparing(Comparator.comparingInt(AnswerView::score).reversed())
                         .thenComparing(AnswerView::createdAt))
@@ -121,9 +128,9 @@ public class QuestionQueryService {
 
         return new QuestionDetailView(row.id(), row.title(), row.body(), renderer.toSafeHtml(row.body()),
                 row.tags(), courseRefOf(row), AuthorView.of(row.authorId(), users.get(row.authorId())),
-                row.score(), row.answerCount(), row.viewCount(), row.acceptedAnswerId(),
+                row.score(), row.answerCount(), row.viewCount(), effectiveAcceptedId,
                 myVotes.getOrDefault("QUESTION:" + questionId, 0),
-                row.createdAt(), row.updatedAt(), permissionsOf(row, actorOrNull, managesCourse),
+                row.createdAt(), row.updatedAt(), permissionsOf(row, effectiveAcceptedId, actorOrNull, managesCourse),
                 questionComments, answers);
     }
 
@@ -154,10 +161,10 @@ public class QuestionQueryService {
                 row.viewCount(), row.acceptedAnswerId() != null, row.createdAt());
     }
 
-    private AnswerView toAnswerView(AnswerRow answer, QuestionRow question, Map<Long, UserSummary> users,
+    private AnswerView toAnswerView(AnswerRow answer, Long effectiveAcceptedId, Map<Long, UserSummary> users,
                                     Map<String, Integer> myVotes, Map<Long, List<CommentView>> answerComments,
                                     Actor actorOrNull, boolean managesCourse) {
-        boolean accepted = question.acceptedAnswerId() != null && question.acceptedAnswerId() == answer.id();
+        boolean accepted = effectiveAcceptedId != null && effectiveAcceptedId == answer.id();
         boolean canEdit = actorOrNull != null && (actorOrNull.is(answer.authorId()) || managesCourse);
         return new AnswerView(answer.id(), answer.body(), renderer.toSafeHtml(answer.body()),
                 AuthorView.of(answer.authorId(), users.get(answer.authorId())), answer.score(), accepted,
@@ -179,14 +186,16 @@ public class QuestionQueryService {
                         .orElseGet(() -> new CourseRefView(row.courseId(), null, null));
     }
 
-    private static PermissionsView permissionsOf(QuestionRow row, Actor actorOrNull, boolean managesCourse) {
+    private static PermissionsView permissionsOf(QuestionRow row, Long effectiveAcceptedId, Actor actorOrNull,
+                                                 boolean managesCourse) {
         if (actorOrNull == null) {
             return PermissionsView.NONE;
         }
         boolean author = actorOrNull.is(row.authorId());
         boolean canEdit = author || managesCourse;
         boolean canDelete = managesCourse || (author && row.answerCount() == 0);
-        boolean canAccept = (author || managesCourse) && row.acceptedAnswerId() == null;
+        // 用有效采纳 ID 而非库里的原始值：脏数据指向已删回答时仍允许重新采纳。
+        boolean canAccept = (author || managesCourse) && effectiveAcceptedId == null;
         return new PermissionsView(canEdit, canDelete, canAccept, managesCourse);
     }
 
