@@ -2,6 +2,7 @@ package com.campusoverflow.qa.application;
 
 import com.campusoverflow.qa.api.QaQueryApi;
 import com.campusoverflow.qa.api.QuestionRef;
+import com.campusoverflow.qa.domain.AnswerRepository;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import java.util.Optional;
@@ -20,14 +21,27 @@ import org.springframework.transaction.annotation.Transactional;
 public class QaQueryApiImpl implements QaQueryApi {
 
     private final QuestionRepository questions;
+    private final AnswerRepository answers;
 
-    public QaQueryApiImpl(QuestionRepository questions) {
+    public QaQueryApiImpl(QuestionRepository questions, AnswerRepository answers) {
         this.questions = questions;
+        this.answers = answers;
     }
 
     @Override
     public Optional<QuestionRef> findQuestion(long questionId) {
         return questions.findById(questionId).map(QaQueryApiImpl::toRef);
+    }
+
+    @Override
+    public boolean hasVisibleAcceptedAnswer(long questionId) {
+        return questions.findById(questionId)
+                .filter(question -> !question.isDeleted())
+                .map(Question::acceptedAnswerId)
+                .flatMap(acceptedId -> answers.findById(acceptedId)
+                        .filter(answer -> !answer.isDeleted() && answer.questionId() == questionId)
+                        .map(answer -> true))
+                .orElse(false);
     }
 
     private static QuestionRef toRef(Question question) {

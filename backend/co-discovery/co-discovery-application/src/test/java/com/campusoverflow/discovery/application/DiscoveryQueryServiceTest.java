@@ -118,6 +118,41 @@ class DiscoveryQueryServiceTest {
     }
 
     @Test
+    void relatedRejectsCourseSourceForOutsider() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity().withUser(3, "路人", Role.STUDENT), new CourseQuestionQa());
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.related(99, 5, outsider))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void relatedAllowsCourseSourceForMember() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity().withUser(3, "课程学生", Role.STUDENT).withCourseMember(3, 100L),
+                new CourseQuestionQa());
+        Actor member = new Actor(3, "课程学生", Role.STUDENT);
+
+        assertThat(service.related(99, 5, member)).isEmpty();
+    }
+
+    @Test
+    void relatedRejectsCourseSourceForAnonymous() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity(), new CourseQuestionQa());
+
+        assertThatThrownBy(() -> service.related(99, 5))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
     void relatedRanksByJaccardAndMapsSimilarity() {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> PageResult.empty(1, 20),
@@ -191,7 +226,14 @@ class DiscoveryQueryServiceTest {
     private static final class ExistingQuestionQa implements QaQueryApi {
         @Override
         public Optional<QuestionRef> findQuestion(long questionId) {
-            return Optional.of(new QuestionRef(questionId, 1L, 100L, "相关问题源问题", null, false));
+            return Optional.of(new QuestionRef(questionId, 1L, null, "公开的相关问题源问题", null, false));
+        }
+    }
+
+    private static final class CourseQuestionQa implements QaQueryApi {
+        @Override
+        public Optional<QuestionRef> findQuestion(long questionId) {
+            return Optional.of(new QuestionRef(questionId, 1L, 100L, "课程问题", null, false));
         }
     }
 

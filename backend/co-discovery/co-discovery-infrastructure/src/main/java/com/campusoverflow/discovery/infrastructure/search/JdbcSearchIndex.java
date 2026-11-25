@@ -105,7 +105,7 @@ public class JdbcSearchIndex implements SearchIndex {
                 WHERE t.tag IN (:tags) AND t.question_id <> :id AND d.deleted = FALSE
                 """);
         MapSqlParameterSource p = new MapSqlParameterSource().addValue("tags", tags).addValue("id", questionId)
-                .addValue("limit", limit);
+                .addValue("limit", limit).addValue("ownTagCount", tags.size());
         if (!allCourses) {
             sql.append(" AND (d.course_id IS NULL");
             if (visibleCourseIds != null && !visibleCourseIds.isEmpty()) {
@@ -116,7 +116,9 @@ public class JdbcSearchIndex implements SearchIndex {
         }
         sql.append("""
                  GROUP BY d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted
-                 ORDER BY shared DESC, d.score DESC
+                 ORDER BY CAST(COUNT(*) AS DECIMAL(10, 6))
+                              / NULLIF(:ownTagCount + d.tag_count - COUNT(*), 0) DESC,
+                          d.score DESC
                  LIMIT :limit
                 """);
         return jdbc.query(sql.toString(), p,
