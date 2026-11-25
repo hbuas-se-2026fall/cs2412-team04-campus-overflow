@@ -30,10 +30,29 @@
 | 测试 | `QingcenBountyServiceTest.openRejectsBountyOnPublicQuestion`（公开问题 → REP-1007 且不触碰账户） |
 | 说明 | 教师若确实想悬赏某个公开问题，应先把问题关联课程——当前编辑接口不支持改课程，属 **v1.1 候选**（届时在 Issue 中登记） |
 
+## 决策 3（审计 W-06）：公开问题的管理权 = **作者本人 + ADMIN**
+
+| 项 | 内容 |
+| --- | --- |
+| 冲突 | `IdentityApiImpl.canManageCourse(userId, null)` 原返回 `role == TEACHER` → **任意全局 TEACHER** 都能编辑/删除他人的公开问题、替他人采纳、教师认证回答（REP-02 只拦了悬赏） |
+| **决策** | 公开问题（未关联课程）没有课程归属，**全局 TEACHER 不再自动获得管理权**；仅 **作者本人**（各聚合的 author 分支放行）与 **ADMIN** 可管理 |
+| 实现 | `IdentityApiImpl.canManageCourse`：`courseId == null` → `return false`（ADMIN 已在上方提前返回 true） |
+| 测试 | 新增 `IdentityApiImplPermissionTest` 4 条：TEACHER 对公开问题 false / ADMIN true / 课程问题按课程内角色 / 非成员 false |
+| 影响面 | `QuestionCommandService.edit/delete`、`AnswerCommandService.accept/endorse/delete` 在公开问题上只允许作者或管理员；qa 模块 45 条测试全绿 |
+
+## 决策 4（审计 W-07 / PRIV-01）：课程成员名单 = **仅登录可读**
+
+| 项 | 内容 |
+| --- | --- |
+| 问题 | `GET /api/v1/courses/*/members` 在 `SecurityConfig` 里 `permitAll`，匿名可拿到 `userId/displayName/role` |
+| **决策** | 属校内人员信息，**不对匿名开放**；仅登录用户可读（v1.0 不做更细的"仅课程成员"限制） |
+| 实现 | `SecurityConfig` 从 `permitAll` 列表移除 `/api/v1/courses/*/members`，落到 `anyRequest().authenticated()` |
+| 影响 | 前端无匿名调用（已 grep 确认无引用）；匿名访问该端点将返回 401 |
+
 ## 执行与复核
 
 | 人 | 事项 | 状态 |
 | --- | --- | --- |
-| 魏志国（PO） | 两项裁决 + REP-02 代码/测试 + 文档同步；**W-01 复核后修订决策 1** | ✅ 已完成（2026-11-25） |
-| 青岑（QA） | 审计提出方，复核两项裁决与实现是否一致 | ✅ 已复核并 APPROVED（PR #222）；W-01 复核意见已并入本修订 |
-| 陈明哲 / 刘俊琒 | `SecurityConfig` 维持现状即符合决策 1（`permitAll` 只放行到控制器，服务层做课程成员校验） | — |
+| 魏志国（PO） | 四项裁决 + REP-02/W-06 代码与测试 + W-07 安全配置 + 文档同步；**W-01 复核后修订决策 1** | ✅ 已完成（2026-11-25） |
+| 青岑（QA） | 审计提出方，复核裁决与实现是否一致 | ✅ 决策 1/2 已复核并 APPROVED（PR #222）；决策 3/4 待其复核 |
+| 陈明哲 / 刘俊琒 | 决策 1：`SecurityConfig` 的 `permitAll` 只放行到控制器、服务层做课程成员校验，维持现状即符合；决策 4 已由 PO 直接改配置，请 SM 复核 | — |

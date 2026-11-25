@@ -66,7 +66,10 @@ public class IdentityApiImpl implements IdentityApi {
             return true;
         }
         if (courseId == null) {
-            return role == Role.TEACHER;
+            // PO 决策（2026-11-25，审计 W-06）：公开问题（未关联课程）没有课程归属，
+            // 全局 TEACHER 不再自动获得管理权（否则任何教师都能编辑/删除他人的公开问题、
+            // 替他人采纳或认证）。公开问题仅：作者本人（由各聚合的 author 分支放行）或 ADMIN。
+            return false;
         }
         return courses.findMember(courseId, userId).map(m -> m.role().canManage()).orElse(false);
     }
