@@ -1,6 +1,8 @@
 package com.campusoverflow.qa.application.command;
 
+import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.qa.api.event.VoteCastEvent;
+import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.AnswerRepository;
 import com.campusoverflow.qa.domain.Question;
@@ -9,6 +11,7 @@ import com.campusoverflow.qa.domain.TargetType;
 import com.campusoverflow.qa.domain.Vote;
 import com.campusoverflow.qa.domain.VoteRepository;
 import com.campusoverflow.shared.domain.BusinessRuleException;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -29,22 +32,27 @@ public class VoteService {
     private final VoteRepository votes;
     private final QuestionRepository questions;
     private final AnswerRepository answers;
+    private final IdentityApi identity;
     private final IntegrationEventPublisher events;
+    private final QuestionListCache listCache;
     private final Clock clock;
 
     public VoteService(VoteRepository votes, QuestionRepository questions, AnswerRepository answers,
-                       IntegrationEventPublisher events, Clock clock) {
+                       IdentityApi identity, IntegrationEventPublisher events, QuestionListCache listCache,
+                       Clock clock) {
         this.votes = votes;
         this.questions = questions;
         this.answers = answers;
+        this.identity = identity;
         this.events = events;
+        this.listCache = listCache;
         this.clock = clock;
     }
 
     public record VoteResult(int myVote, int scoreDelta) {
     }
 
-    private record Target(long authorId, long questionId) {
+    private record Target(long authorId, long questionId, Long courseId) {
     }
 
     @Transactional
@@ -54,6 +62,7 @@ public class VoteService {
         }
 
         Target target = resolve(type, targetId);
+        requireCanParticipate(target.courseId(), actor);
         if (actor.userId() == target.authorId()) {
             throw new BusinessRuleException("QA-1015", "不能给自己的内容投票");
         }
@@ -79,6 +88,8 @@ public class VoteService {
 
         if (type == TargetType.QUESTION) {
             questions.adjustScore(targetId, delta);
+            // 列表摘要包含问题得分；投票后必须作废旧缓存，否则最多 75 秒内仍显示旧票数。
+            listCache.invalidateAll();
         } else {
             answers.adjustScore(targetId, delta);
         }
@@ -93,14 +104,25 @@ public class VoteService {
             Question question = questions.findById(targetId)
                     .filter(q -> !q.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
-            return new Target(question.authorId(), question.id());
+            return new Target(question.authorId(), question.id(), question.courseId());
         }
         if (type == TargetType.ANSWER) {
             Answer answer = answers.findById(targetId)
                     .filter(a -> !a.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
-            return new Target(answer.authorId(), answer.questionId());
+            Question question = questions.findById(answer.questionId())
+                    .filter(q -> !q.isDeleted())
+                    .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+            return new Target(answer.authorId(), answer.questionId(), question.courseId());
         }
         throw new BusinessRuleException("QA-1014", "不支持的投票目标");
+    }
+
+    /** 课程问题及其回答只允许课程成员投票；公开问题不受限制。 */
+    private void requireCanParticipate(Long courseId, Actor actor) {
+        if (courseId == null || actor.isAdmin() || identity.isCourseMember(actor.userId(), courseId)) {
+            return;
+        }
+        throw new ForbiddenException("QA-3007", "只有课程成员可以参与该课程的问题");
     }
 }

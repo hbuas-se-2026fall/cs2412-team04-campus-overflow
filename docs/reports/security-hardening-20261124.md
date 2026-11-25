@@ -1,7 +1,7 @@
 # 安全与质量审计修复记录（2026-11-24）
 
 > 对应组员审计：SEC-01/02、SEC-03、SEC-04、QUAL-01、DOC-01、QA-02、QA-03、DOC-02、CACHE-02、PRIV-01、LEADER-01
-> 分支：`fix/security-hardening-1124`；目标：develop（main 后续同步）
+> 分支：`fix/security-hardening-1124`（PR #209 → #210）；状态：main 已同步安全修复，后续 #216 修复 QA-03。
 
 ## 一、已修复
 
@@ -46,14 +46,16 @@
 - `final/README.md`：03-quality 状态改为“已完成（2026-11-24 口径；Sonar Gate 仍 Failed 1 Bug）”；
 - `release/v1.0.0.md`：已知问题补 `QUAL-01`；
 - 文档中的 `@Size(max=254)` 改为真实的 **100**（注册 DTO 与领域 `checkEmail` 均为 100）；
-- `AdminUserController.CreateStaffRequest` 补 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50）。
+- `AdminUserController.CreateStaffRequest` 已补全 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50），接口层直接 400，不再只靠领域兜底。
 
 ### CACHE-02 浏览量落库失败丢失
 
-`RedisViewCounter.flush()`：
+`RedisViewCounter.flush()`（PR #213 最终实现）：
 
-- 解析失败的条目记录日志并丢弃，不再让整批走异常路径；
-- JDBC `batchUpdate` 失败时，把本批增量 **HINCRBY 回 PENDING** 后再删除临时 key，下个周期可重试，不再永久丢失。
+- 用固定 `FLUSHING` key 原子摘出当前批次；
+- 数据库批次写入使用事务，避免部分成功、部分失败；
+- 失败时保留 `FLUSHING`，下一轮 `recoverFailedBatch()` 合并回 PENDING 后重试；
+- 解析失败的条目记录日志并丢弃，不再让整批走异常路径。
 
 ### LEADER-01 排行榜三 ZSET 部分失败重复计分
 
@@ -64,10 +66,9 @@
 
 ### QA-02 课程问题可见性冲突
 
-- `US-04.feature` / `sprint-1-demo.md` 期望「未加入课程 → 无权限」；
-- 但 `SecurityConfig` 允许匿名 GET questions，`QuestionQueryService` 没有成员校验，`s1-states/README` 也承认「未加入账号能读全文」。
-
-→ 需要 PO 明确：**成员可见** 还是 **公开可见**。若成员可见，需要补 detail/list/search/comment/vote 的成员校验与 actor 维度缓存；若公开，需要改 US-04、演示脚本和截图说明。两套口径不能并存。
+- PO 决策：**保持公开可见**（公开问题允许匿名读）；因此没有把 `SecurityConfig` 的匿名 GET 收回，也没有新增成员校验；
+- 当前代码与公开决策一致：`GET /api/v1/questions/**`、search 仍允许匿名；US-04 / 演示脚本中「未加入课程 → 无权限」的旧表述应以公开决策为准修正；
+- 这是产品取舍，不是代码缺陷；若后续改回成员可见，需要另开需求并补 list/detail/search/comment/vote 校验与 viewer 缓存键。
 
 ### PRIV-01 课程成员名单匿名可读
 
@@ -75,7 +76,7 @@
 
 ### QA-03 删除问题与回答并发窗口
 
-`Question.softDelete` 用内存 `answerCount` 判空，ADR-008 已记录「删除与回答并发可能造成问题已删、回答已落库」。本次未改（需按 ADR 的 `UPDATE ... WHERE answer_count = 0` 条件更新改造 domain/repository 与测试），继续登记为已知风险；建议 v1.1 首 PR 处理。
+已改为作者删除时使用数据库条件 `UPDATE ... WHERE deleted_at IS NULL AND answer_count = 0`；管理者删除保持原逻辑。回归测试覆盖并发回答场景（PR #216 已合入）。
 
 ## 三、验证
 
@@ -90,5 +91,5 @@
 
 1. CI 全量 + Testcontainers；若通过，合并 develop 并同步 main；
 2. 在 SonarQube 机器复扫，确认 `S5998` 归零、Gate PASSED，补 `lab7-sonar-rescan` 截图；
-3. PO 对 QA-02、PRIV-01 拍板；QA-03 登记 v1.1；
+3. PO 对 PRIV-01（成员名单是否公开）拍板；QA-02 已按公开决策关闭、QA-03 已由 #216 修复；
 4. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。

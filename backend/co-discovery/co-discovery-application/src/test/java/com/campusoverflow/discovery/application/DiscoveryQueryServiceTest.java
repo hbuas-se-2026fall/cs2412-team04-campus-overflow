@@ -1,6 +1,7 @@
 package com.campusoverflow.discovery.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchHit;
@@ -12,14 +13,19 @@ import com.campusoverflow.discovery.domain.search.SearchSort;
 import com.campusoverflow.identity.api.CourseSummary;
 import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.identity.api.UserSummary;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
+import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class DiscoveryQueryServiceTest {
@@ -36,7 +42,7 @@ class DiscoveryQueryServiceTest {
                 new StubIdentity().withUser(3, "小红", Role.STUDENT));
 
         PageResult<SearchResultView> result = service.search(new SearchQuery("红黑树", null, null,
-                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20)));
+                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20), false, Set.of()));
 
         assertThat(result.total()).isEqualTo(1);
         SearchResultView view = result.items().get(0);
@@ -50,15 +56,64 @@ class DiscoveryQueryServiceTest {
     }
 
     @Test
+    void searchRejectsNonMemberCourseFilter() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(),
+                new StubIdentity().withUser(3, "小红", Role.STUDENT));
+        Actor outsider = new Actor(3, "小红", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.search(new SearchQuery("红黑树", 100L, null,
+                SearchSort.RELEVANCE, false, false, new PageRequest(1, 20), false, Set.of()), outsider))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void searchPassesMemberCourseScopeToSearchPort() {
+        AtomicReference<SearchQuery> captured = new AtomicReference<>();
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> {
+                    captured.set(query);
+                    return PageResult.empty(1, 20);
+                },
+                new EmptyIndex(),
+                new StubIdentity().withUser(3, "小红", Role.STUDENT).withCourseMember(3, 200L));
+        Actor member = new Actor(3, "小红", Role.STUDENT);
+
+        service.search(new SearchQuery("红黑树", null, null, SearchSort.RELEVANCE, false, false,
+                new PageRequest(1, 20), false, Set.of()), member);
+
+        assertThat(captured.get().allCourses()).isFalse();
+        assertThat(captured.get().visibleCourseIds()).containsExactly(200L);
+    }
+
+    @Test
+    void relatedFiltersCourseCandidatesForOutsider() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(
+                        List.of("java"),
+                        List.of(
+                                new SearchIndex.RelatedCandidate(1, "公开问题", null, 1, 2, 10, 1, false),
+                                new SearchIndex.RelatedCandidate(2, "课程问题", 100L, 1, 2, 5, 1, false))),
+                new StubIdentity().withUser(3, "路人", Role.STUDENT));
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        List<RelatedQuestionView> result = service.related(99, 10, outsider);
+
+        assertThat(result).extracting(RelatedQuestionView::id).containsExactly(1L);
+    }
+
+    @Test
     void relatedRanksByJaccardAndMapsSimilarity() {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> PageResult.empty(1, 20),
                 new EmptyIndex(
                         List.of("java", "spring"),
                         List.of(
-                                new SearchIndex.RelatedCandidate(1, "A", 1, 4, 10, 1, false),
-                                new SearchIndex.RelatedCandidate(2, "B", 2, 3, 1, 4, true),
-                                new SearchIndex.RelatedCandidate(3, "C", 2, 2, 5, 0, false))),
+                                new SearchIndex.RelatedCandidate(1, "A", null, 1, 4, 10, 1, false),
+                                new SearchIndex.RelatedCandidate(2, "B", null, 2, 3, 1, 4, true),
+                                new SearchIndex.RelatedCandidate(3, "C", null, 2, 2, 5, 0, false))),
                 new StubIdentity());
 
         List<RelatedQuestionView> result = service.related(99, 2);
@@ -111,15 +166,22 @@ class DiscoveryQueryServiceTest {
         @Override public void adjustAnswerCount(long questionId, int delta, Instant at) { }
         @Override public void adjustScore(long questionId, int delta) { }
         @Override public void markAccepted(long questionId, Instant at) { }
+        @Override public void clearAccepted(long questionId, Instant at) { }
         @Override public void setBountyOpen(long questionId, boolean open) { }
         @Override public void markDeleted(long questionId) { }
     }
 
     private static final class StubIdentity implements IdentityApi {
         private final Map<Long, UserSummary> users = new java.util.HashMap<>();
+        private final Set<Long> memberships = new HashSet<>();
 
         private StubIdentity withUser(long id, String name, Role role) {
             users.put(id, new UserSummary(id, name, role, true, "计算机工程学院"));
+            return this;
+        }
+
+        private StubIdentity withCourseMember(long userId, long courseId) {
+            memberships.add(courseId);
             return this;
         }
 
@@ -131,5 +193,7 @@ class DiscoveryQueryServiceTest {
         @Override public Optional<UserSummary> findByDisplayName(String displayName) { return Optional.empty(); }
         @Override public Optional<CourseSummary> findCourse(long courseId) { return Optional.empty(); }
         @Override public boolean canManageCourse(long userId, Long courseId) { return false; }
+        @Override public boolean isCourseMember(long userId, long courseId) { return memberships.contains(courseId); }
+        @Override public Set<Long> courseIdsOfUser(long userId) { return Set.copyOf(memberships); }
     }
 }

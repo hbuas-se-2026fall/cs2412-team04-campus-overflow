@@ -48,6 +48,7 @@ class QuestionCommandServiceTest {
             .withUser(1, "小明", Role.STUDENT)
             .withUser(2, "小红", Role.STUDENT)
             .withUser(9, "王老师", Role.TEACHER)
+            .withCourseMember(1, COURSE_ID)
             .withCourseManager(9);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
@@ -102,6 +103,19 @@ class QuestionCommandServiceTest {
 
         assertThat(cache.invalidations).isEqualTo(1);
         assertThat(audit.actions).containsExactly("QUESTION_POSTED");
+    }
+
+    @Test
+    @DisplayName("发布：未加入课程的学生不能向该课程发帖")
+    void nonMemberCannotPostInCourse() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.post(outsider, command("未加入课程还想发课程问题",
+                "这段正文长度超过二十个字符，用来验证课程成员校验。", List.of("java"))))
+                .isInstanceOf(ForbiddenException.class);
+
+        assertThat(questions.saves).isZero();
+        assertThat(events.published).isEmpty();
     }
 
     @Test
@@ -212,6 +226,20 @@ class QuestionCommandServiceTest {
         assertThat(event.questionId()).isEqualTo(id);
         assertThat(cache.invalidations).isEqualTo(2);
         assertThat(audit.actions).contains("QUESTION_DELETED");
+    }
+
+    @Test
+    @DisplayName("删除：作者路径用数据库条件原子检查回答数，避免快照竞态")
+    void authorDeleteUsesAtomicAnswerCountGate() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+        // 模拟“读取问题快照后、删除提交前”并发落下的回答。
+        questions.answerCountDeltas.put(id, 1);
+
+        assertThatThrownBy(() -> service.delete(ming, id))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("已有回答");
+        assertThat(questions.findById(id).orElseThrow().isDeleted()).isFalse();
     }
 
     @Test

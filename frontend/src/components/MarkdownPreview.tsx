@@ -56,7 +56,10 @@ class PreviewRenderer extends Renderer {
   override link({ href, title, tokens }: Tokens.Link): string {
     const text = this.parser.parseInline(tokens ?? []);
     const titleAttr = title ? ` title="${escapeAttr(title)}"` : '';
-    return `<a href="${escapeAttr(href ?? '#')}" target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
+    const safe = sanitizeHref(href);
+    // FE-07：只放行 http/https/mailto 与相对路径，javascript:/data: 等一律去掉 href
+    const hrefAttr = safe ? ` href="${escapeAttr(safe)}"` : '';
+    return `<a${hrefAttr} target="_blank" rel="noopener noreferrer"${titleAttr}>${text}</a>`;
   }
 }
 
@@ -69,6 +72,19 @@ const marked = new Marked({
 
 function escapeAttr(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+/** 链接白名单：防止 markdown 里的 javascript:/data: 等伪协议（FE-07） */
+function sanitizeHref(href?: string | null): string {
+  const value = (href ?? '').trim();
+  if (value === '') {
+    return '';
+  }
+  // 相对路径与页内锚点
+  if (!/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)) {
+    return value;
+  }
+  return /^(https?|mailto):/i.test(value) ? value : '';
 }
 
 /** 把 Markdown 源码转成 HTML 字符串（已做 HTML 转义与高亮） */

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { errorMessage } from '../errors';
@@ -18,6 +18,12 @@ export function QuestionListPage() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  // 重试计数器：state 变化才会重新触发下面的 effect（FE-05：setPage(p => p) 不会触发）
+  const [reloadKey, setReloadKey] = useState(0);
+  // 从 URL 读取 courseId：CourseCard 的「查看课程问题」会带 ?courseId=xx 跳转（FE-02）
+  const [searchParams] = useSearchParams();
+  const courseIdParam = searchParams.get('courseId');
+  const courseId = courseIdParam ? Number(courseIdParam) : undefined;
 
   useEffect(() => {
     api
@@ -37,8 +43,8 @@ export function QuestionListPage() {
     setError('');
     const searching = keyword.trim() !== '' || activeTag || unanswered || sort !== 'newest';
     const promise = searching
-      ? api.search(keyword.trim(), { tag: activeTag, sort, unanswered, page })
-      : api.questions(page, undefined, PAGE_SIZE);
+      ? api.search(keyword.trim(), { tag: activeTag, sort, unanswered, page, courseId })
+      : api.questions(page, courseId, PAGE_SIZE);
     promise
       .then((r) => {
         if (!cancelled) {
@@ -55,7 +61,7 @@ export function QuestionListPage() {
     return () => {
       cancelled = true;
     };
-  }, [keyword, activeTag, sort, unanswered, page]);
+  }, [keyword, activeTag, sort, unanswered, page, courseId, reloadKey]);
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.size)) : 1;
   const busy = loading || (keyword.trim() !== '' && data === null);
@@ -95,7 +101,7 @@ export function QuestionListPage() {
         {error && (
           <div>
             <p className="error">列表加载失败：{error}</p>
-            <button onClick={() => setPage((p) => p)}>重试</button>
+            <button onClick={() => setReloadKey((k) => k + 1)}>重试</button>
           </div>
         )}
 
@@ -122,7 +128,7 @@ export function QuestionListPage() {
                   <span className={q.accepted ? 'accepted' : ''}>
                     <b>{q.answerCount}</b> 回答
                   </span>
-                  <span>{q.viewCount} 浏览</span>
+                  {typeof q.viewCount === 'number' && <span>{q.viewCount} 浏览</span>}
                 </div>
                 <div className="qmain">
                   <Link className="qtitle" to={`/questions/${q.id}`}>

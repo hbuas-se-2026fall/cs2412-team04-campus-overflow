@@ -36,6 +36,9 @@
 
 ## 交付检查（对应指导书 9.4）
 
+> 口径说明：`v1.0.0` tag 内的 `docs/final` 是发布时快照（当时只有 2 份个人总结、没有 5 分钟视频/四域覆盖率证据）；下面的 ✅ 指 **main 最新的最终归档**，tag 本身不包含后期补齐的材料。
+
+
 - [x] main 上的 `v1.0.0` 与完整提交历史（tag `v1.0.0` → `10925c7`）
 - [x] GitHub Release（[v1.0.0](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0)，含 Release Notes 与部署说明）
 - [x] `docs/ddd/`、`docs/adr/`（S3 已就位）

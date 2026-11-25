@@ -3,6 +3,8 @@ package com.campusoverflow.discovery.infrastructure.search;
 import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchIndex;
 import com.campusoverflow.shared.util.UtcTime;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -67,6 +69,14 @@ public class JdbcSearchIndex implements SearchIndex {
     }
 
     @Override
+    public void clearAccepted(long questionId, Instant at) {
+        jdbc.update("""
+                UPDATE dis_search_doc SET accepted = FALSE, last_activity_at = GREATEST(last_activity_at, :at)
+                WHERE question_id = :id
+                """, new MapSqlParameterSource().addValue("id", questionId).addValue("at", UtcTime.toDb(at)));
+    }
+
+    @Override
     public void setBountyOpen(long questionId, boolean open) {
         jdbc.update("UPDATE dis_search_doc SET bounty_open = :open WHERE question_id = :id",
                 new MapSqlParameterSource().addValue("id", questionId).addValue("open", open));
@@ -87,18 +97,23 @@ public class JdbcSearchIndex implements SearchIndex {
     @Override
     public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, int limit) {
         return jdbc.query("""
-                        SELECT d.question_id, d.title, d.tag_count, d.score, d.answer_count, d.accepted,
+                        SELECT d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted,
                                COUNT(*) AS shared
                         FROM dis_question_tag t JOIN dis_search_doc d ON d.question_id = t.question_id
                         WHERE t.tag IN (:tags) AND t.question_id <> :id AND d.deleted = FALSE
-                        GROUP BY d.question_id, d.title, d.tag_count, d.score, d.answer_count, d.accepted
+                        GROUP BY d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted
                         ORDER BY shared DESC, d.score DESC
                         LIMIT :limit
                         """, new MapSqlParameterSource().addValue("tags", tags).addValue("id", questionId)
                         .addValue("limit", limit),
-                (rs, i) -> new RelatedCandidate(rs.getLong("question_id"), rs.getString("title"), rs.getInt("shared"),
-                        rs.getInt("tag_count"), rs.getInt("score"), rs.getInt("answer_count"),
-                        rs.getBoolean("accepted")));
+                (rs, i) -> new RelatedCandidate(rs.getLong("question_id"), rs.getString("title"),
+                        nullableLong(rs, "course_id"), rs.getInt("shared"), rs.getInt("tag_count"),
+                        rs.getInt("score"), rs.getInt("answer_count"), rs.getBoolean("accepted")));
+    }
+
+    private static Long nullableLong(ResultSet rs, String column) throws SQLException {
+        long value = rs.getLong(column);
+        return rs.wasNull() ? null : value;
     }
 
     private void replaceTags(long questionId, List<String> tags) {

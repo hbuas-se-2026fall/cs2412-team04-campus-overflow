@@ -15,9 +15,11 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -38,10 +40,22 @@ public class JdbcQaReadModel implements QaReadModel {
     }
 
     @Override
-    public PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page) {
-        String where = " WHERE deleted_at IS NULL" + (courseId != null ? " AND course_id = :courseId" : "");
+    public PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses,
+                                                  Collection<Long> visibleCourseIds, PageRequest page) {
+        StringBuilder where = new StringBuilder(" WHERE deleted_at IS NULL");
         MapSqlParameterSource p = new MapSqlParameterSource()
-                .addValue("courseId", courseId).addValue("limit", page.size()).addValue("offset", page.offset());
+                .addValue("limit", page.size()).addValue("offset", page.offset());
+        if (courseId != null) {
+            where.append(" AND course_id = :courseId");
+            p.addValue("courseId", courseId);
+        } else if (!allCourses) {
+            where.append(" AND (course_id IS NULL");
+            if (visibleCourseIds != null && !visibleCourseIds.isEmpty()) {
+                where.append(" OR course_id IN (:visibleCourseIds)");
+                p.addValue("visibleCourseIds", visibleCourseIds);
+            }
+            where.append(")");
+        }
         Long total = jdbc.queryForObject("SELECT COUNT(*) FROM qa_question" + where, p, Long.class);
         List<QuestionRow> rows = jdbc.query("SELECT " + QUESTION_COLUMNS.formatted("LEFT(body, 600)")
                 + " FROM qa_question" + where + " ORDER BY created_at DESC, id DESC LIMIT :limit OFFSET :offset", p,
@@ -66,6 +80,15 @@ public class JdbcQaReadModel implements QaReadModel {
                 (rs, i) -> new AnswerRow(rs.getLong("id"), rs.getLong("author_id"), rs.getString("body"),
                         rs.getInt("score"), nullableLong(rs, "endorsed_by"), instant(rs, "created_at"),
                         instant(rs, "updated_at")));
+    }
+
+    @Override
+    public Set<Long> findVisibleAnswerIds(Collection<Long> answerIds) {
+        if (answerIds == null || answerIds.isEmpty()) {
+            return Set.of();
+        }
+        return new HashSet<>(jdbc.query("SELECT id FROM qa_answer WHERE deleted_at IS NULL AND id IN (:ids)",
+                new MapSqlParameterSource("ids", answerIds), (rs, i) -> rs.getLong("id")));
     }
 
     @Override

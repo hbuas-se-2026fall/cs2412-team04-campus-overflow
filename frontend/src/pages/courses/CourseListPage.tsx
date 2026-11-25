@@ -10,7 +10,7 @@ import { CourseCard } from './CourseCard';
  * 四种状态都要有界面：加载中 / 空 / 出错可重试 / 正常列表。
  */
 export function CourseListPage() {
-  const { me, loading: authLoading } = useAuth();
+  const { me, loading: authLoading, refresh } = useAuth();
   const [courses, setCourses] = useState<Course[] | null>(null);
   const [error, setError] = useState('');
 
@@ -31,6 +31,9 @@ export function CourseListPage() {
     setCourses(
       (prev) => prev?.map((c) => (c.id === courseId && !c.myRole ? { ...c, myRole: 'STUDENT' } : c)) ?? prev,
     );
+    // FE-04：AskPage 读的是 AuthProvider 里的 me.courses，只改本页 courses 不够，
+    // 否则新用户加完第一门课去提问仍被判“没有课程”。
+    void refresh();
   };
 
   return (

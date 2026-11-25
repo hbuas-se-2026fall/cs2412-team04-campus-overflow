@@ -87,7 +87,7 @@ jobs:
           node-version: "20"
       - name: 安装依赖
         working-directory: frontend
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund   # BUILD-01：与 Dockerfile 统一用 npm ci
       - name: ESLint
         working-directory: frontend
         run: npm run lint

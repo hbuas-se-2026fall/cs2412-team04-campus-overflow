@@ -13,6 +13,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryVotes;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingAudit;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingEvents;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
+import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.TargetType;
@@ -43,7 +44,8 @@ class AnswerAndVoteServiceTest {
     private final CountingCache cache = new CountingCache();
     private final RecordingAudit audit = new RecordingAudit();
     private final StubIdentity identity = new StubIdentity()
-            .withUser(1, "小明", Role.STUDENT).withUser(2, "小红", Role.STUDENT).withUser(9, "王老师", Role.TEACHER);
+            .withUser(1, "小明", Role.STUDENT).withUser(2, "小红", Role.STUDENT).withUser(9, "王老师", Role.TEACHER)
+            .withCourseMember(1, 100L).withCourseMember(2, 100L).withCourseManager(9);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
     private final Actor hong = new Actor(2, "小红", Role.STUDENT);
@@ -55,7 +57,7 @@ class AnswerAndVoteServiceTest {
     @BeforeEach
     void setUp() {
         answerService = new AnswerCommandService(questions, answers, identity, events, cache, audit, clock);
-        voteService = new VoteService(votes, questions, answers, events, clock);
+        voteService = new VoteService(votes, questions, answers, identity, events, cache, clock);
         Question q = questions.save(Question.post(ming.userId(), 100L, new Title("红黑树插入后为什么必须旋转？"),
                 MarkdownBody.ofQuestion("变色为什么不够？希望有直观解释，最好能给出一个反例。"),
                 Tags.of(List.of("数据结构", "红黑树")), NOW));
@@ -93,6 +95,50 @@ class AnswerAndVoteServiceTest {
     }
 
     @Test
+    @DisplayName("管理者删除已采纳回答后释放采纳关系，问题可以重新采纳")
+    void deletingAcceptedAnswerReleasesQuestionAcceptance() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+        answerService.accept(ming, questionId, answerId);
+
+        answerService.delete(new Actor(9, "王老师", Role.TEACHER), answerId);
+
+        Question question = questions.findById(questionId).orElseThrow();
+        assertThat(question.acceptedAnswerId()).isNull();
+        assertThat(question.isAccepted(answerId)).isFalse();
+    }
+
+    @Test
+    @DisplayName("脏数据→accept 成功：采纳 ID 指向已删回答时先清空再采纳，不抛 QA-2002")
+    void acceptToleratesStaleAcceptedAnswerId() {
+        long staleId = answerService.submit(hong, questionId, "这条回答随后被删除，但问题仍记着它的采纳 ID。");
+        answerService.accept(ming, questionId, staleId);
+        Answer stale = answers.findById(staleId).orElseThrow();
+        stale.softDelete(new Actor(9, "王老师", Role.TEACHER), true, true, NOW);
+        answers.save(stale);
+        // 刻意不走 answerService.delete()：它会清空采纳关系；这里模拟修复前遗留的脏数据。
+
+        long freshId = answerService.submit(hong, questionId, "新的回答可以被正常采纳。");
+
+        answerService.accept(ming, questionId, freshId);
+
+        Question question = questions.findById(questionId).orElseThrow();
+        assertThat(question.acceptedAnswerId()).isEqualTo(freshId);
+        assertThat(events.ofType(AnswerAcceptedEvent.class)).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("课程问题的回答和投票要求课程成员身份")
+    void nonMemberCannotAnswerOrVoteInCourse() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> answerService.submit(outsider, questionId,
+                "这段回答本身长度足够，但提交者没有加入该课程。"))
+                .isInstanceOf(ForbiddenException.class);
+        assertThatThrownBy(() -> voteService.cast(outsider, TargetType.QUESTION, questionId, 1))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
     @DisplayName("投票：改投时按“新值 − 旧值”计算增量，事件携带新旧值供声誉幂等结算")
     void changingVoteProducesCorrectDelta() {
         long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
@@ -113,5 +159,13 @@ class AnswerAndVoteServiceTest {
     void cannotVoteOnOwnContent() {
         assertThatThrownBy(() -> voteService.cast(ming, TargetType.QUESTION, questionId, 1))
                 .isInstanceOf(BusinessRuleException.class);
+    }
+
+    @Test
+    @DisplayName("问题投票后列表缓存失效，避免列表票数停留在旧值")
+    void questionVoteInvalidatesListCache() {
+        voteService.cast(hong, TargetType.QUESTION, questionId, 1);
+
+        assertThat(cache.invalidations).isEqualTo(1);
     }
 }

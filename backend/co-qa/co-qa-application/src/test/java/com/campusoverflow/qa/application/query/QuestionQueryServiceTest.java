@@ -35,7 +35,9 @@ class QuestionQueryServiceTest {
     private final StubIdentity identity = new StubIdentity()
             .withUser(1, "小明", Role.STUDENT)
             .withUser(2, "小红", Role.STUDENT)
-            .withUser(9, "王老师", Role.TEACHER);
+            .withUser(9, "王老师", Role.TEACHER)
+            .withCourseMember(1, COURSE_ID)
+            .withCourseMember(2, COURSE_ID);
 
     private final Actor ming = new Actor(1, "小明", Role.STUDENT);
 
@@ -51,13 +53,17 @@ class QuestionQueryServiceTest {
                 30, NOW, NOW);
     }
 
+    private static QuestionRow publicQuestionRow(long id, long authorId, String title, String body) {
+        return new QuestionRow(id, authorId, null, title, body, List.of("java"), null, 5, 2, 30, NOW, NOW);
+    }
+
     @Test
     @DisplayName("列表：第一次回源并回填缓存，第二次直接命中缓存")
     void listUsesCacheAside() {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？希望有直观解释。", null));
 
-        PageResult<QuestionSummaryView> first = service.list(COURSE_ID, PAGE);
-        PageResult<QuestionSummaryView> second = service.list(COURSE_ID, PAGE);
+        PageResult<QuestionSummaryView> first = service.list(COURSE_ID, PAGE, ming);
+        PageResult<QuestionSummaryView> second = service.list(COURSE_ID, PAGE, ming);
 
         assertThat(first.items()).hasSize(1);
         assertThat(second.items()).hasSize(1);
@@ -71,10 +77,11 @@ class QuestionQueryServiceTest {
     void listMapsAuthorExcerptAndAcceptedFlag() {
         String longBody = "变色为什么不够？".repeat(60);
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", longBody, 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
         readModel.questions.add(questionRow(13L, 404L, "作者已经注销的老问题标题", "这条问题的作者在用户表里查不到。",
                 null));
 
-        PageResult<QuestionSummaryView> page = service.list(COURSE_ID, PAGE);
+        PageResult<QuestionSummaryView> page = service.list(COURSE_ID, PAGE, ming);
 
         QuestionSummaryView first = page.items().get(0);
         assertThat(first.author().displayName()).isEqualTo("小明");
@@ -123,15 +130,102 @@ class QuestionQueryServiceTest {
     }
 
     @Test
-    @DisplayName("详情：未登录时不查投票、权限全为 false")
+    @DisplayName("详情：历史脏数据——accepted_answer_id 指向已删回答时无幽灵采纳标记，且可重新采纳")
+    void detailToleratesStaleAcceptedAnswerId() {
+        // 问题仍记着采纳 50，但 50 已被删除（读模型 deleted_at IS NULL 过滤后不在列表里），
+        // 只剩一条普通回答 51。这是写入侧修复前留下的历史脏数据。
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        // 幽灵标记清除：详情不带采纳 ID，回答也不显示已采纳
+        assertThat(detail.acceptedAnswerId()).isNull();
+        assertThat(detail.answers()).allSatisfy(answer -> assertThat(answer.accepted()).isFalse());
+        // 提问者（ming 是作者）重新获得采纳权限
+        assertThat(detail.permissions().canAccept()).isTrue();
+    }
+
+    @Test
+    @DisplayName("列表：历史脏数据——accepted_answer_id 指向已删回答时不显示已采纳")
+    void listToleratesStaleAcceptedAnswerId() {
+        // 采纳 50 但 50 已被删除，只剩普通回答 51：列表摘要不应再显示“已采纳”。
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
+
+        PageResult<QuestionSummaryView> page = service.list(COURSE_ID, PAGE, ming);
+
+        assertThat(page.items()).hasSize(1);
+        assertThat(page.items().get(0).accepted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("详情：正常采纳不受容错影响——采纳 ID 指向可见回答时仍标记已采纳、不可再采纳")
+    void detailKeepsValidAcceptedAnswer() {
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        assertThat(detail.acceptedAnswerId()).isEqualTo(50L);
+        assertThat(detail.answers().get(0).accepted()).isTrue();
+        assertThat(detail.permissions().canAccept()).isFalse();
+    }
+
+    @Test
+    @DisplayName("列表：未登录只看到公开问题，成员能看到自己课程的问题")
+    void listRespectsCourseVisibility() {
+        readModel.questions.add(publicQuestionRow(11L, 1L, "公开问题", "所有用户都能看到这条公开问题。"));
+        readModel.questions.add(questionRow(12L, 1L, "课程问题", "只有课程成员能看到这条课程问题。", null));
+
+        PageResult<QuestionSummaryView> anonymous = service.list(null, PAGE, null);
+        PageResult<QuestionSummaryView> member = service.list(null, PAGE, ming);
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+        PageResult<QuestionSummaryView> outsiderPage = service.list(null, PAGE, outsider);
+
+        assertThat(anonymous.items()).extracting(QuestionSummaryView::id).containsExactly(11L);
+        assertThat(member.items()).extracting(QuestionSummaryView::id).containsExactly(11L, 12L);
+        assertThat(outsiderPage.items()).extracting(QuestionSummaryView::id).containsExactly(11L);
+    }
+
+    @Test
+    @DisplayName("列表：非成员显式筛选课程时返回 403")
+    void listRejectsNonMemberCourseFilter() {
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.list(COURSE_ID, PAGE, outsider))
+                .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
+    }
+
+    @Test
+    @DisplayName("详情：未登录时只能看公开问题，不查投票、权限全为 false")
     void detailForAnonymous() {
-        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+        readModel.questions.add(publicQuestionRow(12L, 1L, "没有关联课程的公开问题标题", "公开问题对所有用户可见。"));
 
         QuestionDetailView detail = service.detail(12L, null);
 
         assertThat(detail.myVote()).isZero();
         assertThat(detail.permissions()).isEqualTo(PermissionsView.NONE);
         assertThat(readModel.voteLookups).isEmpty();
+    }
+
+    @Test
+    @DisplayName("详情：未登录不能查看课程内问题")
+    void anonymousCannotViewCourseQuestion() {
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+
+        assertThatThrownBy(() -> service.detail(12L, null))
+                .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
+    }
+
+    @Test
+    @DisplayName("详情：未加入课程的学生不能查看课程内问题")
+    void nonMemberCannotViewCourseQuestion() {
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.detail(12L, outsider))
+                .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
     }
 
     @Test

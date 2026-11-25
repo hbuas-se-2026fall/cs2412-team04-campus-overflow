@@ -138,8 +138,19 @@ public class User {
         return v;
     }
 
+    /**
+     * 仅邮箱正则形状校验（不含长度守卫与域名结构校验），包内可见**只为测试**直接覆盖正则本身。
+     *
+     * <p>背景（审计 TEST-01）：原测试用 4005 字符输入试图证明"无灾难性回溯"，但
+     * {@link #checkEmail} 的 {@code length() > 100} 会先拒绝，正则根本不会执行——
+     * 该用例只证明了长度守卫。暴露本方法后，测试可用 ≤100 字符的病态输入直接验证正则行为。
+     */
+    static boolean emailShapeMatches(String email) {
+        return email != null && EMAIL.matcher(email).matches();
+    }
+
     private static String checkEmail(String email) {
-        if (email == null || email.length() > 100 || !EMAIL.matcher(email).matches()) {
+        if (email == null || email.length() > 100 || !emailShapeMatches(email)) {
             throw new BusinessRuleException("ID-1003", "邮箱格式不正确");
         }
         String domain = email.substring(email.indexOf('@') + 1);

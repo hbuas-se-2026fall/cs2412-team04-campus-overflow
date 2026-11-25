@@ -16,6 +16,9 @@ public interface SearchIndex {
 
     void markAccepted(long questionId, Instant at);
 
+    /** 已采纳回答被删除后清除 accepted 标记（只在 Q&A 确认该问题已无采纳答案时调用）。 */
+    void clearAccepted(long questionId, Instant at);
+
     void setBountyOpen(long questionId, boolean open);
 
     void markDeleted(long questionId);
@@ -25,7 +28,7 @@ public interface SearchIndex {
     /** 与给定标签至少共享一个标签的候选问题（排除自身与已删除）。 */
     List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, int limit);
 
-    record RelatedCandidate(long questionId, String title, int sharedTags, int tagCount, int score,
+    record RelatedCandidate(long questionId, String title, Long courseId, int sharedTags, int tagCount, int score,
                             int answerCount, boolean accepted) {
     }
 }

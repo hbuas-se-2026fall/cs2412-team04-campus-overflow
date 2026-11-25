@@ -12,11 +12,13 @@ import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
 import com.campusoverflow.shared.security.Actor;
 import java.time.Clock;
+import java.time.Instant;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class AnswerCommandService {
     @Transactional
     public long submit(Actor actor, long questionId, String body) {
         Question question = loadQuestion(questionId);
+        requireCanParticipate(question, actor);
 
         Answer answer = Answer.submit(question, actor.userId(), MarkdownBody.ofAnswer(body), clock.instant());
         answers.save(answer);
@@ -78,13 +81,21 @@ public class AnswerCommandService {
         Question question = loadQuestion(answer.questionId());
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
+        boolean accepted = question.isAccepted(answer.id());
+        Instant now = clock.instant();
         // 修正 4：最后一个参数改为 Instant
-        answer.softDelete(actor, manages, question.isAccepted(answer.id()), clock.instant());
+        answer.softDelete(actor, manages, accepted, now);
         answers.save(answer);
         questions.adjustAnswerCount(question.id(), -1);
 
+        if (accepted) {
+            // 管理者删除已采纳回答后，释放采纳关系；否则问题会永久卡在“已采纳但无答案”。
+            question.clearAcceptedAnswer(answer.id(), now);
+            questions.save(question);
+        }
+
         events.publish(new ContentDeletedEvent(
-                com.campusoverflow.shared.event.EventIds.next(), clock.instant(),
+                com.campusoverflow.shared.event.EventIds.next(), now,
                 "ANSWER", answerId, question.id()
         ));
 
@@ -97,6 +108,14 @@ public class AnswerCommandService {
         Question question = loadQuestion(questionId);
         Answer answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
+
+        // 历史脏数据容错：写入侧修复前可能留下 accepted_answer_id 指向已删除回答。
+        // 若原采纳回答已不可见，先清空失效 ID 再采纳新回答；清空与采纳落在同一次 save，
+        // 由 @Version 乐观锁保证原子，避免提问者被 QA-2002 永久卡住。
+        Long staleAcceptedId = question.acceptedAnswerId();
+        if (staleAcceptedId != null && !acceptedAnswerStillVisible(questionId, staleAcceptedId)) {
+            question.clearAcceptedAnswer(staleAcceptedId, clock.instant());
+        }
 
         question.accept(answer, actor, manages);
         questions.save(question);
@@ -135,5 +154,21 @@ public class AnswerCommandService {
         return answers.findById(id)
                 .filter(a -> !a.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+    }
+
+    /** 采纳目标是否仍可见：存在、未软删、且确实属于该问题。 */
+    private boolean acceptedAnswerStillVisible(long questionId, long answerId) {
+        return answers.findById(answerId)
+                .filter(a -> !a.isDeleted() && a.questionId() == questionId)
+                .isPresent();
+    }
+
+    /** 课程问题只有课程成员可以回答；公开问题对所有登录用户开放。 */
+    private void requireCanParticipate(Question question, Actor actor) {
+        if (question.courseId() == null || actor.isAdmin()
+                || identity.isCourseMember(actor.userId(), question.courseId())) {
+            return;
+        }
+        throw new ForbiddenException("QA-3007", "只有课程成员可以回答该课程的问题");
     }
 }

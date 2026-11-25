@@ -103,16 +103,35 @@ public class Question {
         this.acceptedAnswerId = answer.id();
     }
 
-    public void softDelete(Actor actor, boolean actorManagesCourse, Instant now) {
+    /**
+     * 只校验删除权限，不改变状态。作者路径随后由仓储用 SQL 条件原子判断回答数，
+     * 避免“先改内存快照、再发现条件不满足”的伪删除。
+     */
+    public void ensureDeletableBy(Actor actor, boolean actorManagesCourse) {
         ensureNotDeleted();
         if (!actorManagesCourse && actor.userId() != authorId) {
             throw new ForbiddenException("QA-3003", "只有作者或课程管理者可以删除问题");
         }
+    }
+
+    public void softDelete(Actor actor, boolean actorManagesCourse, Instant now) {
+        ensureDeletableBy(actor, actorManagesCourse);
         if (!actorManagesCourse && answerCount > 0) {
             throw new BusinessRuleException("QA-1013", "已有回答的问题不能由提问者删除");
         }
         this.deletedAt = Objects.requireNonNull(now, "now");
         this.updatedAt = this.deletedAt;
+    }
+
+    /**
+     * 已采纳回答被删除后释放采纳关系。课程管理者可以删除已采纳回答（用于处理违规内容），
+     * 但问题不能因此永久停留在“已采纳却没有答案”的状态。
+     */
+    public void clearAcceptedAnswer(long answerId, Instant now) {
+        if (acceptedAnswerId != null && acceptedAnswerId == answerId) {
+            this.acceptedAnswerId = null;
+            this.updatedAt = Objects.requireNonNull(now, "now");
+        }
     }
 
     public void ensureOpenForAnswers() {

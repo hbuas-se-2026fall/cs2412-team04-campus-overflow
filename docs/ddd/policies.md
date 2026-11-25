@@ -8,5 +8,5 @@
 3. 当 AnswerAcceptedEvent 发生，则 Reputation 给回答者 +15 并检查徽章，Discovery 标记“已采纳”并通知回答者。
 4. 当 VoteCastEvent 发生，则 Reputation 按票值差值计分并受每日上限约束，Discovery 同步问题/回答得分。
 5. 当 CommentPostedEvent 发生，则 Discovery 解析 @提及并创建通知。
-6. 当 ContentDeletedEvent 发生，则 Discovery 标记投影删除并将回答数 −1。
+6. 当 ContentDeletedEvent 发生，则 Discovery 标记投影删除并将回答数 −1；若删除的是已采纳回答且 Q&A 已释放采纳关系，则同时清除搜索投影的 accepted 标记。
 7. 当 BountyExpiredEvent 或 BountyClosedEvent 发生，则 Reputation 解冻/退还积分，Discovery 移除“悬赏中”。

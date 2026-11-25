@@ -16,7 +16,8 @@ import org.springframework.stereotype.Component;
 
 /**
  * 个人信息字段加密（AES-256-GCM）与可检索摘要（HMAC-SHA256）。
- * 密钥来自环境变量 CO_FIELD_KEY（Base64 编码的 32 字节），切勿提交到代码仓库。
+ * AES 密钥来自 CO_FIELD_KEY；HMAC 使用独立的 CO_FIELD_MAC_KEY（缺省用 HKDF 从主密钥派生），
+ * 避免同一把密钥同时承担加密与 MAC。生产密钥必须由环境注入，切勿提交到代码仓库。
  */
 @Component
 public class FieldEncryptor {
@@ -28,13 +29,36 @@ public class FieldEncryptor {
     private final SecretKeySpec macKey;
     private final SecureRandom random = new SecureRandom();
 
-    public FieldEncryptor(@Value("${co.security.field-key}") String base64Key) {
+    public FieldEncryptor(@Value("${co.security.field-key}") String base64Key,
+                          @Value("${co.security.field-mac-key:}") String base64MacKey) {
         byte[] key = Base64.getDecoder().decode(base64Key);
         if (key.length != 32) {
             throw new IllegalStateException("co.security.field-key 必须是 Base64 编码的 32 字节密钥");
         }
+        byte[] mac = base64MacKey == null || base64MacKey.isBlank()
+                ? hkdf(key, "campus-overflow/field-mac")
+                : Base64.getDecoder().decode(base64MacKey);
+        if (mac.length != 32) {
+            throw new IllegalStateException("co.security.field-mac-key 必须是 Base64 编码的 32 字节密钥");
+        }
         this.aesKey = new SecretKeySpec(key, "AES");
-        this.macKey = new SecretKeySpec(key, "HmacSHA256");
+        this.macKey = new SecretKeySpec(mac, "HmacSHA256");
+    }
+
+    /** HKDF-SHA256（extract + expand）：从主密钥派生 HMAC 子密钥，避免 AES 与 HMAC 共用同一把 key。 */
+    private static byte[] hkdf(byte[] ikm, String info) {
+        try {
+            Mac extract = Mac.getInstance("HmacSHA256");
+            extract.init(new SecretKeySpec(new byte[32], "HmacSHA256"));
+            byte[] prk = extract.doFinal(ikm);
+            Mac expand = Mac.getInstance("HmacSHA256");
+            expand.init(new SecretKeySpec(prk, "HmacSHA256"));
+            expand.update(info.getBytes(StandardCharsets.UTF_8));
+            expand.update((byte) 1);
+            return Arrays.copyOf(expand.doFinal(), 32);
+        } catch (GeneralSecurityException e) {
+            throw new IllegalStateException("HMAC 密钥派生失败", e);
+        }
     }
 
     public String encrypt(String plain) {

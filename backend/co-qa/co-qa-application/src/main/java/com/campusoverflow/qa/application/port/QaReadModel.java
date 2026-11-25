@@ -10,17 +10,29 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 读模型端口（CQRS-lite）：查询直接返回投影行，绕过聚合装配，避免 N+1。
  * 所有查询默认排除已软删除的内容。
  */
 public interface QaReadModel {
-    PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page);
+    /**
+     * 列表查询。courseId 非空时只查该课程；为空时按可见范围返回“公开问题 + 可见课程问题”。
+     * allCourses=true 表示管理员可见全部课程；否则 visibleCourseIds 为当前用户的课程集合。
+     */
+    PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses, Collection<Long> visibleCourseIds,
+                                           PageRequest page);
 
     Optional<QuestionRow> findQuestion(long questionId);
 
     List<AnswerRow> findAnswers(long questionId);
+
+    /**
+     * 批量返回仍可见（未软删除）的回答 ID，用于列表/详情判定 accepted_answer_id 是否已失效。
+     * 一次查询搞定，避免为每个问题单独查库。
+     */
+    Set<Long> findVisibleAnswerIds(Collection<Long> answerIds);
 
     List<CommentRow> findComments(long questionId);
 

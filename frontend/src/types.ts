@@ -105,8 +105,13 @@ export interface QuestionDetail {
   answers: Answer[];
 }
 
-export interface SearchResult extends QuestionSummary {
+/**
+ * 搜索结果。搜索页不展示浏览数，后端 SearchResultView 也不需要 viewCount；
+ * 保留可选字段以兼容未来后端补字段，渲染处始终按“有值才显示”处理。
+ */
+export interface SearchResult extends Omit<QuestionSummary, 'viewCount'> {
   bountyOpen: boolean;
+  viewCount?: number;
 }
 export interface LeaderboardEntry {
   rank: number;

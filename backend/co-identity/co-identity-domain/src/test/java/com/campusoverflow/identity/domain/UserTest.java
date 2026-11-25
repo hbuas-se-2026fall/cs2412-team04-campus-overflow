@@ -79,7 +79,7 @@ class UserTest {
 
     @Test
     void emailPatternIsLinearTimeAndKeepsOriginalSemantics() {
-        // Sonar java:S5852 回归：修复前后语义必须一致 —— @ 后至少「一段.」再接一段
+        // Sonar java:S5852 回归：语义必须保持 —— @ 后至少一段点域名
         assertThatCode(() -> User.register("20230001", "小明", "a@b.c", "h", null, null, NOW))
                 .doesNotThrowAnyException();
         assertThatCode(() -> User.register("20230001", "小明", "a@b.c.d", "h", null, null, NOW))
@@ -90,10 +90,29 @@ class UserTest {
                 .isInstanceOf(BusinessRuleException.class);
         assertThatThrownBy(() -> User.register("20230001", "小明", "a@.b", "h", null, null, NOW))
                 .isInstanceOf(BusinessRuleException.class);
-        // 灾难性回溯输入：旧正则在超长 "a@" + 重复域名段 上会指数级回溯；修复后应快速失败
-        String evil = "a@" + "b.".repeat(2000) + "!";
-        assertTimeoutPreemptively(java.time.Duration.ofSeconds(2), () ->
-                assertThatThrownBy(() -> User.register("20230001", "小明", evil, "h", null, null, NOW))
-                        .isInstanceOf(BusinessRuleException.class));
+    }
+
+    @Test
+    void emailPatternItselfIsLinearOnPathologicalInput() {
+        // 审计 TEST-01：以前用 4005 字符输入断言"无灾难性回溯"，但 checkEmail 的 length()>100
+        // 会先拒绝、正则根本不会执行 —— 那条用例只证明了长度守卫。
+        // 这里改为「≤100 字符 + 直接调用 emailShapeMatches(仅正则)」，确保正则真的被执行。
+        String evil = "a@" + "b.".repeat(48) + "!"; // 99 字符，旧正则在此形态上会指数回溯
+        assertThat(evil.length()).isLessThanOrEqualTo(100);
+        assertTimeoutPreemptively(java.time.Duration.ofSeconds(1), () ->
+                assertThat(User.emailShapeMatches(evil)).isFalse());
+        // 正常形态在同样预算内通过
+        assertTimeoutPreemptively(java.time.Duration.ofSeconds(1), () ->
+                assertThat(User.emailShapeMatches("a@b.c")).isTrue());
+    }
+
+    @Test
+    void emailLengthGuardRejectsOver100Characters() {
+        // 长度守卫独立成测：>100 由 checkEmail 直接拒绝（与正则无关）
+        String tooLong = "a@" + "b.".repeat(50) + "c";
+        assertThat(tooLong.length()).isGreaterThan(100);
+        assertThatThrownBy(() -> User.register("20230001", "小明", tooLong, "h", null, null, NOW))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("邮箱");
     }
 }

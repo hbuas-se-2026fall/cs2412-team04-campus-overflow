@@ -73,10 +73,10 @@ public class OutboxRelay {
 
     @Scheduled(fixedDelayString = "${co.outbox.poll-interval-ms:500}")
     public void relay() {
-        List<Row> batch = claim();
-        for (Row row : batch) {
+        // 严格按 id 顺序处理：一次只认领最老的未投递事件；失败即停，绝不越过它处理后续事件。
+        // 早期实现失败后释放后续行租约，会让 QuestionEdited 先于 QuestionPosted 执行，形成乱序投影。
+        for (Row row : claim()) {
             if (!dispatch(row)) {
-                release(batch, row);
                 break;
             }
         }
@@ -88,8 +88,8 @@ public class OutboxRelay {
             List<Long> ids = jdbc.queryForList("""
                     SELECT id FROM outbox_event
                     WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
-                    ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED
-                    """, Long.class, maxAttempts, now, batchSize);
+                    ORDER BY id LIMIT 1 FOR UPDATE
+                    """, Long.class, maxAttempts, now);
             if (ids.isEmpty()) {
                 return List.of();
             }
@@ -124,15 +124,6 @@ public class OutboxRelay {
                     next, UtcTime.toDb(retryAt), error.length() > 500 ? error.substring(0, 500) : error, row.id());
             log.warn("事件投递失败 id={} type={} attempts={}: {}", row.id(), row.type(), next, error);
             return false;
-        }
-    }
-
-    /** 本批中失败事件之后的行提前释放租约，下个周期重新认领（保证顺序）。 */
-    private void release(List<Row> batch, Row failedRow) {
-        List<Long> rest = batch.stream().map(Row::id).filter(id -> id > failedRow.id()).toList();
-        if (!rest.isEmpty()) {
-            named.update("UPDATE outbox_event SET locked_until = NULL WHERE id IN (:ids) AND published_at IS NULL",
-                    new MapSqlParameterSource("ids", rest));
         }
     }
 

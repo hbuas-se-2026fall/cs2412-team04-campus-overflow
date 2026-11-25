@@ -18,6 +18,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.logout.HttpStatusReturningLogoutSuccessHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -37,9 +38,11 @@ import org.springframework.security.web.csrf.CsrfException;
 public class SecurityConfig {
 
     private final ObjectMapper objectMapper;
+    private final ActiveUserFilter activeUserFilter;
 
-    public SecurityConfig(ObjectMapper objectMapper) {
+    public SecurityConfig(ObjectMapper objectMapper, ActiveUserFilter activeUserFilter) {
         this.objectMapper = objectMapper;
+        this.activeUserFilter = activeUserFilter;
     }
 
     @Bean
@@ -61,15 +64,18 @@ public class SecurityConfig {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
+                .addFilterAfter(activeUserFilter, SecurityContextHolderFilter.class)
                 .securityContext(sc -> sc.securityContextRepository(contextRepository))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/login").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
+                        // PO 决策（2026-11-25，审计 W-07 / PRIV-01）：课程成员名单含 userId/displayName/role，
+                        // 属校内人员信息，不再对匿名开放——从 permitAll 移除，落到 anyRequest().authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/questions/**", "/api/v1/tags/**",
                                 "/api/v1/search/**", "/api/v1/leaderboard", "/api/v1/users/*/reputation",
-                                "/api/v1/courses", "/api/v1/courses/*/members").permitAll()
+                                "/api/v1/courses").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()

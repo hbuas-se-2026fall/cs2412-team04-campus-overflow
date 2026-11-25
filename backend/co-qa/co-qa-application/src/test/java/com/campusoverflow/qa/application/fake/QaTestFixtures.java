@@ -25,7 +25,9 @@ import com.campusoverflow.shared.event.IntegrationEvent;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
+import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -67,6 +69,19 @@ public final class QaTestFixtures {
             }
             store.put(question.id(), question);
             return question;
+        }
+
+        @Override
+        public boolean softDeleteIfUnanswered(long questionId, Instant now) {
+            Question question = store.get(questionId);
+            int count = question == null
+                    ? 0
+                    : question.answerCount() + answerCountDeltas.getOrDefault(questionId, 0);
+            if (question == null || question.isDeleted() || count > 0) {
+                return false;
+            }
+            question.softDelete(new Actor(0, "system", Role.ADMIN), true, now);
+            return true;
         }
 
         @Override
@@ -150,6 +165,7 @@ public final class QaTestFixtures {
     public static class StubIdentity implements IdentityApi {
         private final Map<Long, UserSummary> users = new HashMap<>();
         private final Map<Long, Boolean> courseManagers = new HashMap<>();
+        private final Map<Long, Set<Long>> memberships = new HashMap<>();
         private final Set<Long> missingCourses = new HashSet<>();
 
         public StubIdentity withUser(long id, String name, Role role) {
@@ -159,6 +175,11 @@ public final class QaTestFixtures {
 
         public StubIdentity withCourseManager(long userId) {
             courseManagers.put(userId, true);
+            return this;
+        }
+
+        public StubIdentity withCourseMember(long userId, long courseId) {
+            memberships.computeIfAbsent(userId, key -> new HashSet<>()).add(courseId);
             return this;
         }
 
@@ -197,18 +218,29 @@ public final class QaTestFixtures {
         public boolean canManageCourse(long userId, Long courseId) {
             return courseManagers.getOrDefault(userId, false);
         }
+
+        @Override
+        public boolean isCourseMember(long userId, long courseId) {
+            return courseManagers.getOrDefault(userId, false)
+                    || memberships.getOrDefault(userId, Set.of()).contains(courseId);
+        }
+
+        @Override
+        public Set<Long> courseIdsOfUser(long userId) {
+            return Set.copyOf(memberships.getOrDefault(userId, Set.of()));
+        }
     }
 
     public static class CountingCache implements QuestionListCache {
         public int invalidations;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, PageRequest page) {
+        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
             return Optional.empty();
         }
 
         @Override
-        public void put(Long courseId, PageRequest page, PageResult<QuestionSummaryView> value) {
+        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
         }
 
         @Override
@@ -267,11 +299,14 @@ public final class QaTestFixtures {
         public PageRequest lastPage;
 
         @Override
-        public PageResult<QuestionRow> listQuestions(Long courseId, PageRequest page) {
+        public PageResult<QuestionRow> listQuestions(Long courseId, boolean allCourses,
+                                                       Collection<Long> visibleCourseIds, PageRequest page) {
             listCalls.add(courseId);
             lastPage = page;
             List<QuestionRow> filtered = questions.stream()
                     .filter(row -> courseId == null || courseId.equals(row.courseId()))
+                    .filter(row -> courseId != null || allCourses
+                            || row.courseId() == null || visibleCourseIds.contains(row.courseId()))
                     .toList();
             return new PageResult<>(filtered, filtered.size(), page.page(), page.size());
         }
@@ -285,6 +320,12 @@ public final class QaTestFixtures {
         @Override
         public List<AnswerRow> findAnswers(long questionId) {
             return answers;
+        }
+
+        @Override
+        public Set<Long> findVisibleAnswerIds(Collection<Long> answerIds) {
+            Set<Long> wanted = Set.copyOf(answerIds);
+            return answers.stream().map(AnswerRow::id).filter(wanted::contains).collect(Collectors.toSet());
         }
 
         @Override
@@ -322,8 +363,9 @@ public final class QaTestFixtures {
         public int invalidations;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, PageRequest page) {
-            Optional<PageResult<QuestionSummaryView>> value = Optional.ofNullable(store.get(key(courseId, page)));
+        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+            Optional<PageResult<QuestionSummaryView>> value =
+                    Optional.ofNullable(store.get(key(courseId, viewerId, page)));
             if (value.isPresent()) {
                 hits++;
             } else {
@@ -333,8 +375,8 @@ public final class QaTestFixtures {
         }
 
         @Override
-        public void put(Long courseId, PageRequest page, PageResult<QuestionSummaryView> value) {
-            store.put(key(courseId, page), value);
+        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+            store.put(key(courseId, viewerId, page), value);
         }
 
         @Override
@@ -343,8 +385,9 @@ public final class QaTestFixtures {
             store.clear();
         }
 
-        private static String key(Long courseId, PageRequest page) {
-            return (courseId == null ? "all" : courseId) + ":" + page.page() + ":" + page.size();
+        private static String key(Long courseId, Long viewerId, PageRequest page) {
+            return (courseId == null ? "all" : courseId) + ":" + (viewerId == null ? "anon" : viewerId)
+                    + ":" + page.page() + ":" + page.size();
         }
     }
 }

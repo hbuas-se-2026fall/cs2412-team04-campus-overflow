@@ -210,7 +210,7 @@ public class ReputationTestFixtures {
                     .filter(e -> e.userId() == userId)
                     .sorted(Comparator.comparing(LedgerEntry::createdAt).reversed())
                     .toList();
-            int from = Math.min(page.offset(), mine.size());
+            int from = (int) Math.min(page.offset(), mine.size());
             int to = Math.min(from + page.size(), mine.size());
             return new PageResult<>(mine.subList(from, to), mine.size(), page.page(), page.size());
         }
@@ -406,6 +406,16 @@ public class ReputationTestFixtures {
 
         public void grantCourseManager(long userId) {
             courseManagers.add(userId);
+        }
+
+        @Override
+        public boolean isCourseMember(long userId, long courseId) {
+            return users.containsKey(userId);
+        }
+
+        @Override
+        public Set<Long> courseIdsOfUser(long userId) {
+            return Set.of();
         }
     }
 

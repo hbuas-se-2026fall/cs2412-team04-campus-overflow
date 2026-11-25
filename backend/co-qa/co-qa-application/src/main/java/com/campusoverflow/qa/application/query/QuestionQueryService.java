@@ -6,6 +6,7 @@ import com.campusoverflow.qa.application.port.ContentRenderer;
 import com.campusoverflow.qa.application.port.QaReadModel;
 import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.qa.application.port.ViewCounter;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
@@ -50,19 +51,40 @@ public class QuestionQueryService {
         this.cache = cache;
     }
 
-    /** 列表：先看缓存，未命中再查读模型；作者信息一次批量补齐后回填缓存。 */
-    public PageResult<QuestionSummaryView> list(Long courseId, PageRequest page) {
-        Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, page);
+    /**
+     * 列表：先看缓存，未命中再查读模型；作者信息一次批量补齐后回填缓存。
+     *
+     * <p>课程问题仅课程成员可见；公开问题（course_id 为空）始终可见。未登录用户只看公开问题。
+     * 缓存 key 带 viewerId，避免把某成员可见的课程列表返回给未加入课程的人。</p>
+     */
+    public PageResult<QuestionSummaryView> list(Long courseId, PageRequest page, Actor viewerOrNull) {
+        boolean allCourses = viewerOrNull != null && viewerOrNull.isAdmin();
+        Set<Long> visibleCourseIds = viewerOrNull == null
+                ? Set.of()
+                : identity.courseIdsOfUser(viewerOrNull.userId());
+        if (courseId != null && !allCourses && !visibleCourseIds.contains(courseId)) {
+            throw new ForbiddenException("QA-3006", "无权查看该课程的问题");
+        }
+
+        Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
+        Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, viewerId, page);
         if (cached.isPresent()) {
             return cached.get();
         }
 
-        PageResult<QuestionRow> rows = readModel.listQuestions(courseId, page);
+        PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);
+        // 与详情一致的 effective 语义：一次批量确认采纳回答是否仍可见，历史脏数据不显示“已采纳”。
+        List<Long> acceptedAnswerIds = rows.items().stream()
+                .map(QuestionRow::acceptedAnswerId).filter(id -> id != null).distinct().toList();
+        Set<Long> visibleAcceptedIds = acceptedAnswerIds.isEmpty()
+                ? Set.of()
+                : readModel.findVisibleAnswerIds(acceptedAnswerIds);
         List<Long> authorIds = rows.items().stream().map(QuestionRow::authorId).distinct().toList();
         Map<Long, UserSummary> authors = authorIds.isEmpty() ? Map.of() : identity.findUsers(authorIds);
 
-        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId())));
-        cache.put(courseId, page, result);
+        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId()),
+                visibleAcceptedIds));
+        cache.put(courseId, viewerId, page, result);
         return result;
     }
 
@@ -70,6 +92,7 @@ public class QuestionQueryService {
     public QuestionDetailView detail(long questionId, Actor actorOrNull) {
         QuestionRow row = readModel.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
+        requireCanView(row, actorOrNull);
 
         List<AnswerRow> answerRows = readModel.findAnswers(questionId);
         List<CommentRow> commentRows = readModel.findComments(questionId);
@@ -78,6 +101,12 @@ public class QuestionQueryService {
         boolean managesCourse = actorOrNull != null && identity.canManageCourse(actorOrNull.userId(), row.courseId());
 
         List<Long> answerIds = answerRows.stream().map(AnswerRow::id).toList();
+        // 历史脏数据容错：accepted_answer_id 可能仍指向一条已被删除的回答（写入侧修复前留下的）。
+        // 只有采纳 ID 仍在可见回答列表里才算已采纳，否则按未采纳处理，避免出现“已采纳但无回答可展示”
+        // 的幽灵标记，并让提问者重新获得 canAccept。新数据写入侧已清空，这里只兜旧数据。
+        Long effectiveAcceptedId = row.acceptedAnswerId() != null && answerIds.contains(row.acceptedAnswerId())
+                ? row.acceptedAnswerId()
+                : null;
         Map<String, Integer> myVotes = actorOrNull == null
                 ? Map.of()
                 : readModel.findMyVotes(actorOrNull.userId(), questionId, answerIds);
@@ -94,7 +123,8 @@ public class QuestionQueryService {
         }
 
         List<AnswerView> answers = answerRows.stream()
-                .map(answer -> toAnswerView(answer, row, users, myVotes, answerComments, actorOrNull, managesCourse))
+                .map(answer -> toAnswerView(answer, effectiveAcceptedId, users, myVotes, answerComments,
+                        actorOrNull, managesCourse))
                 .sorted(Comparator.comparing(AnswerView::accepted).reversed()
                         .thenComparing(Comparator.comparingInt(AnswerView::score).reversed())
                         .thenComparing(AnswerView::createdAt))
@@ -105,10 +135,25 @@ public class QuestionQueryService {
 
         return new QuestionDetailView(row.id(), row.title(), row.body(), renderer.toSafeHtml(row.body()),
                 row.tags(), courseRefOf(row), AuthorView.of(row.authorId(), users.get(row.authorId())),
-                row.score(), row.answerCount(), row.viewCount(), row.acceptedAnswerId(),
+                row.score(), row.answerCount(), row.viewCount(), effectiveAcceptedId,
                 myVotes.getOrDefault("QUESTION:" + questionId, 0),
-                row.createdAt(), row.updatedAt(), permissionsOf(row, actorOrNull, managesCourse),
+                row.createdAt(), row.updatedAt(), permissionsOf(row, effectiveAcceptedId, actorOrNull, managesCourse),
                 questionComments, answers);
+    }
+
+    /** 课程问题：管理员、作者或课程成员可见；公开问题不受限制。 */
+    private void requireCanView(QuestionRow row, Actor actorOrNull) {
+        if (row.courseId() == null) {
+            return;
+        }
+        if (actorOrNull == null) {
+            throw new ForbiddenException("QA-3006", "无权查看此内容");
+        }
+        if (actorOrNull.isAdmin() || actorOrNull.is(row.authorId())
+                || identity.isCourseMember(actorOrNull.userId(), row.courseId())) {
+            return;
+        }
+        throw new ForbiddenException("QA-3006", "无权查看此内容");
     }
 
     /** 热门标签：limit 一律夹在 1–50，防止被传 100000 拖垮查询。 */
@@ -117,16 +162,19 @@ public class QuestionQueryService {
         return readModel.popularTags(safeLimit);
     }
 
-    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author) {
+    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author, Set<Long> visibleAcceptedIds) {
+        // 采纳标记同样走 effective 语义：只有采纳回答仍在可见列表里才算已采纳（与 detail 口径一致）。
+        Long acceptedId = row.acceptedAnswerId();
+        boolean accepted = acceptedId != null && visibleAcceptedIds.contains(acceptedId);
         return new QuestionSummaryView(row.id(), row.title(), renderer.toPlainText(row.body(), EXCERPT_LENGTH),
                 row.tags(), row.courseId(), AuthorView.of(row.authorId(), author), row.score(), row.answerCount(),
-                row.viewCount(), row.acceptedAnswerId() != null, row.createdAt());
+                row.viewCount(), accepted, row.createdAt());
     }
 
-    private AnswerView toAnswerView(AnswerRow answer, QuestionRow question, Map<Long, UserSummary> users,
+    private AnswerView toAnswerView(AnswerRow answer, Long effectiveAcceptedId, Map<Long, UserSummary> users,
                                     Map<String, Integer> myVotes, Map<Long, List<CommentView>> answerComments,
                                     Actor actorOrNull, boolean managesCourse) {
-        boolean accepted = question.acceptedAnswerId() != null && question.acceptedAnswerId() == answer.id();
+        boolean accepted = effectiveAcceptedId != null && effectiveAcceptedId == answer.id();
         boolean canEdit = actorOrNull != null && (actorOrNull.is(answer.authorId()) || managesCourse);
         return new AnswerView(answer.id(), answer.body(), renderer.toSafeHtml(answer.body()),
                 AuthorView.of(answer.authorId(), users.get(answer.authorId())), answer.score(), accepted,
@@ -148,14 +196,16 @@ public class QuestionQueryService {
                         .orElseGet(() -> new CourseRefView(row.courseId(), null, null));
     }
 
-    private static PermissionsView permissionsOf(QuestionRow row, Actor actorOrNull, boolean managesCourse) {
+    private static PermissionsView permissionsOf(QuestionRow row, Long effectiveAcceptedId, Actor actorOrNull,
+                                                 boolean managesCourse) {
         if (actorOrNull == null) {
             return PermissionsView.NONE;
         }
         boolean author = actorOrNull.is(row.authorId());
         boolean canEdit = author || managesCourse;
         boolean canDelete = managesCourse || (author && row.answerCount() == 0);
-        boolean canAccept = (author || managesCourse) && row.acceptedAnswerId() == null;
+        // 用有效采纳 ID 而非库里的原始值：脏数据指向已删回答时仍允许重新采纳。
+        boolean canAccept = (author || managesCourse) && effectiveAcceptedId == null;
         return new PermissionsView(canEdit, canDelete, canAccept, managesCourse);
     }
 
