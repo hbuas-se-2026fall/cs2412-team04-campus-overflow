@@ -106,4 +106,4 @@ mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=f
 | 本地 JDK 25 下 JaCoCo 0.8.12 agent 不兼容 | 本机取证需 `-Djacoco.skip=true` | 统一用 JDK 21 取证；CI 固定 21 |
 | 集成测试已硬门禁 | 失败即阻断，不再漏过端到端问题 | 阶段 5 移除了 `continue-on-error`，Testcontainers 起 MySQL/Redis；见 ADR-009 |
 | Sonar `java:S5998`（`User.EMAIL`） | Quality Gate 仍 Failed（1 Bug），Lab 7 只能证明“已复扫” | 2026-11-24 按方案 A 改为 `^[\\w.+-]+@[\\w.-]+$` 并补域名校验；需在 SonarQube 机器复扫确认归零后才能宣称 PASSED |
-| Sonar 覆盖率 70.3% 卡线 | 接近 70% 阈值，新增低覆盖代码可能让门禁变红 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除 |
+| Sonar 覆盖率 70.5%（11-24 复扫）卡线 | 接近 70% 阈值，新增低覆盖代码可能让门禁变红；最终代码（#209 后）尚未复扫 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除；最终复扫见 [`lab7-sonar-rescan.md`](../reports/lab7-sonar-rescan.md) |
