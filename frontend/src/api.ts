@@ -63,12 +63,14 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
     }
   }
   if (!res.ok) {
-    const detail = typeof data === 'object' && data !== null && 'detail' in data
-      ? String((data as { detail: unknown }).detail)
-      : `请求失败（HTTP ${res.status}）`;
-    const code = typeof data === 'object' && data !== null && 'code' in data
-      ? String((data as { code: unknown }).code)
-      : 'SYS-000';
+    const detail =
+      typeof data === 'object' && data !== null && 'detail' in data
+        ? String((data as { detail: unknown }).detail)
+        : `请求失败（HTTP ${res.status}）`;
+    const code =
+      typeof data === 'object' && data !== null && 'code' in data
+        ? String((data as { code: unknown }).code)
+        : 'SYS-000';
     throw new ApiError(res.status, code, detail);
   }
   return data as T;
