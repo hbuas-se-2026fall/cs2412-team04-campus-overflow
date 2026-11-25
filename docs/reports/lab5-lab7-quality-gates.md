@@ -182,7 +182,8 @@ mvn -B sonar:sonar \
 | Lab 7 · 同行评审清单 | ✅ 已入库 | [`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md) |
 | Lab 7 · SonarQube 配置与 CI 接入 | ✅ 已配置（凭 token 启用） | `sonar-project.properties`、`backend/pom.xml`、`ci.yml` 阶段 6 |
 | Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已跑通（修复前 Failed → 复扫后剩 1 Bug，见 §4.6b） | `docs/screenshots/lab7-sonar/`（修复前）+ [`lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)（复扫） |
-| Lab 7 · SonarQube 重扫截图 | ✅ **已执行（2026-11-23）** | 六张见 [`screenshots/lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)；结果见 §4.6b |
+| Lab 7 · SonarQube 重扫截图 | ✅ 已执行三轮（11-23 / 11-24 / 11-25） | `lab7-sonar-rescan/`（Failed 阶段）、[`lab7-sonar-pass/`](../screenshots/lab7-sonar-pass/)（PASSED） |
+| Lab 7 · 质量门禁最终结果 | ✅ **PASSED**（Coverage 72.0% / Bugs 0 / Vulnerabilities 0） | §4.6d + `screenshots/lab7-sonar-pass/` |
 
 ---
 
@@ -332,6 +333,32 @@ Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*$")
 
 > 结论：这条**不应再靠试正则关闭**，需 PO / 身份上下文负责人选一个方案显式处置。
 > 处置后门禁即可 PASSED；在此之前，Lab 7 的「质量门禁」事实是 **Failed 且原因已定位**。
+
+---
+
+#### 4.6d 第三轮复扫（2026-11-25）：S5998 归零，质量门禁 PASSED
+
+按安全审计 **QUAL-01** 的方案 A 落地后（`^[\w.+-]+@[\w.-]+$` 去掉重复分组 + `User.checkEmail` 补域名形状校验），
+第三次复扫结果：
+
+| 指标 | 11-19 基线 | 11-23 | 11-24 | **11-25** |
+| --- | --- | --- | --- | --- |
+| Bugs | 3 | 1 | 1 | **0** ✅ |
+| Coverage | 70.3% | 70.3% | 70.5% | **72.0%** |
+| Unit Tests | 173 | 173 | 174 | **200（100% 通过）** |
+| Vulnerabilities | 0 | 0 | 0 | **0** |
+| **质量门禁** | Failed | Failed | Failed | **✅ PASSED（All conditions passed）** |
+
+**门禁三项（Overall）全部达标**：Coverage 72.0% ≥ 70%、Bugs 0、Vulnerabilities 0。
+
+证据：[`screenshots/lab7-sonar-pass/`](../screenshots/lab7-sonar-pass/)
+- `01-dashboard-passed.png`：左上绿色 **Passed / All conditions passed**
+- `02-coverage.png`：Coverage 72.0%、200 单测全通过
+- `03-bugs-zero.png`：Issues 过滤 `types=BUG` → **0 条**
+- `04-quality-gate.png`：`CampusOverflow Gate` 条件明细
+
+> Lab 7 的「质量门禁」至此闭环：从 Failed（3 Bugs）到 Passed，中间两次正则改写失败的经历（#200、#207）
+> 与最终方案 A 的取舍记录在 [`lab7-sonar-rescan.md`](lab7-sonar-rescan.md)。
 
 ---
 

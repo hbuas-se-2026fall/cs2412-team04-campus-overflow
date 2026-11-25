@@ -53,7 +53,8 @@ services:
     depends_on:
       mysql: { condition: service_healthy }
       redis: { condition: service_healthy }
-    ports: ["8080:8080"]
+    # SEC-04：后端只供同网络内的 nginx 访问，不再对外发布端口
+    expose: ["8080"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
       interval: 10s
@@ -74,7 +75,8 @@ services:
     container_name: co-prometheus
     profiles: ["observability"]
     volumes: ["./prometheus.yml:/etc/prometheus/prometheus.yml:ro"]
-    ports: ["9090:9090"]
+    # SEC-04：监控面板仅本机可访问（排障时用 SSH 隧道）
+    ports: ["127.0.0.1:9090:9090"]
 
   grafana:
     image: grafana/grafana:11.2.0
@@ -83,7 +85,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
     depends_on: [prometheus]
-    ports: ["3000:3000"]
+    ports: ["127.0.0.1:3000:3000"]
     volumes:
       - grafana-data:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

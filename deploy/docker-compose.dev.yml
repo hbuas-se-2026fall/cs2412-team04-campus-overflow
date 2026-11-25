@@ -18,7 +18,8 @@ services:
       MYSQL_DATABASE: campus_overflow
       MYSQL_USER: campus
       MYSQL_PASSWORD: ${DB_PASSWORD:-campus_dev_pwd}
-    ports: ["3306:3306"]
+    # SEC-04：只监听回环，避免校园网同网段直接连到本机数据库
+    ports: ["127.0.0.1:3306:3306"]
     volumes: ["mysql-data:/var/lib/mysql"]
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p${MYSQL_ROOT_PASSWORD:-root_dev_pwd}"]
@@ -30,7 +31,7 @@ services:
     image: redis:7-alpine
     container_name: co-redis-dev
     command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
-    ports: ["6379:6379"]
+    ports: ["127.0.0.1:6379:6379"]
     volumes: ["redis-data:/data"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -56,7 +57,7 @@ services:
     depends_on:
       mysql: { condition: service_healthy }
       redis: { condition: service_healthy }
-    ports: ["8080:8080"]
+    ports: ["127.0.0.1:8080:8080"]
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health/readiness"]
       interval: 10s
@@ -70,7 +71,7 @@ services:
     container_name: co-web-dev
     depends_on:
       backend: { condition: service_started }
-    ports: ["80:80"]
+    ports: ["127.0.0.1:80:80"]
 
 volumes:
   mysql-data:

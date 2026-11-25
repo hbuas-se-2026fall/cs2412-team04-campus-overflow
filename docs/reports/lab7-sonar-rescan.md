@@ -1,6 +1,6 @@
 # Lab 7 · SonarQube 重扫证据与执行单
 
-> 责任人：房国栋 / 陈明哲　状态：**✅ 已执行两轮复扫（2026-11-23 / 2026-11-24）**——配置、CI 接入、Bug 修复、本机 SonarQube 扫描与截图全部完成
+> 责任人：房国栋 / 陈明哲　状态：**✅ 已完成三轮复扫（2026-11-23 / 11-24 / 11-25）——S5998 归零，质量门禁 PASSED**
 > 实测结果以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**（两轮复扫均为 1）、Coverage 70.5%、Quality Gate **仍 Failed**（剩 `User.java` 的 `java:S5998`）
 > 关联：`sonar-project.properties`、`backend/pom.xml`（sonar-maven-plugin）、`.github/workflows/ci.yml` 阶段 6
 > 同行评审清单：[`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md)
@@ -76,18 +76,18 @@ curl -X POST ".../api/qualitygates/select" -d "gateName=...&projectKey=campus-ov
 
 配置后 `后端构建与验证` 的阶段 6 会自动执行，并在门禁失败时让 CI 变红；未配置时保持跳过，不阻塞现有 PR。
 
-## 五、验收（2026-11-23 实际结果）
+## 五、验收（2026-11-25 最终结果）
 
 | 验收项 | 目标 | 实际 | 结论 |
 | --- | --- | --- | --- |
-| SonarQube Quality Gate | PASSED | **Failed**（1 条条件未过） | 🟡 未达标，见下 |
-| Coverage | ≥ 70% | **70.3%** | ✅ |
-| Bugs | = 0 | **1** | ❌ 剩 `java:S5998` |
+| SonarQube Quality Gate | PASSED | **PASSED**（2026-11-25 第三轮复扫） | ✅ 达标 |
+| Coverage | ≥ 70% | **72.0%** | ✅ |
+| Bugs | = 0 | **0** | ✅（S5998 已随 QUAL-01 清除） |
 | Vulnerabilities | = 0 | **0** | ✅ |
-| 截图归档 | 已归档 | 六张，`screenshots/lab7-sonar-rescan/` | ✅ |
+| 截图归档 | 已归档 | `lab7-sonar-rescan/`（Failed 阶段六张）+ [`lab7-sonar-pass/`](../screenshots/lab7-sonar-pass/)（PASSED 四张） | ✅ |
 | `lab5-lab7-quality-gates.md` §三 勾选 | 已勾 | 已勾，并新增「重扫截图 ✅ 已执行」一行 | ✅ |
 
-### 5.1 唯一未达标项与建议
+### 5.1 历史：当时唯一未达标项（已被 §5.3 关闭）
 
 `co-identity/co-identity-domain/src/main/java/com/campusoverflow/identity/domain/User.java:24`
 规则 `java:S5998`（Regex repetition that can lead to stack overflow）。
@@ -153,6 +153,29 @@ Pattern.compile("^[\\w.+-]+@[\\w.-]+$")   // 单字符类，无分组
 - 注意：这是**显式处置**，需在评审记录里写清，不能当作已修复。
 
 > 两种方案都能让门禁转绿；**关键区别是「改代码」还是「改判定」**，需 PO/模块负责人在评审时定。
+
+---
+
+### 5.3 第三轮复扫（2026-11-25）：S5998 归零
+
+QUAL-01 按方案 A 落地后（`^[\w.+-]+@[\w.-]+$` + `User.checkEmail` 域名形状校验，
+`UserTest` 增长 local part 与畸形域名用例），复扫结果：
+
+| 指标 | 11-24 | **11-25** |
+| --- | --- | --- |
+| Bugs | 1 | **0** |
+| Coverage | 70.5% | **72.0%** |
+| Unit Tests | 174 | **200（100% 通过）** |
+| Vulnerabilities | 0 | 0 |
+| 质量门禁 | Failed | **✅ PASSED** |
+
+**门禁三项全部达标**：Coverage 72.0% ≥ 70%、Bugs 0、Vulnerabilities 0。
+
+截图：[`screenshots/lab7-sonar-pass/`](../screenshots/lab7-sonar-pass/)
+（`01-dashboard-passed.png` 左上绿色 **Passed**、`03-bugs-zero.png` 过滤 BUG 为 0 条）。
+
+> 至此本执行单的验收项全部满足：**§五 的「Quality Gate PASSED / Bugs = 0」已达成**，
+> 前两轮「改写分组位置无效」的记录保留在 §5.2，作为方案 A 才是正确解法的依据。
 
 ---
 
