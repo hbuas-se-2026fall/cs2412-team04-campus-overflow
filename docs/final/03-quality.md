@@ -1,6 +1,6 @@
 # 3. 质量证据
 
-> 答辩口径：先给结论（CI 门禁全绿、覆盖率达标、端到端可跑；Sonar 质量门禁仍 Failed 1 Bug，见 §3.7），再按需展开 CI 与报告。
+> 答辩口径：先给结论（CI 门禁全绿、覆盖率达标、端到端可跑、**Sonar 质量门禁 PASSED**），再按需展开 CI 与报告。
 > 数据截至：2026-11-25（最新 CI 全量 + 四域覆盖率重采）。
 
 ## 3.1 CI 门禁（五个后端阶段 + 前端）
@@ -105,5 +105,5 @@ mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=f
 | BUG-003（已关闭） | 曾因 develop 无必需状态检查，CI 失败不一定阻断合并 | 2026-11-17 通过规则集 #27436601 启用 `后端构建与验证`/`前端构建`；`enforce_admins=true`，改作业名需同步规则集 |
 | 本地 JDK 25 下 JaCoCo 0.8.12 agent 不兼容 | 本机取证需 `-Djacoco.skip=true` | 统一用 JDK 21 取证；CI 固定 21 |
 | 集成测试已硬门禁 | 失败即阻断，不再漏过端到端问题 | 阶段 5 移除了 `continue-on-error`，Testcontainers 起 MySQL/Redis；见 ADR-009 |
-| Sonar `java:S5998`（`User.EMAIL`） | Quality Gate 仍 Failed（1 Bug），Lab 7 只能证明“已复扫” | 2026-11-24 按方案 A 改为 `^[\\w.+-]+@[\\w.-]+$` 并补域名校验；需在 SonarQube 机器复扫确认归零后才能宣称 PASSED |
-| Sonar 覆盖率 70.5%（11-24 复扫）卡线 | 接近 70% 阈值，新增低覆盖代码可能让门禁变红；最终代码（#209 后）尚未复扫 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除；最终复扫见 [`lab7-sonar-rescan.md`](../reports/lab7-sonar-rescan.md) |
+| Sonar Quality Gate（**已关闭**） | 曾因 `java:S5998` 与覆盖率卡线导致 Lab 7 门禁 Failed | 2026-11-25 在最终代码上复扫：**Gate PASSED**（Bugs 0 / Vulnerabilities 0 / 安全热点 100% 复核 / Coverage 73.8% / 219 单测），证据见 [`lab7-sonar-final-rescan.md`](../reports/lab7-sonar-final-rescan.md) |
+| Sonar 覆盖率 73.8% 接近 70% 阈值 | 新增低覆盖代码可能让门禁回红 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除；当前 New Code 覆盖率 88.2% |

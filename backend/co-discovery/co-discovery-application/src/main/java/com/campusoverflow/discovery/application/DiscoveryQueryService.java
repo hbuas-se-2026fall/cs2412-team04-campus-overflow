@@ -65,9 +65,10 @@ public class DiscoveryQueryService {
 
     /** 相关问题也按课程可见范围过滤；过滤条件下推到候选查询，避免先 LIMIT 50 再过滤导致漏结果。 */
     public List<RelatedQuestionView> related(long questionId, int limit, Actor viewerOrNull) {
-        qa.findQuestion(questionId)
-                .filter(question -> !question.deleted())
-                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已被删除"));
+        // 先存在性守卫：用 isPresent 而不是丢掉 orElseThrow 的返回值（Sonar java:S2201）。
+        if (qa.findQuestion(questionId).filter(question -> !question.deleted()).isEmpty()) {
+            throw new NotFoundException("QA-4001", "问题不存在或已被删除");
+        }
         if (limit <= 0) {
             return List.of();
         }

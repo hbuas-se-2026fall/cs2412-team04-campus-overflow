@@ -38,7 +38,7 @@
 - 按方案 A 修改：`^[\\w.+-]+@[\\w.-]+$`，去掉所有重复分组；
 - `User.checkEmail` 补域名校验：不含 `..`、不以 `.` 开头/结尾、必须含 `.`；
 - `UserTest` 增加长 local part 与畸形域名用例。
-- ⚠️ 需要 SonarQube 机器复扫确认 `S5998` 归零；在复扫前 Lab 7 的门禁事实仍是 Failed（1 Bug）。
+- ✅ **已复扫确认归零（2026-11-25）**：最终代码上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
 
 ### DOC-01 / DOC-02
 
