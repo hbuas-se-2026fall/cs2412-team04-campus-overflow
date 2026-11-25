@@ -68,15 +68,21 @@
 
 ## 二、需要 PO / 产品决策（未改代码）
 
-### QA-02 课程问题可见性冲突
+### QA-02 课程问题可见性冲突（已被 2026-11-25 最终裁决取代）
 
-- PO 决策：**保持公开可见**（公开问题允许匿名读）；因此没有把 `SecurityConfig` 的匿名 GET 收回，也没有新增成员校验；
-- 当前代码与公开决策一致：`GET /api/v1/questions/**`、search 仍允许匿名；US-04 / 演示脚本中「未加入课程 → 无权限」的旧表述应以公开决策为准修正；
-- 这是产品取舍，不是代码缺陷；若后续改回成员可见，需要另开需求并补 list/detail/search/comment/vote 校验与 viewer 缓存键。
+> **更新（2026-11-25 晚）**：本文下方“保持公开可见”的初版结论已作废。
+> PO 最终裁决为 **课程成员可见**：公开问题对所有访问者可见；课程问题仅管理员、作者、课程成员可见，
+> 未加入者返回 `QA-3006`。代码 `QuestionQueryService.requireCanView()`、`QuestionController`、
+> 前端 `QuestionDetailPage` 已按此实现。
 
-### PRIV-01 课程成员名单匿名可读
+- 初版（已作废）：PO 决策曾为“保持公开可见”，因此当时没有新增成员校验；
+- 最终口径：以 [`v1-scope-decisions-2026-11-25.md`](v1-scope-decisions-2026-11-25.md) 决策 1 为准；
+- 这是产品取舍，不是代码缺陷；当前代码已按最终裁决补齐 list/detail/search/related/bounty 校验与 viewer 缓存键。
 
-`GET /api/v1/courses/*/members` 当前允许匿名，返回 `displayName/role/userId`。需 PO 确认名单是否公开；若不公开，要求登录 + 课程成员，并同步 Nginx 限制。
+### PRIV-01 课程成员名单匿名可读（已关闭）
+
+`GET /api/v1/courses/*/members` 已从 `SecurityConfig` 的 `permitAll` 列表移除，落到 `anyRequest().authenticated()`：
+匿名访问返回 401，登录用户可读。最终口径见 `v1-scope-decisions-2026-11-25.md` 决策 4。
 
 ### QA-03 删除问题与回答并发窗口
 
