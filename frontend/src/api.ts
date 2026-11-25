@@ -52,9 +52,24 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   });
   if (res.status === 204) return undefined as T;
   const text = await res.text();
-  const data = text ? JSON.parse(text) : undefined;
+  let data: unknown;
+  if (text) {
+    // FE-06：网关（Nginx）对 502/504 会返回 HTML 而非 JSON，直接 JSON.parse 会抛
+    // SyntaxError 并丢失 HTTP 状态；这里容错解析，失败时退化为「无 body」再按 status 报错。
+    try {
+      data = JSON.parse(text);
+    } catch {
+      data = undefined;
+    }
+  }
   if (!res.ok) {
-    throw new ApiError(res.status, data?.code ?? 'SYS-000', data?.detail ?? '请求失败');
+    const detail = typeof data === 'object' && data !== null && 'detail' in data
+      ? String((data as { detail: unknown }).detail)
+      : `请求失败（HTTP ${res.status}）`;
+    const code = typeof data === 'object' && data !== null && 'code' in data
+      ? String((data as { code: unknown }).code)
+      : 'SYS-000';
+    throw new ApiError(res.status, code, detail);
   }
   return data as T;
 }
@@ -129,15 +144,21 @@ export const api = {
   reputation: (userId: number) => get<ReputationProfile>(`/v1/users/${userId}/reputation`),
   ledger: (userId: number, page = 1, size = 20) =>
     get<Page<LedgerEntry>>(`/v1/users/${userId}/reputation/ledger?page=${page}&size=${size}`),
-  /** 问题最近一次悬赏；无悬赏时后端返回 204，这里统一转成 null */
+  /** 问题最近一次悬赏；无悬赏时后端返回 204，这里统一转成 null。
+   *  FE-06：只把「问题不存在（404）」当作「没有悬赏」，5xx 等真实故障必须向上抛，
+   *  避免把服务端错误误判成「没有悬赏」。 */
   bountyOf: (questionId: number) =>
     request<Bounty | undefined>('GET', `/v1/questions/${questionId}/bounty`)
       .then((b) => b ?? null)
-      .catch(() => null),
+      .catch((e: unknown) => {
+        if (e instanceof ApiError && e.status === 404) return null;
+        throw e;
+      }),
   bounty: (questionId: number, points: number, days: number) =>
     request<{ id: number }>('POST', `/v1/questions/${questionId}/bounty`, { points, days }),
 
-  notifications: () => get<Page<Notification>>('/v1/notifications'),
+  notifications: (page = 1, size = 20) =>
+    get<Page<Notification>>(`/v1/notifications?page=${page}&size=${size}`),
   unreadCount: () => get<{ count: number }>('/v1/notifications/unread-count'),
   readOne: (id: number) => request<void>('POST', `/v1/notifications/${id}/read`, {}),
   readAll: () => request<{ updated: number }>('POST', '/v1/notifications/read-all', {}),

@@ -4,7 +4,7 @@ import { api } from '../api';
 import { useAuth } from '../auth';
 import { BountyDialog } from '../components/BountyDialog';
 import { errorKind, errorMessage } from '../errors';
-import type { Answer, QuestionDetail } from '../types';
+import type { Answer, Comment, QuestionDetail } from '../types';
 
 type PageState = 'loading' | 'ok' | 'notfound' | 'forbidden' | 'error';
 
@@ -138,6 +138,7 @@ export function QuestionDetailPage() {
             <div className="votebox">
               <button
                 disabled={!me}
+                className={q.myVote === 1 ? 'active' : ''}
                 title={me ? '赞成' : '登录后可投票'}
                 onClick={() => act(() => api.vote('QUESTION', q.id, q.myVote === 1 ? 0 : 1))}
               >
@@ -146,6 +147,7 @@ export function QuestionDetailPage() {
               <b>{q.score}</b>
               <button
                 disabled={!me}
+                className={q.myVote === -1 ? 'active' : ''}
                 title={me ? '反对' : '登录后可投票'}
                 onClick={() => act(() => api.vote('QUESTION', q.id, q.myVote === -1 ? 0 : -1))}
               >
@@ -181,7 +183,13 @@ export function QuestionDetailPage() {
                 )}
                 {/* FE-06：后端 GET /questions/{id}/bounty 是公开的，user-guide 也说详情页显示悬赏，
                     因此组件对所有人渲染；"能否发起"由 canOpen(=canManage) 单独控制 */}
-                <BountyDialog questionId={q.id} canOpen={canManage} onChanged={load} />
+                <BountyDialog
+                  questionId={q.id}
+                  courseId={q.course?.id}
+                  accepted={q.acceptedAnswerId != null}
+                  canOpen={canManage}
+                  onChanged={load}
+                />
               </div>
 
               <CommentList
@@ -352,6 +360,7 @@ function AnswerBlock({
       <div className="votebox">
         <button
           disabled={!canVote}
+          className={answer.myVote === 1 ? 'active' : ''}
           onClick={() => onAct(() => api.vote('ANSWER', answer.id, answer.myVote === 1 ? 0 : 1))}
         >
           ▲
@@ -359,6 +368,7 @@ function AnswerBlock({
         <b>{answer.score}</b>
         <button
           disabled={!canVote}
+          className={answer.myVote === -1 ? 'active' : ''}
           onClick={() => onAct(() => api.vote('ANSWER', answer.id, answer.myVote === -1 ? 0 : -1))}
         >
           ▼
@@ -439,7 +449,7 @@ function CommentList({
   onDone,
   canComment,
 }: {
-  comments: { id: number; author: { displayName: string }; body: string; createdAt: string }[];
+  comments: Comment[];
   targetType: 'QUESTION' | 'ANSWER';
   targetId: number;
   onDone: () => void;
@@ -447,13 +457,21 @@ function CommentList({
 }) {
   const [text, setText] = useState('');
   const [open, setOpen] = useState(false);
+  const [replyTo, setReplyTo] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState('');
   const [error, setError] = useState('');
 
-  const submit = async () => {
+  const submit = async (parentId?: number) => {
     try {
-      await api.comment(targetType, targetId, text);
-      setText('');
-      setOpen(false);
+      const body = parentId === undefined ? text : replyText;
+      await api.comment(targetType, targetId, body, parentId);
+      if (parentId === undefined) {
+        setText('');
+        setOpen(false);
+      } else {
+        setReplyText('');
+        setReplyTo(null);
+      }
       setError('');
       onDone();
     } catch (e) {
@@ -461,12 +479,40 @@ function CommentList({
     }
   };
 
+  // FE-03：后端已支持 parentId，前端按 parentId 渲染一层缩进的二级回复。
+  const top = comments.filter((c) => !c.parentId);
+  const repliesOf = (parentId: number) => comments.filter((c) => c.parentId === parentId);
+
   return (
     <div className="comments">
-      {comments.map((c) => (
-        <div className="comment" key={c.id}>
-          <span>{highlightMentions(c.body)}</span>
-          <span className="muted"> — {c.author.displayName}</span>
+      {top.map((c) => (
+        <div key={c.id}>
+          <div className="comment">
+            <span>{highlightMentions(c.body)}</span>
+            <span className="muted"> — {c.author.displayName}</span>
+            {canComment && (
+              <button className="link" onClick={() => setReplyTo(replyTo === c.id ? null : c.id)}>
+                回复
+              </button>
+            )}
+          </div>
+          {repliesOf(c.id).map((r) => (
+            <div className="comment reply" key={r.id}>
+              <span>{highlightMentions(r.body)}</span>
+              <span className="muted"> — {r.author.displayName}</span>
+            </div>
+          ))}
+          {replyTo === c.id && (
+            <div className="comment-form reply">
+              <input
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={`回复 ${c.author.displayName}`}
+              />
+              <button onClick={() => submit(c.id)}>回复</button>
+              <button onClick={() => setReplyTo(null)}>取消</button>
+            </div>
+          )}
         </div>
       ))}
       {error && <p className="error">{error}</p>}
@@ -478,7 +524,8 @@ function CommentList({
               onChange={(e) => setText(e.target.value)}
               placeholder="评论，可用 @昵称 提醒他人"
             />
-            <button onClick={submit}>发表</button>
+            <button onClick={() => submit()}>发表</button>
+            <button onClick={() => setOpen(false)}>取消</button>
           </div>
         ) : (
           <button className="link" onClick={() => setOpen(true)}>

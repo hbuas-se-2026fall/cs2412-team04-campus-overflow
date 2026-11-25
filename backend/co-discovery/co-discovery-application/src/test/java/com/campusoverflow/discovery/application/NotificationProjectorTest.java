@@ -22,7 +22,8 @@ class NotificationProjectorTest {
     private final NotificationTestFixtures.InMemoryNotifications notifications =
             new NotificationTestFixtures.InMemoryNotifications();
     private final NotificationTestFixtures.StubIdentity identity = new NotificationTestFixtures.StubIdentity()
-            .withUser(1, "小明").withUser(2, "小红").withUser(9, "王老师");
+            .withUser(1, "小明").withUser(2, "小红").withUser(9, "王老师")
+            .withCourseMember(1).withCourseMember(2).withCourseMember(9);
     private final NotificationTestFixtures.StubQa qa = new NotificationTestFixtures.StubQa()
             .withQuestion(7, 1, "红黑树插入后为什么必须旋转？");
 
@@ -88,6 +89,40 @@ class NotificationProjectorTest {
         assertThat(notifications.byRecipient(1)).isEmpty();
         assertThat(notifications.byRecipient(9).get(0).type()).isEqualTo(NotificationType.MENTIONED);
         assertThat(notifications.byRecipient(9).get(0).title()).contains("红黑树插入后为什么必须旋转？");
+    }
+
+    @Test
+    void mentionDoesNotLeakCourseQuestionTitleToNonMember() {
+        NotificationTestFixtures.StubIdentity id = new NotificationTestFixtures.StubIdentity()
+                .withUser(1, "小明").withUser(2, "小红").withUser(9, "王老师")
+                .withCourseMember(1).withCourseMember(2); // 9 不是课程成员
+        NotificationTestFixtures.StubQa q = new NotificationTestFixtures.StubQa()
+                .withQuestion(7, 1, "红黑树插入后为什么必须旋转？");
+        NotificationProjector p = new NotificationProjector(notifications, id, q);
+
+        CommentPostedEvent event = new CommentPostedEvent("e10", NOW, 60, 7, 1, "感谢 @王老师 @小红");
+
+        p.on(event);
+
+        // 课程成员（小红）能收到；非成员（王老师）收不到，避免泄露课程问题标题。
+        assertThat(notifications.byRecipient(2)).hasSize(1);
+        assertThat(notifications.byRecipient(9)).isEmpty();
+    }
+
+    @Test
+    void mentionOnPublicQuestionNotifiesNonMember() {
+        NotificationTestFixtures.StubIdentity id = new NotificationTestFixtures.StubIdentity()
+                .withUser(1, "小明").withUser(2, "小红"); // 2 不是任何课程成员
+        NotificationTestFixtures.StubQa q = new NotificationTestFixtures.StubQa()
+                .withPublicQuestion(7, 1, "公开问题标题");
+        NotificationProjector p = new NotificationProjector(notifications, id, q);
+
+        CommentPostedEvent event = new CommentPostedEvent("e11", NOW, 60, 7, 1, "@小红 请看");
+
+        p.on(event);
+
+        // 公开问题对所有人可见，非成员也能收到提及通知。
+        assertThat(notifications.byRecipient(2)).hasSize(1);
     }
 
     @Test

@@ -5,22 +5,36 @@ import type { Notification } from '../types';
 
 export function NotificationsPage() {
   const [items, setItems] = useState<Notification[] | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [size, setSize] = useState(20);
   const [error, setError] = useState('');
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [markingAll, setMarkingAll] = useState(false);
 
-  const load = () =>
-    api
-      .notifications()
+  const load = (pageNum = 1, append = false) => {
+    if (append) setLoadingMore(true);
+    return api
+      .notifications(pageNum, size)
       .then((p) => {
-        setItems(p.items);
+        setItems((prev) => (append && prev ? [...prev, ...p.items] : p.items));
+        setTotal(p.total);
+        setSize(p.size);
+        setPage(pageNum);
         setError('');
       })
       .catch((e: Error) => {
-        setItems([]);
+        if (!append) setItems([]);
         setError(e.message);
+      })
+      .finally(() => {
+        if (append) setLoadingMore(false);
       });
+  };
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const readOne = async (id: number) => {
@@ -34,6 +48,24 @@ export function NotificationsPage() {
     setItems((prev) => prev?.map((n) => (n.id === id ? { ...n, read: true } : n)) ?? prev);
   };
 
+  const markAll = async () => {
+    setMarkingAll(true);
+    setError('');
+    try {
+      await api.readAll();
+      await load();
+    } catch (e) {
+      setError((e as Error).message || '标记已读失败，请重试');
+    } finally {
+      setMarkingAll(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (loadingMore || (items && items.length >= total)) return;
+    void load(page + 1, true);
+  };
+
   const unread = items?.filter((n) => !n.read).length ?? 0;
 
   return (
@@ -44,10 +76,10 @@ export function NotificationsPage() {
       </div>
 
       <div className="actions">
-        <button onClick={() => api.readAll().then(load)} disabled={unread === 0}>
-          全部标记为已读
+        <button onClick={markAll} disabled={unread === 0 || markingAll}>
+          {markingAll ? '标记中…' : '全部标记为已读'}
         </button>
-        <button onClick={load}>刷新</button>
+        <button onClick={() => load()}>刷新</button>
       </div>
 
       {error && <p className="error">加载失败：{error}</p>}
@@ -81,6 +113,14 @@ export function NotificationsPage() {
           </li>
         ))}
       </ul>
+
+      {items !== null && items.length < total && (
+        <div className="actions">
+          <button onClick={loadMore} disabled={loadingMore}>
+            {loadingMore ? '加载中…' : `加载更多（已显示 ${items.length}/${total}）`}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
