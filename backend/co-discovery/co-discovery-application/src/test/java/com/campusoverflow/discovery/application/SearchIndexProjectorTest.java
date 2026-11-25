@@ -18,6 +18,7 @@ import com.campusoverflow.reputation.api.event.BountyOpenedEvent;
 import com.campusoverflow.shared.event.ProcessedEventStore;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -134,6 +135,8 @@ class SearchIndexProjectorTest {
         @Override public void markDeleted(long questionId) { deleted.add(questionId); }
         @Override public List<String> findTags(long questionId) { return List.of(); }
         @Override public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags,
+                                                                          boolean allCourses,
+                                                                          Collection<Long> visibleCourseIds,
                                                                           int limit) { return List.of(); }
     }
 }

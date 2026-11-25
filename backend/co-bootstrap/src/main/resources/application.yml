@@ -21,6 +21,8 @@ spring:
       hibernate.order_inserts: true
   flyway:
     enabled: true
+    # 允许补入 V202611230001（唯一索引前清理历史重复 OPEN）；已有库上该脚本是无操作。
+    out-of-order: true
     # 每个上下文拥有独立的迁移目录，互不干扰（平台表放在 platform）
     locations: classpath:db/migration/platform,classpath:db/migration/identity,classpath:db/migration/qa,classpath:db/migration/reputation,classpath:db/migration/discovery
   data:
