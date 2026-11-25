@@ -14,7 +14,7 @@ export PATH="$JAVA_HOME/bin:/e/java内容/IntelliJ IDEA Community Edition 2023.2
 mvn -o test -Djacoco.skip=true -DskipITs
 ```
 
-结果：**BUILD SUCCESS，211 个测试，0 失败 / 0 错误**。
+结果：**BUILD SUCCESS，214 个测试，0 失败 / 0 错误**。
 
 | 模块 | 测试数 |
 | --- | ---: |
@@ -24,7 +24,7 @@ mvn -o test -Djacoco.skip=true -DskipITs
 | `co-identity-infrastructure` | 1 |
 | `co-qa-domain` | 42 |
 | `co-qa-api` | 8 |
-| `co-qa-application` | 48 |
+| `co-qa-application` | 51 |
 | `co-qa-infrastructure` | 3 |
 | `co-reputation-domain` | 20 |
 | `co-reputation-application` | 39 |
