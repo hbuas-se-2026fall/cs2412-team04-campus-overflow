@@ -103,6 +103,23 @@ public class Question {
         this.acceptedAnswerId = answer.id();
     }
 
+    /**
+     * 撤销采纳标记。已采纳的回答被课程管理者删除后调用，使问题回到“待采纳”状态。
+     * 作者本人不能删除已采纳的回答（见 Answer.softDelete），故撤销同样只开放给管理者。
+     * 重复调用是幂等的：没有采纳标记时直接返回。
+     */
+    public void clearAccepted(Actor actor, boolean actorManagesCourse, Instant now) {
+        ensureNotDeleted();
+        if (!actorManagesCourse) {
+            throw new ForbiddenException("QA-3005", "只有课程管理者可以撤销采纳标记");
+        }
+        if (acceptedAnswerId == null) {
+            return;
+        }
+        this.acceptedAnswerId = null;
+        this.updatedAt = Objects.requireNonNull(now, "now");
+    }
+
     public void softDelete(Actor actor, boolean actorManagesCourse, Instant now) {
         ensureNotDeleted();
         if (!actorManagesCourse && actor.userId() != authorId) {

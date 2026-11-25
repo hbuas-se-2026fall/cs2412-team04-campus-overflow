@@ -2,6 +2,7 @@ package com.campusoverflow.qa.application.command;
 
 import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
+import com.campusoverflow.qa.api.event.AnswerAcceptanceClearedEvent;
 import com.campusoverflow.qa.api.event.AnswerEndorsedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.ContentDeletedEvent;
@@ -78,10 +79,21 @@ public class AnswerCommandService {
         Question question = loadQuestion(answer.questionId());
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
-        // 修正 4：最后一个参数改为 Instant
-        answer.softDelete(actor, manages, question.isAccepted(answer.id()), clock.instant());
+        boolean wasAccepted = question.isAccepted(answer.id());
+        answer.softDelete(actor, manages, wasAccepted, clock.instant());
         answers.save(answer);
         questions.adjustAnswerCount(question.id(), -1);
+
+        // QA-01：删掉已采纳回答后必须撤销采纳标记，否则问题永久卡在“已采纳但无回答可展示”，
+        // 提问者也无法重新采纳。Answer.softDelete 已保证只有管理者能删已采纳回答，这里直接撤销。
+        if (wasAccepted) {
+            question.clearAccepted(actor, manages, clock.instant());
+            questions.save(question);
+            events.publish(new AnswerAcceptanceClearedEvent(
+                    EventIds.next(), clock.instant(), answerId, question.id()
+            ));
+            audit.record("ANSWER_ACCEPTANCE_CLEARED", actor.userId(), "QUESTION", String.valueOf(question.id()), null);
+        }
 
         events.publish(new ContentDeletedEvent(
                 com.campusoverflow.shared.event.EventIds.next(), clock.instant(),

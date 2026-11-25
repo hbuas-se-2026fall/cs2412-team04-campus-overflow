@@ -16,6 +16,9 @@ public interface SearchIndex {
 
     void markAccepted(long questionId, Instant at);
 
+    /** 撤销采纳标记（已采纳回答被删除时调用），使问题在搜索结果里不再显示为已采纳。 */
+    void clearAccepted(long questionId, Instant at);
+
     void setBountyOpen(long questionId, boolean open);
 
     void markDeleted(long questionId);

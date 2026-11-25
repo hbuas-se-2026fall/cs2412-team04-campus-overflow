@@ -123,6 +123,33 @@ class QuestionQueryServiceTest {
     }
 
     @Test
+    @DisplayName("QA-01：acceptedAnswerId 指向已删除回答时按未采纳处理，可重新采纳且无幽灵标记")
+    void staleAcceptedAnswerIsTreatedAsNotAccepted() {
+        // 问题行仍指向 50，但 50 已被删除、不在可见回答列表里（只剩 51）
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "看叔叔节点颜色。", 3, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        assertThat(detail.acceptedAnswerId()).isNull();
+        assertThat(detail.permissions().canAccept()).isTrue();       // 提问者可以重新采纳
+        assertThat(detail.answers()).extracting(AnswerView::accepted).containsExactly(false);
+    }
+
+    @Test
+    @DisplayName("QA-01：仍有可见采纳回答时保持已采纳，不能重新采纳")
+    void visibleAcceptedAnswerKeepsAcceptedState() {
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "看叔叔节点颜色。", 3, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        assertThat(detail.acceptedAnswerId()).isEqualTo(50L);
+        assertThat(detail.permissions().canAccept()).isFalse();
+        assertThat(detail.answers().get(0).accepted()).isTrue();
+    }
+
+    @Test
     @DisplayName("详情：未登录时不查投票、权限全为 false")
     void detailForAnonymous() {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));

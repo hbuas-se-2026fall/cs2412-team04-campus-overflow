@@ -41,6 +41,13 @@ class EventFieldOrderContractTest {
     }
 
     @Test
+    @DisplayName("AnswerAcceptanceClearedEvent：eventId, occurredAt, answerId, questionId")
+    void answerAcceptanceClearedOrder() {
+        assertThat(componentsOf(AnswerAcceptanceClearedEvent.class)).containsExactly(
+                "eventId", "occurredAt", "answerId", "questionId");
+    }
+
+    @Test
     @DisplayName("AnswerEndorsedEvent：eventId, occurredAt, answerId, questionId, answerAuthorId, endorserId, questionTitle")
     void answerEndorsedOrder() {
         assertThat(componentsOf(AnswerEndorsedEvent.class)).containsExactly(

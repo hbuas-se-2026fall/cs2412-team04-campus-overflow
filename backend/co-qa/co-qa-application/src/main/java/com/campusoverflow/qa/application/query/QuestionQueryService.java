@@ -74,6 +74,13 @@ public class QuestionQueryService {
         List<AnswerRow> answerRows = readModel.findAnswers(questionId);
         List<CommentRow> commentRows = readModel.findComments(questionId);
 
+        // QA-01：读模型会过滤掉已软删除的回答。若 acceptedAnswerId 指向的回答已不在可见列表，
+        // 说明它已被删除，此时必须按“未采纳”处理，否则会出现“已采纳但无回答可展示”，
+        // 且提问者永远无法重新采纳。写入侧删除时也会清空该字段，这里再兜一层历史脏数据。
+        Long effectiveAcceptedId = row.acceptedAnswerId() != null
+                && answerRows.stream().anyMatch(a -> a.id() == row.acceptedAnswerId())
+                ? row.acceptedAnswerId() : null;
+
         Map<Long, UserSummary> users = loadUsers(row, answerRows, commentRows);
         boolean managesCourse = actorOrNull != null && identity.canManageCourse(actorOrNull.userId(), row.courseId());
 
@@ -94,7 +101,8 @@ public class QuestionQueryService {
         }
 
         List<AnswerView> answers = answerRows.stream()
-                .map(answer -> toAnswerView(answer, row, users, myVotes, answerComments, actorOrNull, managesCourse))
+                .map(answer -> toAnswerView(answer, effectiveAcceptedId, users, myVotes, answerComments, actorOrNull,
+                        managesCourse))
                 .sorted(Comparator.comparing(AnswerView::accepted).reversed()
                         .thenComparing(Comparator.comparingInt(AnswerView::score).reversed())
                         .thenComparing(AnswerView::createdAt))
@@ -105,9 +113,9 @@ public class QuestionQueryService {
 
         return new QuestionDetailView(row.id(), row.title(), row.body(), renderer.toSafeHtml(row.body()),
                 row.tags(), courseRefOf(row), AuthorView.of(row.authorId(), users.get(row.authorId())),
-                row.score(), row.answerCount(), row.viewCount(), row.acceptedAnswerId(),
+                row.score(), row.answerCount(), row.viewCount(), effectiveAcceptedId,
                 myVotes.getOrDefault("QUESTION:" + questionId, 0),
-                row.createdAt(), row.updatedAt(), permissionsOf(row, actorOrNull, managesCourse),
+                row.createdAt(), row.updatedAt(), permissionsOf(effectiveAcceptedId, row, actorOrNull, managesCourse),
                 questionComments, answers);
     }
 
@@ -123,10 +131,10 @@ public class QuestionQueryService {
                 row.viewCount(), row.acceptedAnswerId() != null, row.createdAt());
     }
 
-    private AnswerView toAnswerView(AnswerRow answer, QuestionRow question, Map<Long, UserSummary> users,
+    private AnswerView toAnswerView(AnswerRow answer, Long effectiveAcceptedId, Map<Long, UserSummary> users,
                                     Map<String, Integer> myVotes, Map<Long, List<CommentView>> answerComments,
                                     Actor actorOrNull, boolean managesCourse) {
-        boolean accepted = question.acceptedAnswerId() != null && question.acceptedAnswerId() == answer.id();
+        boolean accepted = effectiveAcceptedId != null && effectiveAcceptedId == answer.id();
         boolean canEdit = actorOrNull != null && (actorOrNull.is(answer.authorId()) || managesCourse);
         return new AnswerView(answer.id(), answer.body(), renderer.toSafeHtml(answer.body()),
                 AuthorView.of(answer.authorId(), users.get(answer.authorId())), answer.score(), accepted,
@@ -148,14 +156,15 @@ public class QuestionQueryService {
                         .orElseGet(() -> new CourseRefView(row.courseId(), null, null));
     }
 
-    private static PermissionsView permissionsOf(QuestionRow row, Actor actorOrNull, boolean managesCourse) {
+    private static PermissionsView permissionsOf(Long effectiveAcceptedId, QuestionRow row, Actor actorOrNull,
+                                                 boolean managesCourse) {
         if (actorOrNull == null) {
             return PermissionsView.NONE;
         }
         boolean author = actorOrNull.is(row.authorId());
         boolean canEdit = author || managesCourse;
         boolean canDelete = managesCourse || (author && row.answerCount() == 0);
-        boolean canAccept = (author || managesCourse) && row.acceptedAnswerId() == null;
+        boolean canAccept = (author || managesCourse) && effectiveAcceptedId == null;
         return new PermissionsView(canEdit, canDelete, canAccept, managesCourse);
     }
 

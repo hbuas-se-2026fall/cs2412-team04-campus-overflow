@@ -111,6 +111,7 @@ class DiscoveryQueryServiceTest {
         @Override public void adjustAnswerCount(long questionId, int delta, Instant at) { }
         @Override public void adjustScore(long questionId, int delta) { }
         @Override public void markAccepted(long questionId, Instant at) { }
+        @Override public void clearAccepted(long questionId, Instant at) { }
         @Override public void setBountyOpen(long questionId, boolean open) { }
         @Override public void markDeleted(long questionId) { }
     }

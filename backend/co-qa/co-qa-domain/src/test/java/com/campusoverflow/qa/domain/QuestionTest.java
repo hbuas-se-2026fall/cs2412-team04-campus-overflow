@@ -210,6 +210,38 @@ class QuestionTest {
         }
 
         @Test
+        void managerCanClearAcceptanceSoQuestionCanBeAcceptedAgain() {
+            Question q = persistedQuestion();
+            Answer a = persistedAnswer(q, OTHER.userId(), 50);
+            q.accept(a, ASKER, false);
+            assertThat(q.acceptedAnswerId()).isEqualTo(50L);
+
+            q.clearAccepted(TEACHER, true, NOW.plusSeconds(60));
+
+            assertThat(q.acceptedAnswerId()).isNull();
+            Answer b = persistedAnswer(q, 3, 51);
+            q.accept(b, ASKER, false);   // 撤销后应能重新采纳
+            assertThat(q.acceptedAnswerId()).isEqualTo(51L);
+        }
+
+        @Test
+        void nonManagerCannotClearAcceptance() {
+            Question q = persistedQuestion();
+            q.accept(persistedAnswer(q, OTHER.userId(), 50), ASKER, false);
+
+            assertThatThrownBy(() -> q.clearAccepted(OTHER, false, NOW.plusSeconds(60)))
+                    .isInstanceOf(ForbiddenException.class);
+            assertThat(q.acceptedAnswerId()).isEqualTo(50L);
+        }
+
+        @Test
+        void clearingAcceptanceIsIdempotent() {
+            Question q = persistedQuestion();
+            q.clearAccepted(TEACHER, true, NOW);
+            assertThat(q.acceptedAnswerId()).isNull();
+        }
+
+        @Test
         void answerMustBelongToQuestion() {
             Question q = persistedQuestion();
             Question another = persistedQuestion();

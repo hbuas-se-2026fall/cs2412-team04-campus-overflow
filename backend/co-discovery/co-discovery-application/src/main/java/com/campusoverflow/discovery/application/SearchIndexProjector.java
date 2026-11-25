@@ -6,6 +6,7 @@ package com.campusoverflow.discovery.application;
 
 import com.campusoverflow.discovery.domain.search.SearchDocument;
 import com.campusoverflow.discovery.domain.search.SearchIndex;
+import com.campusoverflow.qa.api.event.AnswerAcceptanceClearedEvent;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.ContentDeletedEvent;
@@ -90,6 +91,15 @@ public class SearchIndexProjector {
             return;
         }
         index.markAccepted(e.questionId(), e.occurredAt());
+    }
+
+    @EventListener
+    @Transactional
+    public void on(AnswerAcceptanceClearedEvent e) {
+        if (!firstTime(e)) {
+            return;
+        }
+        index.clearAccepted(e.questionId(), e.occurredAt());
     }
 
     @EventListener

@@ -3,8 +3,10 @@ package com.campusoverflow.qa.application.command;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.campusoverflow.qa.api.event.AnswerAcceptanceClearedEvent;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.qa.api.event.VoteCastEvent;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.CountingCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryAnswers;
@@ -90,6 +92,42 @@ class AnswerAndVoteServiceTest {
         assertThat(accepted.get(0).answerAuthorId()).isEqualTo(hong.userId());
         assertThat(accepted.get(0).acceptedById()).isEqualTo(ming.userId());
         assertThat(audit.actions).contains("ANSWER_ACCEPTED");
+    }
+
+    @Test
+    @DisplayName("QA-01：管理者删除已采纳回答后清空采纳标记，问题可重新采纳，并通知搜索投影")
+    void managerDeletesAcceptedAnswerClearsAcceptance() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+        answerService.accept(ming, questionId, answerId);
+        assertThat(questions.findById(questionId).orElseThrow().acceptedAnswerId()).isEqualTo(answerId);
+
+        identity.withCourseManager(9);
+        Actor teacher = new Actor(9, "王老师", Role.TEACHER);
+        answerService.delete(teacher, answerId);
+
+        assertThat(questions.findById(questionId).orElseThrow().acceptedAnswerId()).isNull();
+        List<AnswerAcceptanceClearedEvent> cleared = events.ofType(AnswerAcceptanceClearedEvent.class);
+        assertThat(cleared).hasSize(1);
+        assertThat(cleared.get(0).answerId()).isEqualTo(answerId);
+        assertThat(cleared.get(0).questionId()).isEqualTo(questionId);
+        List<ContentDeletedEvent> deleted = events.ofType(ContentDeletedEvent.class);
+        assertThat(deleted).hasSize(1);
+        assertThat(audit.actions).contains("ANSWER_ACCEPTANCE_CLEARED");
+
+        // 撤销后提问者可以重新采纳另一条回答
+        long anotherId = answerService.submit(hong, questionId, "另一个角度：从叔父节点是否为红色分情况讨论即可。");
+        answerService.accept(ming, questionId, anotherId);
+        assertThat(questions.findById(questionId).orElseThrow().acceptedAnswerId()).isEqualTo(anotherId);
+    }
+
+    @Test
+    @DisplayName("QA-01：删除普通回答不产生撤销采纳事件")
+    void deletingNormalAnswerDoesNotClearAcceptance() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+
+        answerService.delete(hong, answerId);
+
+        assertThat(events.ofType(AnswerAcceptanceClearedEvent.class)).isEmpty();
     }
 
     @Test
