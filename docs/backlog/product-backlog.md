@@ -2,6 +2,9 @@
 项目：CampusOverflow 校园问答平台
 范围：V3 完整 Product Backlog（48 条，Sprint 0 ~ Sprint 4）
 
+> 依赖关系（V3 §5.5）：见 [`dependency-map.md`](dependency-map.md)——含 Mermaid 总览图、关键前置关系表与可并行簇。
+> 估点口径：[`planning-poker.md`](planning-poker.md)；看板同步：[`board-sync-2026-11-17.md`](board-sync-2026-11-17.md)。
+
 | ID | 用户故事 | 史诗 | 优先级 | SP | 归属迭代 | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
 | PB-01 | 搭建团队私有仓库与分支保护 | E0 | Must | 3 | S0 | [#27](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/issues/27) |
@@ -102,4 +105,12 @@ PB-05（注册，3）+ PB-06（发布问题，5）+ PB-07（列表，3）+ PB-08
 | PB-09 | 提交回答 | `US-09-answer-question.feature` |
 | PB-10 | 采纳答案 | `US-08-accept-answer.feature` |
 | PB-11 | 投票 | `US-05-upvote-answer.feature` |
-| PB-15 | 评论 | `US-15-comment.feature` |
+| PB-12 | 编辑问题与回答（Must） | `US-12-edit-content.feature` |
+| PB-13 | 软删除问题与回答（Must） | `US-13-soft-delete.feature` |
+| PB-14 | 教师认证优质回答（Should） | 复用 `US-09-answer-question.feature` 的回答链路 + 领域用例 `AnswerTest.Endorsing`（认证仅管理者、未认证过、已删拒绝） |
+| PB-15 | 评论与一层回复 | `US-15-comment.feature` |
+| PB-16 | 热门标签浏览（Should） | 复用 `US-07-tag-filter.feature` 的热门标签场景（`TagController.popular`，limit 1–50） |
+| PB-17 | QaQueryApi 查询问题引用（Must） | 技术接口：`QaQueryApiImplTest` 4 条 + 悬赏/通知 E2E（`BountyAndAccountTest`、通知用例），无用户场景 |
+
+> 审计 W-03 收口（2026-11-25）：48 条 PBI 中 Must 项已全部有验收依据——用户可见功能补 `.feature`（PB-12/13），
+> 技术接口（PB-17）与 Should 项（PB-14/16）在表中明确"复用哪个场景/哪组测试"，不再存在无验收依据的 Must 项。
