@@ -42,7 +42,7 @@ backend/pom.xml（父 POM：依赖版本、JaCoCo、覆盖率门槛 0.70）
 上下文映射与事件风暴见：
 
 - [`docs/ddd/context-map.md`](../ddd/context-map.md) / [`context-map.png`](../ddd/context-map.png)
-- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 30 事件）
+- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 14 个实际事件，与 `events.md` 一致）
 - [`docs/ddd/glossary.md`](../ddd/glossary.md)（统一语言）
 
 ## 1.4 关键流程

@@ -20,7 +20,7 @@
 | 删除问题 | DeleteQuestion | 软删除问题；已删除问题统一 404 | 问答上下文(co-qa) |
 | 删除回答 | DeleteAnswer | 软删除回答；已采纳回答由管理者删除时释放采纳关系 | 问答上下文(co-qa) |
 | 声誉 | Reputation | 用户由互动行为累计的整数分；允许为负，等于账本流水之和 | 声誉上下文(co-reputation) |
-| 声誉流水 | ReputationLedgerEntry | 一次不可变的声誉变更记录 | 声誉上下文(co-reputation) |
+| 声誉流水 | LedgerEntry | 一次不可变的声誉变更记录（代码类名 `LedgerEntry`） | 声誉上下文(co-reputation) |
 | 徽章 | Badge | 用户达成条件后获得的荣誉标识；当前没有收回徽章功能 | 声誉上下文(co-reputation) |
 | 授予徽章 | GrantBadge | 系统按规则自动发放徽章 | 声誉上下文(co-reputation) |
 | 悬赏 | Bounty | 课程教师/助教在课程问题上冻结积分，采纳后发放给回答者 | 声誉上下文(co-reputation) |

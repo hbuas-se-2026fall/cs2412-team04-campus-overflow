@@ -1,27 +1,28 @@
 # Lab 3 领域建模：聚合识别与不变式
 
 > 负责人：青岑（Dev-1 后端视角）
-> 范围：Q&A + Reputation 限界上下文
-> 依据：`backend/co-qa/co-qa-domain` 与 `backend/co-reputation/co-reputation-domain`
-## 1. 领域事件（实际发布）
+> 范围：Q&A + Reputation 限界上下文，附 Discovery 的 Notification / SearchIndex 读模型
+> 依据：`backend/co-qa/co-qa-domain`、`backend/co-reputation/co-reputation-domain` 与 `backend/co-discovery/co-discovery-domain`
+## 1. 领域事件（实际发布，14 个）
 
 | # | 事件（过去时） | 中文 | 所属聚合 |
 |---|---|---|---|
-| 1 | QuestionPosted | 问题已发布 | Question |
-| 2 | QuestionEdited | 问题已编辑 | Question |
-| 3 | AnswerSubmitted | 回答已提交 | Answer |
-| 4 | AnswerAccepted | 回答已采纳 | Question |
-| 5 | AnswerEndorsed | 回答已认证 | Answer |
-| 6 | VoteCast | 投票已投出/变更 | Vote |
-| 7 | CommentPosted | 评论已发布 | Comment |
-| 8 | ContentDeleted | 问题/回答已删除 | Question / Answer |
-| 9 | ReputationChanged | 声誉已变更 | ReputationAccount |
-| 10 | BadgeAwarded | 徽章已授予 | Badge |
-| 11 | BountyOpened | 悬赏已发起 | Bounty |
-| 12 | BountyAwarded | 悬赏已发放 | Bounty |
-| 13 | BountyClosed | 悬赏已关闭/到期 | Bounty |
+| 1 | UserRegistered | 用户已注册 | User |
+| 2 | QuestionPosted | 问题已发布 | Question |
+| 3 | QuestionEdited | 问题已编辑 | Question |
+| 4 | AnswerSubmitted | 回答已提交 | Answer |
+| 5 | AnswerAccepted | 回答已采纳 | Question |
+| 6 | AnswerEndorsed | 回答已认证 | Answer |
+| 7 | VoteCast | 投票已投出/变更 | Vote |
+| 8 | CommentPosted | 评论已发布 | Comment |
+| 9 | ContentDeleted | 问题/回答已删除 | Question / Answer |
+| 10 | ReputationChanged | 声誉已变更 | ReputationAccount |
+| 11 | BadgeAwarded | 徽章已授予 | Badge |
+| 12 | BountyOpened | 悬赏已发起 | Bounty |
+| 13 | BountyAwarded | 悬赏已发放 | Bounty |
+| 14 | BountyClosed | 悬赏已关闭/到期 | Bounty |
 
-时间线：QuestionPosted → AnswerSubmitted → (VoteCast / CommentPosted) → AnswerAccepted / AnswerEndorsed → ReputationChanged；悬赏走 BountyOpened → BountyAwarded / BountyClosed。
+时间线：UserRegistered → QuestionPosted → AnswerSubmitted → (VoteCast / CommentPosted) → AnswerAccepted / AnswerEndorsed → ReputationChanged；悬赏走 BountyOpened → BountyAwarded / BountyClosed。
 
 ## 2. 命令-事件对照表
 

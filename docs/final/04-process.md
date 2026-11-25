@@ -21,7 +21,7 @@
 | Product Backlog | [`docs/backlog/product-backlog.md`](../backlog/product-backlog.md) | PB-01～48，含 PBI/Issue 映射 |
 | Sprint 计划与记录 | [`docs/scrum/`](../scrum/) | S0～S4（S4 记录已入库，仅两次彩排待执行） |
 | 燃尽图 | `sprint-1-burndown.png`、`sprint-2-burndown.png`、`sprint-3-burndown.png` | S1/S2/S3 已归档；S0 为启动周、S4 为发布周，未单独生成燃尽图（以发布检查/任务表替代） |
-| 评审与回顾 | S2/S3 有 Review/回顾；S1/S4 未执行正式 Review/回顾 | 原因：S1 时间压缩、采纳顺延到 S2；S4 以发布+彩排收口，回顾合并到答辩准备 |
+| 评审与回顾 | S2 有评审彩排与回顾，但未召开独立正式 Review；S1/S4 未执行正式 Review/回顾；S3 见其记录 | 原因：S1 时间压缩、采纳顺延到 S2；S2 用彩排替代 Review；S4 以发布+彩排收口，回顾合并到答辩准备 |
 | CI 运行记录 | GitHub Actions | 每次 PR 的后端/前端检查；v0.3.0 三阶段绿 |
 
 ## 4.3 协作与贡献

@@ -13,8 +13,8 @@ backend/pom.xml（父 POM）
 ├── co-bootstrap：启动入口、装配、安全链、Flyway
 ├── co-identity：用户、课程、角色、会话（完整参考实现）
 ├── co-qa：问题、回答、投票、评论、采纳
-├── co-reputation：声誉账本、徽章、悬赏
-└── co-discovery：搜索投影、通知、排行榜
+├── co-reputation：声誉账本、徽章、悬赏、排行榜
+└── co-discovery：搜索投影、通知
 
 每个上下文内部：
 
@@ -50,7 +50,7 @@ backend/pom.xml（父 POM）
 - **软删除**：ContentDeletedEvent；读模型过滤 `deleted_at`。
 - **原子计数**：score / answerCount / viewCount 由仓储原子 SQL 更新，不整行回写（ADR-008）。
 - **Flyway**：每个上下文独立迁移目录；`ddl-auto: none`。
-- **读模型**：Discovery 的 SearchDocument / Notification / Leaderboard 由事件投影维护。
+- **读模型**：Discovery 的 SearchDocument / Notification 由事件投影维护；Leaderboard 归 Reputation，由 `LeaderboardService` 维护 Redis ZSET。
 
 ## 6. 为什么这样分
 
