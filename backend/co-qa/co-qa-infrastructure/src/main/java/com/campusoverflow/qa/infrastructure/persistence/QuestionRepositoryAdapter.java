@@ -58,6 +58,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
     }
 
     @Override
+    public boolean adjustAnswerCountIfOpen(long questionId, int delta) {
+        return jpa.adjustAnswerCountIfOpen(questionId, delta) == 1;
+    }
+
+    @Override
     public void adjustScore(long questionId, int delta) {
         jpa.adjustScore(questionId, delta);
     }

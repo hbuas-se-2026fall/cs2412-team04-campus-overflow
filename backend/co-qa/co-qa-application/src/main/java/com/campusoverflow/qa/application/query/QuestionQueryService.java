@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,9 +66,9 @@ public class QuestionQueryService {
         }
 
         Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
-        Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, viewerId, page);
-        if (cached.isPresent()) {
-            return cached.get();
+        QuestionListCache.Lookup lookup = cache.get(courseId, viewerId, page);
+        if (lookup.value().isPresent()) {
+            return lookup.value().get();
         }
 
         PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);
@@ -84,7 +83,7 @@ public class QuestionQueryService {
 
         PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId()),
                 visibleAcceptedIds));
-        cache.put(courseId, viewerId, page, result);
+        cache.put(courseId, viewerId, page, lookup.generation(), result);
         return result;
     }
 

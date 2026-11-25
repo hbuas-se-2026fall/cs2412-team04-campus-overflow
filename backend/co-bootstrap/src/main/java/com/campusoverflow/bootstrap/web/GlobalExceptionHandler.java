@@ -57,7 +57,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ProblemDetail> integrity(DataIntegrityViolationException ex) {
-        log.info("数据完整性冲突: {}", ex.getMostSpecificCause().getMessage());
+        String cause = ex.getMostSpecificCause().getMessage();
+        log.info("数据完整性冲突: {}", cause);
+        if (cause != null && cause.contains("uk_bounty_open_question")) {
+            return problem(HttpStatus.CONFLICT, "REP-2002", "该问题已有进行中的悬赏");
+        }
         return problem(HttpStatus.CONFLICT, "SYS-409-DUPLICATE", "操作冲突（可能是重复提交），请刷新后重试");
     }
 
