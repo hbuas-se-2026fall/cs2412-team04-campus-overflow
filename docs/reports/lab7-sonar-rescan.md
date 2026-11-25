@@ -1,7 +1,8 @@
 # Lab 7 · SonarQube 重扫证据与执行单
 
-> 责任人：房国栋 / 陈明哲　状态：**已执行两轮复扫（2026-11-23 / 2026-11-24），但扫描的是 #209 之前的代码；#209 改为方案 A 后尚未复扫**
-> 最近一次实测以 [`lab5-lab7-quality-gates.md`](lab5-lab7-quality-gates.md) §4.6b 为准：**Bugs 3 → 1**、Coverage 70.5%、Quality Gate **Failed**（`User.java` 的 `java:S5998`）。#209 已按方案 A 改代码，**最终代码未再扫描**；因此当前事实仍是 Failed，不能写成已修复。
+> 责任人：房国栋 / 陈明哲　状态：✅ **已用最终代码完成复扫（2026-11-25 10:20），Quality Gate PASSED**
+> **最新证据请看 [`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)**（Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测 / 安全热点 100% 复核），截图归在 [`docs/screenshots/lab7-sonar-final/`](../screenshots/lab7-sonar-final/)。
+> 下文 §一～§六保留为**历史过程记录**（#209 之前的扫描），其中的 `70.3% / 173`、`70.5% / 174` 与「Gate Failed 1 Bug」均已过期。
 > 关联：`sonar-project.properties`、`backend/pom.xml`（sonar-maven-plugin）、`.github/workflows/ci.yml` 阶段 6
 > 同行评审清单：[`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md)
 
@@ -158,6 +159,17 @@ Pattern.compile("^[\\w.+-]+@[\\w.-]+$")   // 单字符类，无分组
 
 ## 六、结论
 
-重扫**已执行两轮**，但均对应 #209 之前的代码。最近结果 Coverage 70.5%、Vulnerabilities 0、**Bugs 1**，门禁 **Failed**。
-#209 已按方案 A 把正则改为 `^[\w.+-]+@[\w.-]+$` 并补域名校验，但**最终代码尚未重新扫描**——
-在拿到新的 SonarQube 截图前，Lab 7 的结论只能是「已定位、代码已改、待复扫」，不能写 PASSED。
+重扫共执行三轮：2026-11-23（#209 前，Bugs 1）、2026-11-24（#207 后，Bugs 1）、**2026-11-25（最终代码，Gate PASSED）**。
+
+**最终结论以 [`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md) 为准：**
+
+| 指标 | 最终值 |
+| --- | --- |
+| Quality Gate | **PASSED** |
+| Bugs | **0**（`S5998` 已归零） |
+| Vulnerabilities | **0** |
+| Security Hotspots | **0 待复核（100% 已复核）** |
+| Coverage | **73.8%**（1,645 行待覆盖） |
+| Unit Tests | **219 / 0 失败** |
+
+截图：[`docs/screenshots/lab7-sonar-final/`](../screenshots/lab7-sonar-final/)。

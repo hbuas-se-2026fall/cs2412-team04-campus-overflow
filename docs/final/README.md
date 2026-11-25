@@ -9,7 +9,7 @@
 | --- | --- | --- | --- | --- |
 | 1 | 架构 | [`01-architecture.md`](01-architecture.md) | 模块化单体 + 六边形分层、4 上下文、关键流程 | 已完成 |
 | 2 | 关键 ADR | [`02-adr.md`](02-adr.md) | ADR-001～010 一句话决策与影响 | 已完成 |
-| 3 | 质量证据 | [`03-quality.md`](03-quality.md) | 测试/覆盖率/CI/冒烟/缺陷台账 | 已完成（2026-11-24 口径；Sonar Gate 仍 Failed 1 Bug） |
+| 3 | 质量证据 | [`03-quality.md`](03-quality.md) | 测试/覆盖率/CI/冒烟/缺陷台账 | 已完成（2026-11-25 口径；Sonar Gate **PASSED**） |
 | 4 | 过程证据 | [`04-process.md`](04-process.md) | Sprint 0～4 记录、燃尽图、评审与回顾 | 已完成 |
 | 5 | 演示脚本 | [`05-demo-script.md`](05-demo-script.md) | ≤15 分钟彩排脚本与 ≤5 分钟视频分镜 | 已完成 |
 | 6 | 个人总结 | [`06-personal-summary-template.md`](06-personal-summary-template.md) | 模板 + 每人一份 | 已完成（5/5） |

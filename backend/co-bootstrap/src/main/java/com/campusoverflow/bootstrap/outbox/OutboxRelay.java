@@ -67,8 +67,8 @@ public class OutboxRelay {
         this.maxAttempts = maxAttempts;
         this.published = registry.counter("co_outbox_published_total");
         this.failed = registry.counter("co_outbox_failed_total");
-        Gauge.builder("co_outbox_backlog", this, r -> r.count("attempts < " + maxAttempts)).register(registry);
-        Gauge.builder("co_outbox_dead_letters", this, r -> r.count("attempts >= " + maxAttempts)).register(registry);
+        Gauge.builder("co_outbox_backlog", this, OutboxRelay::backlogCount).register(registry);
+        Gauge.builder("co_outbox_dead_letters", this, OutboxRelay::deadLetterCount).register(registry);
     }
 
     @Scheduled(fixedDelayString = "${co.outbox.poll-interval-ms:500}")
@@ -135,10 +135,27 @@ public class OutboxRelay {
         log.info("清理已投递的发件箱事件 {} 条", n);
     }
 
-    private double count(String condition) {
+    /** 待投递条数（尝试次数未到上限）。SQL 为字面量 + 占位符，阈值走绑定参数。 */
+    private double backlogCount() {
+        return countWhere("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND attempts < ?",
+                maxAttempts);
+    }
+
+    /** 死信条数（尝试次数已达上限）。 */
+    private double deadLetterCount() {
+        return countWhere("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND attempts >= ?",
+                maxAttempts);
+    }
+
+    /**
+     * 执行计数 SQL。
+     *
+     * <p>只接受调用方写死的字面量 SQL，阈值一律用 {@code ?} 绑定参数，不做字符串拼接——
+     * 既避免 SQL 注入风险（Sonar java:S2077），也让语句可被数据库预编译缓存。
+     */
+    private double countWhere(String sql, int threshold) {
         try {
-            Long n = jdbc.queryForObject("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND "
-                    + condition, Long.class);
+            Long n = jdbc.queryForObject(sql, Long.class, threshold);
             return n == null ? 0 : n;
         } catch (RuntimeException e) {
             return Double.NaN;

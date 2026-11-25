@@ -147,9 +147,10 @@ public class BountyService {
 
     @Transactional(readOnly = true)
     public Optional<BountyView> latest(long questionId) {
-        qa.findQuestion(questionId)
-                .filter(question -> !question.deleted())
-                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已被删除"));
+        // 先存在性守卫：用 isEmpty 而不是丢掉 orElseThrow 的返回值（Sonar java:S2201）。
+        if (qa.findQuestion(questionId).filter(question -> !question.deleted()).isEmpty()) {
+            throw new NotFoundException("QA-4001", "问题不存在或已被删除");
+        }
         return bounties.findLatestByQuestion(questionId).map(b -> new BountyView(
                 b.id(), b.questionId(), b.sponsorId(),
                 identity.findUser(b.sponsorId()).map(UserSummary::displayName).orElse("未知用户"),

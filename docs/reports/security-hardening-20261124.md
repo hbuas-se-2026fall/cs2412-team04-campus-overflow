@@ -38,7 +38,7 @@
 - 按方案 A 修改：`^[\\w.+-]+@[\\w.-]+$`，去掉所有重复分组；
 - `User.checkEmail` 补域名校验：不含 `..`、不以 `.` 开头/结尾、必须含 `.`；
 - `UserTest` 增加长 local part 与畸形域名用例。
-- ⚠️ 需要 SonarQube 机器复扫确认 `S5998` 归零；在复扫前 Lab 7 的门禁事实仍是 Failed（1 Bug）。
+- ✅ **已复扫确认归零（2026-11-25）**：最终代码上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
 
 ### DOC-01 / DOC-02
 
@@ -59,8 +59,12 @@
 
 ### LEADER-01 排行榜三 ZSET 部分失败重复计分
 
-`RedisLeaderboardStore.increment` 改为 **Lua 脚本一次原子更新** week/month/term 三个 ZSET 与 TTL：
-任一失败则三个都不生效，DB 事务回滚后重试不会只给 week 多加一次。
+`RedisLeaderboardStore.increment` 改为 **Lua 脚本一次提交** week/month/term 三个 ZSET 的 `ZINCRBY` 与 `EXPIRE`。
+
+> 措辞修订（2026-11-25，审计 F-13）：原「任一失败则三个都不生效」不严格。Lua 脚本保证的是**原子执行**
+> （三个命令之间不会被并发请求穿插），但脚本中途的命令错误（如第 2/3 个 key 类型不对、`WRONGTYPE`）
+> **不会回滚已执行的第 1 条 `ZINCRBY`**。此外 `LeaderboardService.on` 先写 `ProcessedEventStore`（DB）再写 Redis，
+> 若 DB 提交失败而 Redis 已累加，重试会再累加一次（at-least-once，存在重复计分窗口），该限制仍待后续收敛。
 
 ## 二、需要 PO / 产品决策（未改代码）
 

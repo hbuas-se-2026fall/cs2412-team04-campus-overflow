@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,8 +68,10 @@ public class QuestionQueryService {
 
         Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
         QuestionListCache.Lookup lookup = cache.get(courseId, viewerId, page);
-        if (lookup.value().isPresent()) {
-            return lookup.value().get();
+        // 先取出 Optional 再判空，避免对同一表达式重复求值（Sonar java:S3655）。
+        Optional<PageResult<QuestionSummaryView>> cached = lookup.value();
+        if (cached.isPresent()) {
+            return cached.get();
         }
 
         PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);

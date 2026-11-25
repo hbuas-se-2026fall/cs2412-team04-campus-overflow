@@ -17,10 +17,14 @@ $ docker tag docker.1ms.run/library/redis:7-alpine redis:7-alpine
 $ docker tag docker.1ms.run/library/mysql:8.0.39 mysql:8.0.39
 
 ## 3. 容器启动
-本机 3306 被已装的 MySQL80 服务占用，改用 override 文件把容器端口映射到 3307
-（deploy/docker-compose.local.yml，未提交；生产/CI 仍用 3306）
+本机 3306 被已装的 MySQL80 服务占用，当时用 override 文件把容器端口映射到 3307
+（deploy/docker-compose.local.yml，未提交）。
 
 $ docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.local.yml up -d mysql redis
+
+> 修订（2026-11-25，审计 F-09）：当时的 `deploy/docker-compose.local.yml` 临时覆盖文件现已不在仓库；
+> 本地开发改用 `deploy/docker-compose.dev.yml`（默认 3306、含 demo 数据，容器名 `co-mysql-dev` / `co-redis-dev`）。
+> 当前生产 compose 已强制要求 `--env-file deploy/.env`（DB_PASSWORD 等变量 `:?` 必填），不带 env 会失败。
 
 NAME       IMAGE            COMMAND                   SERVICE   CREATED         STATUS                   PORTS
 co-mysql   mysql:8.0.39     "docker-entrypoint.s…"   mysql     5 minutes ago   Up 5 minutes (healthy)   0.0.0.0:3307->3306/tcp, [::]:3307->3306/tcp

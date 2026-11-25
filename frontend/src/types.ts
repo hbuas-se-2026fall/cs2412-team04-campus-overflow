@@ -11,7 +11,7 @@ export interface Course {
   myRole: string | null;
 }
 
-export type CourseRole = 'STUDENT' | 'TEACHING_ASSISTANT' | 'TEACHER';
+export type CourseRole = 'STUDENT' | 'TA' | 'TEACHER';
 
 export interface Author {
   id: number;
@@ -149,7 +149,7 @@ export interface LedgerEntry {
   createdAt: string;
 }
 
-/** 悬赏（BountyView）；status: OPEN / AWARDED / CLOSED / EXPIRED */
+/** 悬赏（BountyView）；status: OPEN / AWARDED / EXPIRED（后端不产生 CLOSED） */
 export interface Bounty {
   id: number;
   questionId: number;

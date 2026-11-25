@@ -13,8 +13,13 @@
 即 README §5「Docker 一键部署」真正走的那条路径。
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d --build
+# 生产 compose 需要 deploy/.env 注入 DB_PASSWORD / MYSQL_ROOT_PASSWORD / CO_FIELD_KEY / CO_FIELD_MAC_KEY
+cp deploy/.env.example deploy/.env   # 填入真实值
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
 ```
+
+> 修订（2026-11-25，审计 F-09）：原版命令 `docker compose -f deploy/docker-compose.yml up -d --build`
+> 缺少 `--env-file`；当前生产 compose 对 `DB_PASSWORD` 等变量强制必填（`:?`），不带 env 会直接失败。
 
 ## 二、容器状态
 
@@ -130,6 +135,9 @@ services:
       - "3307:3306"
 ```
 
+> 修订（2026-11-25，审计 F-09）：`deploy/docker-compose.local.yml` 是当时的临时覆盖文件，现已不在仓库；
+> 本地开发改用 `deploy/docker-compose.dev.yml`（默认端口 3306、含 demo 数据），见 README §2.2。
+
 对应后端 `DB_PORT=3307`。仓库默认仍是 3306，`README.md` §2.2 已写明两种做法。
 
 > 踩坑提示：`ports` 在 compose 多文件合并时是**追加**而非替换，必须写 `!override`，
@@ -149,16 +157,22 @@ services:
 ## 七、复现步骤
 
 ```bash
-# 1) 起中间件（本机 3306 被占用时加 -f deploy/docker-compose.local.yml）
-docker compose -f deploy/docker-compose.yml up -d mysql redis
+# 0) 准备环境变量（当前生产 compose 必填）
+cp deploy/.env.example deploy/.env   # 填入 DB_PASSWORD / MYSQL_ROOT_PASSWORD / CO_FIELD_KEY / CO_FIELD_MAC_KEY
+
+# 1) 起中间件（本地开发可直接用 docker-compose.dev.yml，无需手写端口覆盖）
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d mysql redis
 
 # 2) 构建并启动全栈
-docker compose -f deploy/docker-compose.yml up -d --build
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
 
 # 3) 验证
-curl http://localhost:8080/actuator/health    # {"status":"UP",...}
+curl http://localhost/actuator/health    # {"status":"UP",...}（经 Nginx 白名单）
 curl -o /dev/null -w "%{http_code}\n" http://localhost   # 200
 curl "http://localhost/api/v1/questions?page=1&size=2"   # 问题列表 JSON
 
 # 4) 浏览器打开 http://localhost/
 ```
+
+> 修订（2026-11-25，审计 F-09）：生产 compose 不再把后端 8080 暴露到 host，健康检查改走
+> `http://localhost/actuator/health`；本地开发请用 `deploy/docker-compose.dev.yml`。
