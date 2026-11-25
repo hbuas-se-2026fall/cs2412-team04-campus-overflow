@@ -29,6 +29,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
     }
 
     @Override
+    public Optional<Question> findByIdForUpdate(long id) {
+        return jpa.findByIdForUpdate(id).map(QuestionRepositoryAdapter::toDomain);
+    }
+
+    @Override
     public Question save(Question q) {
         QuestionJpaEntity e = q.id() == null
                 ? new QuestionJpaEntity(q.authorId(), q.courseId(), q.createdAt())

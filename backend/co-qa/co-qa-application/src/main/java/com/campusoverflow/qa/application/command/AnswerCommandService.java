@@ -70,7 +70,9 @@ public class AnswerCommandService {
     @Transactional
     public void edit(Actor actor, long answerId, String body) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        // 拿到问题锁后重读回答：若并发删除已先提交，这里会按 404 失败，而不是用旧快照把它写回复活。
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         // 修正 3：参数类型改为 MarkdownBody 和 Instant
@@ -81,7 +83,9 @@ public class AnswerCommandService {
     @Transactional
     public void delete(Actor actor, long answerId) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        // 锁住问题后重读回答：与采纳串行化，确保 accepted 判断基于最新状态。
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         boolean accepted = question.isAccepted(answer.id());
@@ -108,7 +112,8 @@ public class AnswerCommandService {
 
     @Transactional
     public void accept(Actor actor, long questionId, long answerId) {
-        Question question = loadQuestion(questionId);
+        // 先锁问题再读回答：与“删除回答”使用同一把锁，二者不再能同时基于旧快照通过校验。
+        Question question = loadQuestionForUpdate(questionId);
         Answer answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
@@ -135,7 +140,8 @@ public class AnswerCommandService {
     @Transactional
     public void endorse(Actor actor, long answerId) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         answer.endorse(actor, manages); // 如果这里报错，说明 endorse 要的参数不一样
@@ -149,6 +155,13 @@ public class AnswerCommandService {
 
     private Question loadQuestion(long id) {
         return questions.findById(id)
+                .filter(q -> !q.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已删除"));
+    }
+
+    /** 状态变更（采纳 / 删除 / 编辑 / 认证回答）统一先锁问题行。 */
+    private Question loadQuestionForUpdate(long id) {
+        return questions.findByIdForUpdate(id)
                 .filter(q -> !q.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已删除"));
     }
