@@ -90,6 +90,16 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public boolean adjustAnswerCountIfOpen(long questionId, int delta) {
+            Question question = store.get(questionId);
+            if (question == null || question.isDeleted()) {
+                return false;
+            }
+            answerCountDeltas.merge(questionId, delta, Integer::sum);
+            return true;
+        }
+
+        @Override
         public void adjustScore(long questionId, int delta) {
             scoreDeltas.merge(questionId, delta, Integer::sum);
         }
@@ -235,12 +245,13 @@ public final class QaTestFixtures {
         public int invalidations;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
-            return Optional.empty();
+        public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+            return new Lookup(0L, Optional.empty());
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+        public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+                        PageResult<QuestionSummaryView> value) {
         }
 
         @Override
@@ -361,33 +372,36 @@ public final class QaTestFixtures {
         public int hits;
         public int misses;
         public int invalidations;
+        private long generation;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+        public Lookup get(Long courseId, Long viewerId, PageRequest page) {
             Optional<PageResult<QuestionSummaryView>> value =
-                    Optional.ofNullable(store.get(key(courseId, viewerId, page)));
+                    Optional.ofNullable(store.get(key(courseId, viewerId, page, generation)));
             if (value.isPresent()) {
                 hits++;
             } else {
                 misses++;
             }
-            return value;
+            return new Lookup(generation, value);
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
-            store.put(key(courseId, viewerId, page), value);
+        public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+                        PageResult<QuestionSummaryView> value) {
+            store.put(key(courseId, viewerId, page, generation), value);
         }
 
         @Override
         public void invalidateAll() {
             invalidations++;
+            generation++;
             store.clear();
         }
 
-        private static String key(Long courseId, Long viewerId, PageRequest page) {
-            return (courseId == null ? "all" : courseId) + ":" + (viewerId == null ? "anon" : viewerId)
-                    + ":" + page.page() + ":" + page.size();
+        private static String key(Long courseId, Long viewerId, PageRequest page, long generation) {
+            return generation + ":" + (courseId == null ? "all" : courseId) + ":"
+                    + (viewerId == null ? "anon" : viewerId) + ":" + page.page() + ":" + page.size();
         }
     }
 }

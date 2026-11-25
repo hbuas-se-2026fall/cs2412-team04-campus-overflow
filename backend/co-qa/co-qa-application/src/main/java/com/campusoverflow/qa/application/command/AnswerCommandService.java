@@ -12,6 +12,7 @@ import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
@@ -53,7 +54,9 @@ public class AnswerCommandService {
 
         Answer answer = Answer.submit(question, actor.userId(), MarkdownBody.ofAnswer(body), clock.instant());
         answers.save(answer);
-        questions.adjustAnswerCount(questionId, 1);
+        if (!questions.adjustAnswerCountIfOpen(questionId, 1)) {
+            throw new BusinessRuleException("QA-1020", "问题已删除");
+        }
 
         events.publish(new AnswerSubmittedEvent(
                 EventIds.next(), clock.instant(),

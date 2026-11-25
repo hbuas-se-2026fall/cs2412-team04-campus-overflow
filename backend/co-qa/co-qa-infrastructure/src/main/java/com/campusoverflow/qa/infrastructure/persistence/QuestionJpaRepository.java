@@ -18,6 +18,11 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionJpaEntity, 
     int adjustAnswerCount(@Param("id") long id, @Param("delta") int delta);
 
     @Modifying
+    @Query("update QuestionJpaEntity q set q.answerCount = q.answerCount + :delta "
+            + "where q.id = :id and q.deletedAt is null")
+    int adjustAnswerCountIfOpen(@Param("id") long id, @Param("delta") int delta);
+
+    @Modifying
     @Query("update QuestionJpaEntity q set q.score = q.score + :delta where q.id = :id")
     int adjustScore(@Param("id") long id, @Param("delta") int delta);
 }

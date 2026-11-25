@@ -8,6 +8,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryListCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryReadModel;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubRenderer;
+import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
@@ -15,6 +16,8 @@ import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -70,6 +73,35 @@ class QuestionQueryServiceTest {
         assertThat(readModel.listCalls).hasSize(1);   // 第二次没有再查库
         assertThat(cache.misses).isEqualTo(1);
         assertThat(cache.hits).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("列表：回填缓存必须使用读取时的代际号，避免旧快照写进新代")
+    void listWritesBackWithGenerationSeenAtRead() {
+        AtomicLong putGeneration = new AtomicLong(-1);
+        QuestionListCache fixedGenerationCache = new QuestionListCache() {
+            @Override
+            public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+                return new Lookup(7L, Optional.empty());
+            }
+
+            @Override
+            public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+                            PageResult<QuestionSummaryView> value) {
+                putGeneration.set(generation);
+            }
+
+            @Override
+            public void invalidateAll() {
+            }
+        };
+        QuestionQueryService serviceWithFixedCache = new QuestionQueryService(readModel, identity,
+                new StubRenderer(), viewCounter, fixedGenerationCache);
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+
+        serviceWithFixedCache.list(null, PAGE, ming);
+
+        assertThat(putGeneration).hasValue(7L);
     }
 
     @Test

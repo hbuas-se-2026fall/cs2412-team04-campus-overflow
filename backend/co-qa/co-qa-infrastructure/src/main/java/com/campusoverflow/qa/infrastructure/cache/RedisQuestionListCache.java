@@ -37,21 +37,24 @@ public class RedisQuestionListCache implements QuestionListCache {
     }
 
     @Override
-    public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+    public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+        long generation = readGeneration();
         try {
-            String json = redis.opsForValue().get(key(courseId, viewerId, page));
-            return json == null ? Optional.empty() : Optional.of(mapper.readValue(json, TYPE));
+            String json = redis.opsForValue().get(key(courseId, viewerId, page, generation));
+            return new Lookup(generation,
+                    json == null ? Optional.empty() : Optional.of(mapper.readValue(json, TYPE)));
         } catch (Exception e) {
             log.debug("列表缓存读取失败，回源数据库: {}", e.getMessage());
-            return Optional.empty();
+            return new Lookup(generation, Optional.empty());
         }
     }
 
     @Override
-    public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+    public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+                    PageResult<QuestionSummaryView> value) {
         try {
             Duration ttl = Duration.ofSeconds(60L + ThreadLocalRandom.current().nextInt(15)); // TTL 抖动防雪崩
-            redis.opsForValue().set(key(courseId, viewerId, page), mapper.writeValueAsString(value), ttl);
+            redis.opsForValue().set(key(courseId, viewerId, page, generation), mapper.writeValueAsString(value), ttl);
         } catch (Exception e) {
             log.debug("列表缓存写入失败: {}", e.getMessage());
         }
@@ -78,9 +81,18 @@ public class RedisQuestionListCache implements QuestionListCache {
         }
     }
 
-    private String key(Long courseId, Long viewerId, PageRequest page) {
-        String gen = Optional.ofNullable(redis.opsForValue().get(GEN_KEY)).orElse("0");
-        return "qa:list:" + gen + ":" + (courseId == null ? "all" : courseId)
+    private long readGeneration() {
+        try {
+            String raw = redis.opsForValue().get(GEN_KEY);
+            return raw == null ? 0L : Long.parseLong(raw);
+        } catch (Exception e) {
+            log.debug("列表缓存代际读取失败，按 0 处理: {}", e.getMessage());
+            return 0L;
+        }
+    }
+
+    private String key(Long courseId, Long viewerId, PageRequest page, long generation) {
+        return "qa:list:" + generation + ":" + (courseId == null ? "all" : courseId)
                 + ":" + (viewerId == null ? "anon" : viewerId) + ":" + page.page() + ":" + page.size();
     }
 }

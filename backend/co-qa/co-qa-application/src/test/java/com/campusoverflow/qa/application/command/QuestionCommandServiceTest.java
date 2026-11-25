@@ -220,6 +220,7 @@ class QuestionCommandServiceTest {
         service.delete(ming, id);
 
         assertThat(questions.findById(id).orElseThrow().isDeleted()).isTrue();
+        assertThat(tags.usage).containsEntry("java", 0);
         ContentDeletedEvent event = events.ofType(ContentDeletedEvent.class).get(0);
         assertThat(event.targetType()).isEqualTo("QUESTION");
         assertThat(event.targetId()).isEqualTo(id);
