@@ -37,10 +37,10 @@ public class RedisQuestionListCache implements QuestionListCache {
     }
 
     @Override
-    public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+    public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
         long generation = readGeneration();
         try {
-            String json = redis.opsForValue().get(key(courseId, viewerId, page, generation));
+            String json = redis.opsForValue().get(key(courseId, viewerId, page, scope, generation));
             return new Lookup(generation,
                     json == null ? Optional.empty() : Optional.of(mapper.readValue(json, TYPE)));
         } catch (Exception e) {
@@ -50,11 +50,12 @@ public class RedisQuestionListCache implements QuestionListCache {
     }
 
     @Override
-    public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+    public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
                     PageResult<QuestionSummaryView> value) {
         try {
             Duration ttl = Duration.ofSeconds(60L + ThreadLocalRandom.current().nextInt(15)); // TTL 抖动防雪崩
-            redis.opsForValue().set(key(courseId, viewerId, page, generation), mapper.writeValueAsString(value), ttl);
+            redis.opsForValue().set(key(courseId, viewerId, page, scope, generation),
+                    mapper.writeValueAsString(value), ttl);
         } catch (Exception e) {
             log.debug("列表缓存写入失败: {}", e.getMessage());
         }
@@ -91,8 +92,9 @@ public class RedisQuestionListCache implements QuestionListCache {
         }
     }
 
-    private String key(Long courseId, Long viewerId, PageRequest page, long generation) {
+    private String key(Long courseId, Long viewerId, PageRequest page, String scope, long generation) {
         return "qa:list:" + generation + ":" + (courseId == null ? "all" : courseId)
-                + ":" + (viewerId == null ? "anon" : viewerId) + ":" + page.page() + ":" + page.size();
+                + ":" + (viewerId == null ? "anon" : viewerId) + ":" + scope
+                + ":" + page.page() + ":" + page.size();
     }
 }

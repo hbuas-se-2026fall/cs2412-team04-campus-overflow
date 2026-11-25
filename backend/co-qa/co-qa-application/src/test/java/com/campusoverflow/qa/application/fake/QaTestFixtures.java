@@ -55,9 +55,16 @@ public final class QaTestFixtures {
         public final Map<Long, Integer> answerCountDeltas = new HashMap<>();
         public final Map<Long, Integer> scoreDeltas = new HashMap<>();
         public int saves;
+        public int lockedLoads;
 
         @Override
         public Optional<Question> findById(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public Optional<Question> findByIdForUpdate(long id) {
+            lockedLoads++;
             return Optional.ofNullable(store.get(id));
         }
 
@@ -245,12 +252,12 @@ public final class QaTestFixtures {
         public int invalidations;
 
         @Override
-        public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
             return new Lookup(0L, Optional.empty());
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
                         PageResult<QuestionSummaryView> value) {
         }
 
@@ -375,9 +382,9 @@ public final class QaTestFixtures {
         private long generation;
 
         @Override
-        public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
             Optional<PageResult<QuestionSummaryView>> value =
-                    Optional.ofNullable(store.get(key(courseId, viewerId, page, generation)));
+                    Optional.ofNullable(store.get(key(courseId, viewerId, page, scope, generation)));
             if (value.isPresent()) {
                 hits++;
             } else {
@@ -387,9 +394,9 @@ public final class QaTestFixtures {
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
                         PageResult<QuestionSummaryView> value) {
-            store.put(key(courseId, viewerId, page, generation), value);
+            store.put(key(courseId, viewerId, page, scope, generation), value);
         }
 
         @Override
@@ -399,9 +406,10 @@ public final class QaTestFixtures {
             store.clear();
         }
 
-        private static String key(Long courseId, Long viewerId, PageRequest page, long generation) {
+        private static String key(Long courseId, Long viewerId, PageRequest page, String scope, long generation) {
             return generation + ":" + (courseId == null ? "all" : courseId) + ":"
-                    + (viewerId == null ? "anon" : viewerId) + ":" + page.page() + ":" + page.size();
+                    + (viewerId == null ? "anon" : viewerId) + ":" + scope + ":"
+                    + page.page() + ":" + page.size();
         }
     }
 }

@@ -1,9 +1,12 @@
 package com.campusoverflow.qa.infrastructure.cache;
 
 import com.campusoverflow.qa.application.port.ViewCounter;
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -24,6 +27,14 @@ public class RedisViewCounter implements ViewCounter {
     static final String PENDING = "qa:views:pending";
     /** 上一轮摘走但尚未落库的批次；失败后由下一轮合并回 PENDING。 */
     static final String FLUSHING = PENDING + ":flushing";
+    /** 批次 ID 存在 hash 内，和计数一起被 RENAME 摘走；落库时与计数同一事务写入已应用表。 */
+    static final String BATCH_ID_FIELD = "__batch_id";
+    /** 防止多实例同时执行“recover → rename → 落库”，避免互相覆盖 FLUSHING。 */
+    private static final String FLUSH_LOCK = PENDING + ":lock";
+    private static final Duration FLUSH_LOCK_TTL = Duration.ofMinutes(2);
+    private static final String MARK_APPLIED_SQL =
+            "INSERT INTO qa_view_batch (batch_id, applied_at) VALUES (?, NOW(6))";
+    private static final String IS_APPLIED_SQL = "SELECT COUNT(*) FROM qa_view_batch WHERE batch_id = ?";
 
     private final StringRedisTemplate redis;
     private final JdbcTemplate jdbc;
@@ -46,14 +57,35 @@ public class RedisViewCounter implements ViewCounter {
 
     @Scheduled(fixedDelayString = "${co.qa.view-flush-interval-ms:60000}")
     public void flush() {
+        String token = UUID.randomUUID().toString();
+        Boolean acquired = redis.opsForValue().setIfAbsent(FLUSH_LOCK, token, FLUSH_LOCK_TTL);
+        if (!Boolean.TRUE.equals(acquired)) {
+            return;
+        }
+        try {
+            flushLocked();
+        } finally {
+            try {
+                redis.delete(FLUSH_LOCK);
+            } catch (RuntimeException e) {
+                log.warn("浏览计数刷新锁释放失败，等待 TTL 自动过期: {}", e.getMessage());
+            }
+        }
+    }
+
+    private void flushLocked() {
         try {
             // 上轮落库失败时先把遗留在 FLUSHING 的计数合并回 PENDING，避免永久丢失。
             recoverFailedBatch();
             if (!Boolean.TRUE.equals(redis.hasKey(PENDING))) {
                 return;
             }
+            String batchId = UUID.randomUUID().toString();
+            // 批次 ID 与计数在同一个 hash 中，RENAME 会一起摘走。
+            redis.opsForHash().put(PENDING, BATCH_ID_FIELD, batchId);
             redis.rename(PENDING, FLUSHING); // 原子地“摘走”当前批次，新增量写入新的 PENDING
-            Map<Object, Object> entries = redis.opsForHash().entries(FLUSHING);
+            Map<Object, Object> entries = new HashMap<>(redis.opsForHash().entries(FLUSHING));
+            entries.remove(BATCH_ID_FIELD);
             if (entries.isEmpty()) {
                 redis.delete(FLUSHING);
                 return;
@@ -71,9 +103,12 @@ public class RedisViewCounter implements ViewCounter {
                 redis.delete(FLUSHING);
                 return;
             }
-            // 批次必须原子提交；否则“部分行已加、整个批次又回滚重试”会重复计数。
-            transaction.executeWithoutResult(status ->
-                    jdbc.batchUpdate("UPDATE qa_question SET view_count = view_count + ? WHERE id = ?", args));
+            // 计数更新与“已应用批次”标记必须同一事务提交：
+            // 提交成功后即使 Redis 清理失败/进程崩溃，下一轮也不会把同一批再写一次。
+            transaction.executeWithoutResult(status -> {
+                jdbc.batchUpdate("UPDATE qa_question SET view_count = view_count + ? WHERE id = ?", args);
+                jdbc.update(MARK_APPLIED_SQL, batchId);
+            });
             redis.delete(FLUSHING);
         } catch (RuntimeException e) {
             // 保留 FLUSHING；下一轮 recoverFailedBatch() 会合并回 PENDING 后重试。
@@ -86,7 +121,14 @@ public class RedisViewCounter implements ViewCounter {
         if (!Boolean.TRUE.equals(redis.hasKey(FLUSHING))) {
             return;
         }
-        Map<Object, Object> entries = redis.opsForHash().entries(FLUSHING);
+        Object appliedBatch = redis.opsForHash().get(FLUSHING, BATCH_ID_FIELD);
+        if (appliedBatch != null && isApplied(appliedBatch.toString())) {
+            // 数据库已提交但上次没来得及删 FLUSHING：直接丢弃，绝不能回灌。
+            redis.delete(FLUSHING);
+            return;
+        }
+        Map<Object, Object> entries = new HashMap<>(redis.opsForHash().entries(FLUSHING));
+        entries.remove(BATCH_ID_FIELD);
         for (Map.Entry<Object, Object> entry : entries.entrySet()) {
             try {
                 long delta = Long.parseLong(entry.getValue().toString());
@@ -99,5 +141,10 @@ public class RedisViewCounter implements ViewCounter {
             redis.opsForHash().delete(FLUSHING, entry.getKey());
         }
         redis.delete(FLUSHING);
+    }
+
+    private boolean isApplied(String batchId) {
+        Integer count = jdbc.queryForObject(IS_APPLIED_SQL, Integer.class, batchId);
+        return count != null && count > 0;
     }
 }

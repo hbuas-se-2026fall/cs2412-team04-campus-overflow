@@ -81,12 +81,12 @@ class QuestionQueryServiceTest {
         AtomicLong putGeneration = new AtomicLong(-1);
         QuestionListCache fixedGenerationCache = new QuestionListCache() {
             @Override
-            public Lookup get(Long courseId, Long viewerId, PageRequest page) {
+            public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
                 return new Lookup(7L, Optional.empty());
             }
 
             @Override
-            public void put(Long courseId, Long viewerId, PageRequest page, long generation,
+            public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
                             PageResult<QuestionSummaryView> value) {
                 putGeneration.set(generation);
             }

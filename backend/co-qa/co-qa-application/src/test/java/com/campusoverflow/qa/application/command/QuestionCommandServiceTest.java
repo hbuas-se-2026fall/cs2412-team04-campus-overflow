@@ -288,6 +288,20 @@ class QuestionCommandServiceTest {
     }
 
     @Test
+    @DisplayName("编辑/删除问题前先锁问题行，避免与并发删除互相覆盖")
+    void stateChangesUseLockedRead() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+
+        service.edit(ming, id, new EditQuestionCommand("红黑树插入后如何判断旋转方向？",
+                "补充说明：希望在回答里给出一个必须双旋的反例，谢谢。", List.of("java")));
+        assertThat(questions.lockedLoads).isEqualTo(1);
+
+        service.delete(ming, id);
+        assertThat(questions.lockedLoads).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("删除：别人的问题删不掉；已有回答时作者也删不掉，但课程管理者可以")
     void deleteHonoursAuthorAndAnswerCountRules() {
         long id = service.post(ming, command("红黑树插入后为什么必须旋转？",

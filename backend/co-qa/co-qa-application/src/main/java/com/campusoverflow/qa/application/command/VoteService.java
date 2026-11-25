@@ -62,6 +62,20 @@ public class VoteService {
         }
 
         Target target = resolve(type, targetId);
+        // 对所有投票先锁住所属问题行：首票也走同一把锁，避免并发首次投票同时插入、
+        // 其中一方被唯一键拒绝而返回 409（与 PUT 幂等语义不符）。
+        com.campusoverflow.qa.domain.Question locked = questions.findByIdForUpdate(target.questionId())
+                .filter(question -> !question.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+        if (type == TargetType.ANSWER) {
+            // 锁后重读回答：与删除回答串行化，避免给已删回答投票。
+            Answer fresh = answers.findById(targetId)
+                    .filter(answer -> !answer.isDeleted())
+                    .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
+            target = new Target(fresh.authorId(), fresh.questionId(), locked.courseId());
+        } else {
+            target = new Target(locked.authorId(), locked.id(), locked.courseId());
+        }
         requireCanParticipate(target.courseId(), actor);
         if (actor.userId() == target.authorId()) {
             throw new BusinessRuleException("QA-1015", "不能给自己的内容投票");

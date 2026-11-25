@@ -6,6 +6,12 @@ import java.util.Optional;
 public interface QuestionRepository {
     Optional<Question> findById(long id);
 
+    /**
+     * 以行级悲观锁读取问题，供“采纳 / 删除回答 / 编辑 / 删除问题”等状态变更使用。
+     * 同一问题的这些写操作由此串行化，避免基于旧快照同时通过校验。
+     */
+    Optional<Question> findByIdForUpdate(long id);
+
     Question save(Question question);
 
     /**

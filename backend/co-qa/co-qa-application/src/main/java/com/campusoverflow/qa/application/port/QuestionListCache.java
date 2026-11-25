@@ -15,9 +15,9 @@ public interface QuestionListCache {
     record Lookup(long generation, Optional<PageResult<QuestionSummaryView>> value) {
     }
 
-    Lookup get(Long courseId, Long viewerId, PageRequest page);
+    Lookup get(Long courseId, Long viewerId, PageRequest page, String scope);
 
-    void put(Long courseId, Long viewerId, PageRequest page, long generation,
+    void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
              PageResult<QuestionSummaryView> value);
 
     void invalidateAll();

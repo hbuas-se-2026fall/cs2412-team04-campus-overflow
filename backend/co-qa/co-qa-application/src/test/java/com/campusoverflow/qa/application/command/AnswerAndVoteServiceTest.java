@@ -105,6 +105,8 @@ class AnswerAndVoteServiceTest {
         Question question = questions.findById(questionId).orElseThrow();
         assertThat(question.acceptedAnswerId()).isNull();
         assertThat(question.isAccepted(answerId)).isFalse();
+        // 提交时 +1、删除时 -1，净增量为 0；JPA 适配器还需保证 save 不回写旧 answerCount。
+        assertThat(questions.answerCountDeltas).containsEntry(questionId, 0);
     }
 
     @Test
@@ -124,6 +126,18 @@ class AnswerAndVoteServiceTest {
         Question question = questions.findById(questionId).orElseThrow();
         assertThat(question.acceptedAnswerId()).isEqualTo(freshId);
         assertThat(events.ofType(AnswerAcceptedEvent.class)).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("采纳与删除回答共用问题行锁，避免基于旧快照同时通过校验")
+    void acceptAndDeleteUseTheSameQuestionLock() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+
+        answerService.accept(ming, questionId, answerId);
+        answerService.delete(new Actor(9, "王老师", Role.TEACHER), answerId);
+
+        assertThat(questions.lockedLoads).isEqualTo(2);
+        assertThat(questions.findById(questionId).orElseThrow().acceptedAnswerId()).isNull();
     }
 
     @Test
@@ -152,6 +166,8 @@ class AnswerAndVoteServiceTest {
         assertThat(voteEvents).hasSize(2);
         assertThat(voteEvents.get(1).oldValue()).isEqualTo(1);
         assertThat(voteEvents.get(1).newValue()).isEqualTo(-1);
+        // 每次投票（含首次）都先锁问题行，首票并发不会同时插入。
+        assertThat(questions.lockedLoads).isEqualTo(3);
     }
 
     @Test

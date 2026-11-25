@@ -99,7 +99,7 @@ public class QuestionCommandService {
 
     @Transactional
     public void edit(Actor actor, long questionId, EditQuestionCommand cmd) {
-        Question question = load(questionId);
+        Question question = loadForUpdate(questionId);
 
         // 权限判定入口在应用层（要不要查课程成员关系），真正的拒绝由聚合方法抛出
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
@@ -130,7 +130,7 @@ public class QuestionCommandService {
 
     @Transactional
     public void delete(Actor actor, long questionId) {
-        Question question = load(questionId);
+        Question question = loadForUpdate(questionId);
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
         Instant now = clock.instant();
 
@@ -161,6 +161,13 @@ public class QuestionCommandService {
     /** 统一 404：不存在与已软删除对外表现一致，避免泄露“这条内容曾经存在”。 */
     private Question load(long questionId) {
         return questions.findById(questionId)
+                .filter(question -> !question.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
+    }
+
+    /** 状态变更前对问题行加锁，避免“编辑 / 删除”基于同一旧快照同时通过校验。 */
+    private Question loadForUpdate(long questionId) {
+        return questions.findByIdForUpdate(questionId)
                 .filter(question -> !question.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
     }
