@@ -18,6 +18,7 @@
 | --- | --- | --- | --- |
 | T4-02 | `AdminUserService.disable` + `PUT /api/v1/admin/users/{userId}/disable` + 会话撤销 + 审计 + 测试 | 魏志国 | ✅ #127；验证见 [`s4-disable-account.md`](../reports/s4-disable-account.md) |
 | T4-04 | Grafana 四面板 + `co_reputation_mismatches` 定时刷新 + HTTP P95 直方图 | 陈明哲 | ✅ #128；实测见 [`t4-04-observability.md`](../reports/t4-04-observability.md) |
+| T4-03 | Markdown 实时预览 + 代码高亮（PB-42，S4/Should/3 SP） | 房国栋 | ✅ #151 |
 | T4-05 | 管理页：待认证学生、认证、建教职工、改角色 | 青岑 | ✅ #129；截图 `docs/final/screenshots/admin/` |
 | T4-07 | README、ADR-010、用户手册 | 青岑 | ✅ #130 |
 | T4-01 | develop→main 发布 PR、v1.0.0 tag、GitHub Release、部署验证 | 陈明哲（SM）/ 魏志国（PO 审批） | ✅ PR #135 → `10925c7`；tag `v1.0.0`；[Release](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0) |

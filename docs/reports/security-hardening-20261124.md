@@ -1,7 +1,7 @@
 # 安全与质量审计修复记录（2026-11-24）
 
 > 对应组员审计：SEC-01/02、SEC-03、SEC-04、QUAL-01、DOC-01、QA-02、QA-03、DOC-02、CACHE-02、PRIV-01、LEADER-01
-> 分支：`fix/security-hardening-1124`；目标：develop（main 后续同步）
+> 分支：`fix/security-hardening-1124`（PR #209 → #210）；状态：main 已同步安全修复，后续 #216 修复 QA-03。
 
 ## 一、已修复
 
@@ -46,7 +46,7 @@
 - `final/README.md`：03-quality 状态改为“已完成（2026-11-24 口径；Sonar Gate 仍 Failed 1 Bug）”；
 - `release/v1.0.0.md`：已知问题补 `QUAL-01`；
 - 文档中的 `@Size(max=254)` 改为真实的 **100**（注册 DTO 与领域 `checkEmail` 均为 100）；
-- `AdminUserController.CreateStaffRequest` 仍需补 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50）：当前只 import 了 `Size`，注解尚未加，领域层兜底校验仍然有效。
+- `AdminUserController.CreateStaffRequest` 已补全 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50），接口层直接 400，不再只靠领域兜底。
 
 ### CACHE-02 浏览量落库失败丢失
 
@@ -66,9 +66,9 @@
 
 ### QA-02 课程问题可见性冲突
 
-- 2026-11-24 已定为**课程内问题仅课程成员可见，公开问题保持公开**；
-- 修复分支覆盖 list/detail/search/related/post/answer/comment/vote，并把 viewer 加入列表缓存 key；回归测试覆盖未登录、非成员、成员三种身份。
-- `SecurityConfig` 仍允许匿名 GET，是为了让公开问题可被访客浏览；课程问题由应用层成员校验拦截。
+- PO 决策：**保持公开可见**（公开问题允许匿名读）；因此没有把 `SecurityConfig` 的匿名 GET 收回，也没有新增成员校验；
+- 当前代码与公开决策一致：`GET /api/v1/questions/**`、search 仍允许匿名；US-04 / 演示脚本中「未加入课程 → 无权限」的旧表述应以公开决策为准修正；
+- 这是产品取舍，不是代码缺陷；若后续改回成员可见，需要另开需求并补 list/detail/search/comment/vote 校验与 viewer 缓存键。
 
 ### PRIV-01 课程成员名单匿名可读
 
@@ -91,5 +91,5 @@
 
 1. CI 全量 + Testcontainers；若通过，合并 develop 并同步 main；
 2. 在 SonarQube 机器复扫，确认 `S5998` 归零、Gate PASSED，补 `lab7-sonar-rescan` 截图；
-3. PO 对 PRIV-01 拍板；QA-02 已按成员可见落地，QA-03 已修复；后续 PR 需同步更新本报告状态；
+3. PO 对 PRIV-01（成员名单是否公开）拍板；QA-02 已按公开决策关闭、QA-03 已由 #216 修复；
 4. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。

@@ -54,7 +54,7 @@ final class NotificationTestFixtures {
             List<Notification> all = store.values().stream()
                     .filter(n -> n.recipientId() == recipientId)
                     .toList();
-            int from = Math.min(page.offset(), all.size());
+            int from = (int) Math.min(page.offset(), all.size());
             int to = Math.min(from + page.size(), all.size());
             return new PageResult<>(all.subList(from, to), all.size(), page.page(), page.size());
         }
