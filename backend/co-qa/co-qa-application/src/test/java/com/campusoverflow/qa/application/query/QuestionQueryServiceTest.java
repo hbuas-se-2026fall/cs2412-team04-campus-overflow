@@ -129,6 +129,36 @@ class QuestionQueryServiceTest {
     }
 
     @Test
+    @DisplayName("详情：历史脏数据——accepted_answer_id 指向已删回答时无幽灵采纳标记，且可重新采纳")
+    void detailToleratesStaleAcceptedAnswerId() {
+        // 问题仍记着采纳 50，但 50 已被删除（读模型 deleted_at IS NULL 过滤后不在列表里），
+        // 只剩一条普通回答 51。这是写入侧修复前留下的历史脏数据。
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        // 幽灵标记清除：详情不带采纳 ID，回答也不显示已采纳
+        assertThat(detail.acceptedAnswerId()).isNull();
+        assertThat(detail.answers()).allSatisfy(answer -> assertThat(answer.accepted()).isFalse());
+        // 提问者（ming 是作者）重新获得采纳权限
+        assertThat(detail.permissions().canAccept()).isTrue();
+    }
+
+    @Test
+    @DisplayName("详情：正常采纳不受容错影响——采纳 ID 指向可见回答时仍标记已采纳、不可再采纳")
+    void detailKeepsValidAcceptedAnswer() {
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
+
+        QuestionDetailView detail = service.detail(12L, ming);
+
+        assertThat(detail.acceptedAnswerId()).isEqualTo(50L);
+        assertThat(detail.answers().get(0).accepted()).isTrue();
+        assertThat(detail.permissions().canAccept()).isFalse();
+    }
+
+    @Test
     @DisplayName("列表：未登录只看到公开问题，成员能看到自己课程的问题")
     void listRespectsCourseVisibility() {
         readModel.questions.add(publicQuestionRow(11L, 1L, "公开问题", "所有用户都能看到这条公开问题。"));
