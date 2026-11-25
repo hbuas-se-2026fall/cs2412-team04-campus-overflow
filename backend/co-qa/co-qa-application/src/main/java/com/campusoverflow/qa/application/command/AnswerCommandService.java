@@ -109,6 +109,14 @@ public class AnswerCommandService {
         Answer answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
+        // 历史脏数据容错：写入侧修复前可能留下 accepted_answer_id 指向已删除回答。
+        // 若原采纳回答已不可见，先清空失效 ID 再采纳新回答；清空与采纳落在同一次 save，
+        // 由 @Version 乐观锁保证原子，避免提问者被 QA-2002 永久卡住。
+        Long staleAcceptedId = question.acceptedAnswerId();
+        if (staleAcceptedId != null && !acceptedAnswerStillVisible(questionId, staleAcceptedId)) {
+            question.clearAcceptedAnswer(staleAcceptedId, clock.instant());
+        }
+
         question.accept(answer, actor, manages);
         questions.save(question);
 
@@ -146,6 +154,13 @@ public class AnswerCommandService {
         return answers.findById(id)
                 .filter(a -> !a.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+    }
+
+    /** 采纳目标是否仍可见：存在、未软删、且确实属于该问题。 */
+    private boolean acceptedAnswerStillVisible(long questionId, long answerId) {
+        return answers.findById(answerId)
+                .filter(a -> !a.isDeleted() && a.questionId() == questionId)
+                .isPresent();
     }
 
     /** 课程问题只有课程成员可以回答；公开问题对所有登录用户开放。 */

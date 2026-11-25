@@ -77,6 +77,7 @@ class QuestionQueryServiceTest {
     void listMapsAuthorExcerptAndAcceptedFlag() {
         String longBody = "变色为什么不够？".repeat(60);
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", longBody, 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
         readModel.questions.add(questionRow(13L, 404L, "作者已经注销的老问题标题", "这条问题的作者在用户表里查不到。",
                 null));
 
@@ -143,6 +144,19 @@ class QuestionQueryServiceTest {
         assertThat(detail.answers()).allSatisfy(answer -> assertThat(answer.accepted()).isFalse());
         // 提问者（ming 是作者）重新获得采纳权限
         assertThat(detail.permissions().canAccept()).isTrue();
+    }
+
+    @Test
+    @DisplayName("列表：历史脏数据——accepted_answer_id 指向已删回答时不显示已采纳")
+    void listToleratesStaleAcceptedAnswerId() {
+        // 采纳 50 但 50 已被删除，只剩普通回答 51：列表摘要不应再显示“已采纳”。
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
+
+        PageResult<QuestionSummaryView> page = service.list(COURSE_ID, PAGE, ming);
+
+        assertThat(page.items()).hasSize(1);
+        assertThat(page.items().get(0).accepted()).isFalse();
     }
 
     @Test

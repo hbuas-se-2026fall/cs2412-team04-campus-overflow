@@ -323,6 +323,12 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public Set<Long> findVisibleAnswerIds(Collection<Long> answerIds) {
+            Set<Long> wanted = Set.copyOf(answerIds);
+            return answers.stream().map(AnswerRow::id).filter(wanted::contains).collect(Collectors.toSet());
+        }
+
+        @Override
         public List<CommentRow> findComments(long questionId) {
             return comments;
         }

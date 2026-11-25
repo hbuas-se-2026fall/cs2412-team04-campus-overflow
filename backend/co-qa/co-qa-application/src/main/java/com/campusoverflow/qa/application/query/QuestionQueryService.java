@@ -73,10 +73,17 @@ public class QuestionQueryService {
         }
 
         PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);
+        // 与详情一致的 effective 语义：一次批量确认采纳回答是否仍可见，历史脏数据不显示“已采纳”。
+        List<Long> acceptedAnswerIds = rows.items().stream()
+                .map(QuestionRow::acceptedAnswerId).filter(id -> id != null).distinct().toList();
+        Set<Long> visibleAcceptedIds = acceptedAnswerIds.isEmpty()
+                ? Set.of()
+                : readModel.findVisibleAnswerIds(acceptedAnswerIds);
         List<Long> authorIds = rows.items().stream().map(QuestionRow::authorId).distinct().toList();
         Map<Long, UserSummary> authors = authorIds.isEmpty() ? Map.of() : identity.findUsers(authorIds);
 
-        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId())));
+        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId()),
+                visibleAcceptedIds));
         cache.put(courseId, viewerId, page, result);
         return result;
     }
@@ -155,10 +162,13 @@ public class QuestionQueryService {
         return readModel.popularTags(safeLimit);
     }
 
-    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author) {
+    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author, Set<Long> visibleAcceptedIds) {
+        // 采纳标记同样走 effective 语义：只有采纳回答仍在可见列表里才算已采纳（与 detail 口径一致）。
+        Long acceptedId = row.acceptedAnswerId();
+        boolean accepted = acceptedId != null && visibleAcceptedIds.contains(acceptedId);
         return new QuestionSummaryView(row.id(), row.title(), renderer.toPlainText(row.body(), EXCERPT_LENGTH),
                 row.tags(), row.courseId(), AuthorView.of(row.authorId(), author), row.score(), row.answerCount(),
-                row.viewCount(), row.acceptedAnswerId() != null, row.createdAt());
+                row.viewCount(), accepted, row.createdAt());
     }
 
     private AnswerView toAnswerView(AnswerRow answer, Long effectiveAcceptedId, Map<Long, UserSummary> users,
