@@ -9,7 +9,7 @@
 按根目录 [`README.md`](../../README.md) 的「五分钟跑起来」启动：
 
 1. `docker compose -f deploy/docker-compose.dev.yml up -d mysql redis`
-2. 后端用 `demo` profile 启动；
+2. 后端用 `dev,demo` 两个 profile 启动（`--spring.profiles.active=dev,demo`）；`demo` 负责演示数据，`dev` 提供本地数据库密码和字段密钥默认值。若只启 `demo`，需显式注入 `DB_PASSWORD`/`CO_FIELD_KEY`/`CO_FIELD_MAC_KEY`；
 3. `cd frontend && npm run dev`；
 4. 打开终端打印的地址。若 `localhost:5173` 连不上，改用 `http://127.0.0.1:5173/`。
 
@@ -132,8 +132,8 @@
 预期结果：
 
 - 中文关键词至少 2 个字符；单字（如 `树`）会返回 422 `DIS-1001`；
-- 搜索命中问题的标题、正文和标签；
-- 相关问题按共享标签的相似度排序，并显示相似度。
+- 关键词检索命中问题的标题和正文；标签请用「标签筛选」，不参与关键词全文匹配；
+- 相关问题按共享标签的相似度排序（接口返回 similarity；当前前端只展示标题）。
 
 > 中文全文检索依赖 compose 中的 MySQL `ngram_token_size=2`；自建数据库参数不同会搜不到。
 
@@ -197,8 +197,8 @@
   → 加入课程
   → 提问
   → 另一个账号回答
-  → 提问者采纳
-  → 教师发起悬赏并采纳结算
+  → 教师先发起悬赏
+  → 提问者采纳并结算悬赏
   → 搜索“红黑树”并查看相关问题
   → 查看通知
   → 管理员认证学生/建教职工/改角色

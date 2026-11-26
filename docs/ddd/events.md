@@ -16,7 +16,7 @@ Identity → Q&A → Reputation → Discovery
 | 2 | `QuestionPostedEvent` | 问题已发布 | Q&A | Question | Discovery 插入搜索投影 |
 | 3 | `QuestionEditedEvent` | 问题已编辑 | Q&A | Question | Discovery 更新投影标题/正文/标签 |
 | 4 | `AnswerSubmittedEvent` | 回答已提交 | Q&A | Answer | Discovery 回答数 +1、通知提问者；Reputation 检查徽章 |
-| 5 | `AnswerAcceptedEvent` | 回答已采纳 | Q&A | Question | Reputation +15、徽章、悬赏结算；Discovery 标记已采纳、通知回答者 |
+| 5 | `AnswerAcceptedEvent` | 回答已采纳 | Q&A | Question | Reputation +15（自答 +0，不写流水）、徽章、悬赏结算；Discovery 标记已采纳、通知回答者 |
 | 6 | `AnswerEndorsedEvent` | 回答已认证 | Q&A | Answer | Reputation 名师认可；Discovery 通知回答者 |
 | 7 | `VoteCastEvent` | 投票已投出/变更 | Q&A | Vote | Reputation 按新旧值差计分（受日上限）；Discovery 同步**问题**得分（回答得分不在搜索投影中） |
 | 8 | `CommentPostedEvent` | 评论已发布 | Q&A | Comment | Discovery 解析 @提及并通知 |

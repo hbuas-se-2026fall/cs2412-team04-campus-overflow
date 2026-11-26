@@ -54,7 +54,7 @@ PUT /api/v1/questions/{id}/accepted-answer
   → AnswerCommandService.accept（Q&A 事务：改 Question.acceptedAnswerId）
   → 写 outbox_event(AnswerAcceptedEvent)
   → OutboxRelay 异步投递
-      → ReputationEventHandlers.on(AnswerAccepted)：+15 声誉、徽章、悬赏结算
+      → ReputationEventHandlers.on(AnswerAccepted)：+15 声誉（自答 +0）、徽章、悬赏结算
       → Discovery 投影：搜索文档/通知
 ```
 

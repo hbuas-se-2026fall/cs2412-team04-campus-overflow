@@ -7,7 +7,7 @@
 2. 当 `QuestionPostedEvent` 发生，则 Discovery 插入搜索投影。
 3. 当 `QuestionEditedEvent` 发生，则 Discovery 更新搜索投影的标题、正文纯文本与标签。
 4. 当 `AnswerSubmittedEvent` 发生，则 Discovery 回答数 +1 并通知提问者；Reputation 检查“初来乍到”徽章。
-5. 当 `AnswerAcceptedEvent` 发生，则 Reputation 给回答者 +15 并检查徽章、结算悬赏；Discovery 标记“已采纳”并通知回答者。
+5. 当 `AnswerAcceptedEvent` 发生，则 Reputation 给回答者 +15（**提问者自答采纳为 +0，不写流水**）并检查徽章、结算悬赏；Discovery 标记“已采纳”并通知回答者。
 6. 当 `AnswerEndorsedEvent` 发生，则 Reputation 记“名师认可”，Discovery 通知回答者。
 7. 当 `VoteCastEvent` 发生，则 Reputation 按新旧票值差计分并受每日上限约束，Discovery 同步**问题**得分；回答得分不在搜索投影中（`SearchIndexProjector` 只处理 `QUESTION` 目标）。
 8. 当 `CommentPostedEvent` 发生，则 Discovery 解析 `@昵称` 并创建站内通知。
