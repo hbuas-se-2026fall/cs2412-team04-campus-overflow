@@ -1,8 +1,8 @@
 # Lab 3 领域建模：聚合识别与不变式
 
 > 负责人：青岑（Dev-1 后端视角）
-> 范围：Q&A + Reputation 限界上下文，附 Discovery 的 Notification / SearchIndex 读模型
-> 依据：`backend/co-qa/co-qa-domain`、`backend/co-reputation/co-reputation-domain` 与 `backend/co-discovery/co-discovery-domain`
+> 范围：Q&A + Reputation 聚合，含 Identity 的 UserRegistered 事件，附 Discovery 的 Notification / SearchIndex 读模型
+> 依据：`backend/co-qa/co-qa-domain`、`backend/co-reputation/co-reputation-domain`、`backend/co-identity/co-identity-domain` 与 `backend/co-discovery/co-discovery-domain`
 ## 1. 领域事件（实际发布，14 个）
 
 | # | 事件（过去时） | 中文 | 所属聚合 |
@@ -30,7 +30,7 @@
 |---|---|---|---|---|
 | 发布问题 | 登录用户（课程问题需成员） | QuestionPosted | Question | 标题 10–150 字，标签 1–5 个 |
 | 编辑问题 | 作者/课程管理者 | QuestionEdited | Question | 仅作者或管理者 |
-| 删除问题 | 提问者（无回答时）/管理者 | ContentDeleted | Question | 有回答时提问者不可删 |
+| 删除问题 | 提问者（无回答时）/管理者 | ContentDeleted | Question | 有回答时提问者不可删；Reputation 关闭该问题 OPEN 悬赏并退款 |
 | 发布回答 | 登录用户（课程问题需成员） | AnswerSubmitted | Answer | 问题必须存在且未删除 |
 | 编辑回答 | 回答作者/管理者 | 无集成事件 | Answer | 仅作者或管理者；不改变搜索投影文本 |
 | 删除回答 | 回答作者/管理者 | ContentDeleted | Answer | 被采纳的回答作者不可删；管理者删除时问题释放采纳关系 |
@@ -97,7 +97,7 @@
 ### SearchIndex（根：SearchDocument）
 
 - 不变式：
-  1. 只有未删除问题出现在搜索结果；删除事件必须清理 `dis_question_tag`。
+  1. 只有未删除问题出现在搜索结果；删除事件把 `dis_search_doc.deleted` 置为 TRUE，所有候选查询必须带 `deleted = FALSE`。
   2. 投影更新按事件顺序应用；`accepted`/`bounty_open`/`answer_count` 必须可由事件重放收敛。
 ## 4. 聚合与上下文归属
 
@@ -106,14 +106,17 @@
 |---|---|---|---|
 | Question / Answer / Vote / Comment | Question 等 | Q&A | co-qa |
 | User / Course | User | Identity | co-identity |
-| ReputationAccount / Badge / Bounty | ReputationAccount | Reputation | co-reputation |
-| Notification / SearchIndex | Notification | Discovery | co-discovery |
+| ReputationAccount | ReputationAccount | Reputation | co-reputation |
+| Badge | Badge | Reputation | co-reputation |
+| Bounty | Bounty | Reputation | co-reputation |
+| Notification | Notification | Discovery | co-discovery |
+| SearchDocument / SearchIndex | SearchDocument | Discovery | co-discovery |
 | Actor / 事件契约 / 异常 / 分页 | — | Shared Kernel | co-shared-kernel |
 
 上下文关系：
 
 - Q&A → Identity：客户-供应商（通过 identity-api 取用户/角色，ACL 防腐）
-- Q&A → Reputation：事件驱动（AnswerAccepted / VoteCast → 声誉账本）
+- Q&A → Reputation：事件驱动（AnswerAccepted / VoteCast → 声誉账本；ContentDeleted(QUESTION) → 关闭 OPEN 悬赏并退款）
 - Q&A → Discovery：事件驱动（问题/回答变更 → 搜索索引；回答/采纳 → 通知）
 - Identity → Reputation：客户-供应商
 - 全体共享 co-shared-kernel

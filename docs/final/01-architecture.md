@@ -36,8 +36,8 @@ backend/pom.xml（父 POM：依赖版本、JaCoCo、覆盖率门槛 0.70）
 | --- | --- | --- | --- |
 | Identity | `co-identity` | 用户、课程、成员角色、会话、CSRF | `IdentityApi`（同步）、`UserRegisteredEvent`（异步） |
 | Q&A | `co-qa` | 问题/回答/投票/评论/采纳、软删除 | `QaQueryApi`（同步）、`QuestionPosted`/`AnswerSubmitted`/`VoteCast`/`AnswerAccepted` 等事件 |
-| Reputation | `co-reputation` | 声誉账户与账本、徽章、悬赏、排行榜 | `ReputationApi`；消费 Q&A 事件，发 `ReputationChanged`/`BadgeAwarded`/`Bounty*` |
-| Discovery | `co-discovery` | 搜索索引、相关问题、通知 | `SearchQuery`/`SearchPort`；消费 Q&A/Reputation 事件；排行榜由 Reputation 提供 |
+| Reputation | `co-reputation` | 声誉账户与账本、徽章、悬赏、排行榜 | `ReputationApi`；消费 Identity `UserRegisteredEvent` 与 Q&A 事件，发 `ReputationChanged`/`BadgeAwarded`/`Bounty*` |
+| Discovery | `co-discovery` | 搜索索引、相关问题、通知 | 无跨上下文同步 API（`co-discovery-api` 仅包声明）；`SearchQuery`/`SearchPort` 为内部领域端口；消费 Q&A/Reputation 事件；排行榜由 Reputation 提供 |
 
 上下文映射与事件风暴见：
 

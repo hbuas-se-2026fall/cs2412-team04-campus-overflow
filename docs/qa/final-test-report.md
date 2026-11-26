@@ -14,27 +14,27 @@ export PATH="$JAVA_HOME/bin:/e/java内容/IntelliJ IDEA Community Edition 2023.2
 mvn -o test -Djacoco.skip=true -DskipITs
 ```
 
-结果：**BUILD SUCCESS，237 个测试，0 失败 / 0 错误**。
+结果：**BUILD SUCCESS，255 个测试，0 失败 / 0 错误**。
 
 | 模块 | 测试数 |
 | --- | ---: |
 | `co-shared-kernel` | 3 |
 | `co-identity-domain` | 13 |
-| `co-identity-application` | 7 |
+| `co-identity-application` | 8 |
 | `co-identity-infrastructure` | 1 |
 | `co-qa-domain` | 42 |
 | `co-qa-api` | 8 |
 | `co-qa-application` | 56 |
-| `co-qa-infrastructure` | 4 |
+| `co-qa-infrastructure` | 6 |
 | `co-reputation-domain` | 20 |
-| `co-reputation-application` | 50 |
-| `co-reputation-infrastructure` | 1 |
+| `co-reputation-application` | 56 |
+| `co-reputation-infrastructure` | 3 |
 | `co-discovery-domain` | 6 |
 | `co-discovery-application` | 25 |
-| `co-bootstrap` | 1（ArchUnit） |
+| `co-bootstrap` | 8（ArchUnit 1 + EnvironmentGuard 7） |
 
 > 另有 `CampusOverflowFlowIT` 4 条集成测试由 failsafe 执行，需要 Docker/Testcontainers，本地未跑；
-> 完整口径为 **237 单测 + 4 集成 = 241**。
+> 完整口径为 **255 单测 + 4 集成 = 259**。
 
 ## 二、前端
 
@@ -45,7 +45,7 @@ npm run test:run
 npm run build
 ```
 
-结果：**typecheck 通过，Vitest 4 条通过（`BountyDialog.test.tsx`），Vite build 通过**。
+结果：**typecheck 通过，Vitest 6 条通过（`BountyDialog.test.tsx`），Vite build 通过**。
 
 ## 三、未覆盖项
 

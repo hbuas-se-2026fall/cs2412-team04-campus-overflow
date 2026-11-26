@@ -71,7 +71,7 @@
 | 1 | 组织仓库 + develop/main 分支保护（不允许绕过） | `docs/lab1-submission/screenshots/branch-protection.png`、PR #13；API 核验见 [lab1 README 第 1 节](../lab1-submission/README.md) | ✅ |
 | 2 | Issue/PR 模板 + CODEOWNERS + 看板四列 | `.github/`（PR #23）、`docs/lab1-submission/screenshots/lab1-board.png` | ✅ |
 | 3 | 团队章程、角色承诺书、团队约定、DoR/DoD | `docs/team/charter-v1.0.md`、`role-commitment.md`（5 人签署 2026-10-26）、PR #24 | ✅ |
-| 4 | DDD 文档：事件风暴 30 事件 / 4 上下文、上下文映射、词汇表 | `docs/ddd/event-storming.png`、`events.md`、`context-map.md`、`glossary.md`、PR #17/#18 | ✅ |
+| 4 | DDD 文档：事件风暴（S0 当时为 30 事件，2026-11-25 已修订为 14 个实际事件）/ 4 上下文、上下文映射、词汇表 | `docs/ddd/event-storming.png`、`events.md`、`context-map.md`、`glossary.md`、PR #17/#18 | ✅ |
 | 5 | 架构理解笔记 | `docs/notes/architecture.md`；T0-05 讲解分工见其第 8 节 | ✅ |
 | 6 | 渐进式 CI 门禁 + ADR-009 | `.github/workflows/ci.yml`、`docs/adr/009-渐进式质量门禁.md` | ✅ |
 | 7 | Product Backlog（48 PBI）与 Sprint 1 DoR | `docs/backlog/product-backlog.md`、Projects 看板 | ✅ |
