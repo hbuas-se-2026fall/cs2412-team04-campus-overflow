@@ -38,7 +38,7 @@ backend/pom.xml（父 POM）
 ## 4. 上下文边界
 
 - Identity → Q&A / Reputation / Discovery：OHS/PL，同步 IdentityApi + UserRegisteredEvent；下游只拿 UserSummary。
-- Q&A → Reputation：客户/供应商，Answer* / VoteCast 事件 + QaQueryApi.findQuestion。
+- Q&A → Reputation：客户/供应商，Answer* / VoteCast / ContentDeleted(QUESTION) 事件 + QaQueryApi.findQuestion。
 - Q&A → Discovery：遵奉者，Question* / Answer* / Vote / Comment / ContentDeleted 事件。
 - Reputation → Discovery：遵奉者，Bounty* / BadgeAwarded 事件。
 - 全部依赖 `co-shared-kernel`；修改共享内核需全组评审。

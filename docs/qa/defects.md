@@ -41,12 +41,18 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 237 个单测 + 前端 4 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 255 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |
 | Q-24 | 中 | 投票并发首次插入一方 409，与幂等 PUT 不符 | 投票前锁问题行，首次/改投/撤销统一串行化；保留唯一键兜底 | 已修复 |
 | Q-25 | 高 | 删除已采纳回答后 answer_count 回涨；软删除可被并发编辑复活；采纳/删除竞态 | 实体 `@DynamicUpdate`、软删除递增 version、所有状态变更先锁问题行 | 已修复（需 MySQL 并发 IT 验证） |
 | Q-26 | 中 | 列表缓存 key 不含角色/课程成员范围，加入课程/改角色后 75 秒内读旧列表 | key 增加 `scope`（anon/admin/member:课程ID集合） | 已修复 |
+| Q-27 | 高 | `expireDue` 用事务外快照逐条退款，可二次退款并覆盖已 AWARDED 悬赏 | 每条在 `REQUIRES_NEW` 内按 id 加锁重读，校验 `OPEN && due` 后才退款；补快照已关闭用例 | 已修复（待 MySQL 并发 IT） |
+| Q-28 | 中 | 悬赏发起人账户缺失会让事件处理回滚并最终死信，连带丢失采纳加分 | Reputation 处理器捕获脏数据异常并记录日志，不再回滚整个事件 | 已修复 |
+| Q-29 | 中 | 浏览量刷新锁释放未校验 token，多实例可能误删他人锁 | Redis Lua compare-and-delete | 已修复（待多实例 IT） |
+| Q-30 | 中 | 对账只比较 reputation/ledger，不检查 frozen 与 OPEN 悬赏 | 新增 `reconcilePoints()`、`co_reputation_points_mismatches` 指标和 `/admin/reputation/reconciliation/points` | 已修复 |
+| Q-31 | 中 | 回答锁后二次 `findById` 命中一级缓存，竞态退化为 409 | 新增加 `AnswerRepository.findQuestionId` 标量投影，锁后首次加载回答 | 已修复 |
+| Q-32 | 低 | `qa_view_batch` 只增不删 | 每次刷新后清理 7 天前的已应用批次 | 已修复 |
 
-> 剩余未关闭：Q-07/Q-10/Q-11/Q-25 的真实 MySQL/多实例集成验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。
+> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31 的真实 MySQL/多实例集成验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。
