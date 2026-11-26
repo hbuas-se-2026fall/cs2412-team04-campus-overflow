@@ -23,7 +23,7 @@
 | 声誉流水 | LedgerEntry | 一次不可变的声誉变更记录（代码类名 `LedgerEntry`） | 声誉上下文(co-reputation) |
 | 徽章 | Badge | 用户达成条件后获得的荣誉标识；当前没有收回徽章功能 | 声誉上下文(co-reputation) |
 | 授予徽章 | GrantBadge | 系统按规则自动发放徽章 | 声誉上下文(co-reputation) |
-| 悬赏 | Bounty | 课程教师/助教在课程问题上冻结积分，采纳后发放给回答者 | 声誉上下文(co-reputation) |
+| 悬赏 | Bounty | 课程管理者（课程 TEACHER/TA，或 ADMIN）在课程问题上冻结积分，采纳后发放给回答者 | 声誉上下文(co-reputation) |
 | 冻结积分 | FrozenPoints | 发起悬赏时从可用积分划入冻结账户的部分 | 声誉上下文(co-reputation) |
 | 排行榜 | Leaderboard | 按周/月/学期汇总的声誉 ZSET，实现位于 Reputation | 声誉上下文(co-reputation) |
 | 通知 | Notification | 系统推送给用户的消息 | 发现上下文(co-discovery) |

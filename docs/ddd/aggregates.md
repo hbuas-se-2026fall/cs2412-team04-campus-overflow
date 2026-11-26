@@ -34,8 +34,8 @@
 | 发布回答 | 登录用户（课程问题需成员） | AnswerSubmitted | Answer | 问题必须存在且未删除 |
 | 编辑回答 | 回答作者/管理者 | 无集成事件 | Answer | 仅作者或管理者；不改变搜索投影文本 |
 | 删除回答 | 回答作者/管理者 | ContentDeleted | Answer | 被采纳的回答作者不可删；管理者删除时问题释放采纳关系 |
-| 采纳回答 | 提问者/课程教师 | AnswerAccepted | Question | 只能采纳一个；历史脏数据允许重新采纳 |
-| 认证回答 | 课程教师/助教 | AnswerEndorsed | Answer | 只能认证一次 |
+| 采纳回答 | 提问者/课程管理者（TEACHER/TA/ADMIN） | AnswerAccepted | Question | 只能采纳一个；不能采纳自己的回答；历史脏数据允许重新采纳 |
+| 认证回答 | 课程管理者（TEACHER/TA/ADMIN） | AnswerEndorsed | Answer | 只能认证一次；不能认证自己的回答 |
 | 投出/修改/撤销投票 | 登录用户（课程问题需成员） | VoteCast | Vote | 不能给自己投票，值 ±1 |
 | 发表评论 | 登录用户（课程问题需成员） | CommentPosted | Comment | 同一目标下一层回复 |
 | 发起悬赏 | 课程教师/助教/管理员 | BountyOpened | Bounty | 只能课程问题；同一问题仅一个 OPEN |
@@ -71,7 +71,7 @@
 - 不变式：
     1. 评论必须挂在与父评论相同的目标（问题或回答）下。
     2. 回复最多一层：不能回复一条已经是回复的评论。
-    3. 评论正文不能为空，长度不超过 600 个字符。
+    3. 评论正文长度为 2–600 个字符。
     4. 只有评论作者或管理员可以删除评论；删除顶层评论时级联删除它的全部回复。
 
 ### ReputationAccount（根：ReputationAccount）

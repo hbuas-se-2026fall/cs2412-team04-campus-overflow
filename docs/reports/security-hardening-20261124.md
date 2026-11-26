@@ -38,7 +38,7 @@
 - 按方案 A 修改：`^[\\w.+-]+@[\\w.-]+$`，去掉所有重复分组；
 - `User.checkEmail` 补域名校验：不含 `..`、不以 `.` 开头/结尾、必须含 `.`；
 - `UserTest` 增加长 local part 与畸形域名用例。
-- ✅ **已复扫确认归零（2026-11-25）**：在 `3750111` 基线上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。该基线不是当前 HEAD；当前 HEAD 为 259 单测，需在最终提交上重扫。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
+- ✅ **已复扫确认归零（2026-11-25）**：在 `3750111` 基线上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。该基线不是当前 HEAD；当前 HEAD 为 264 单测，需在最终提交上重扫。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
 
 ### DOC-01 / DOC-02
 
@@ -109,6 +109,6 @@
 
 ## 四、剩余动作
 
-1. 在**当前 HEAD**上重跑 CI 全量 + Testcontainers，并在 SonarQube 机器复扫（`3750111` 的 PASSED 不能直接代表当前 259 单测）；
+1. 在**当前 HEAD**上重跑 CI 全量 + Testcontainers，并在 SonarQube 机器复扫（`3750111` 的 PASSED 不能直接代表当前 264 单测）；
 2. QA-02 已按 2026-11-25 最终决策“课程成员可见”关闭；PRIV-01 已按“名单仅登录可读”关闭；QA-03 已由 #216 修复；
 3. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。

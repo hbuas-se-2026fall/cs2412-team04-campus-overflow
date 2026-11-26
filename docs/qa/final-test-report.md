@@ -14,7 +14,7 @@ export PATH="$JAVA_HOME/bin:/e/java内容/IntelliJ IDEA Community Edition 2023.2
 mvn -o test -Djacoco.skip=true -DskipITs
 ```
 
-结果：**BUILD SUCCESS，259 个测试，0 失败 / 0 错误**。
+结果：**BUILD SUCCESS，264 个测试，0 失败 / 0 错误**。
 
 | 模块 | 测试数 |
 | --- | ---: |
@@ -27,14 +27,14 @@ mvn -o test -Djacoco.skip=true -DskipITs
 | `co-qa-application` | 56 |
 | `co-qa-infrastructure` | 6 |
 | `co-reputation-domain` | 20 |
-| `co-reputation-application` | 58 |
+| `co-reputation-application` | 62 |
 | `co-reputation-infrastructure` | 3 |
 | `co-discovery-domain` | 6 |
-| `co-discovery-application` | 25 |
+| `co-discovery-application` | 26 |
 | `co-bootstrap` | 8（ArchUnit 1 + EnvironmentGuard 7） |
 
 > 另有 `CampusOverflowFlowIT` 4 条集成测试由 failsafe 执行，需要 Docker/Testcontainers，本地未跑；
-> 完整口径为 **259 单测 + 4 集成 = 263**。
+> 完整口径为 **264 单测 + 4 集成 = 268**。
 
 ## 二、前端
 

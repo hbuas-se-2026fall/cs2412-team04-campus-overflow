@@ -41,7 +41,7 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 259 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 264 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |
@@ -59,5 +59,15 @@
 | Q-35 | 中 | VoteService 预加载回答后锁问题，锁后重读命中一级缓存，可给已删回答投票 | 先用 `findQuestionId` 标量投影，锁问题后再首次加载回答 | 已修复（待 MySQL 交错 IT） |
 | Q-36 | 中 | 自问自答可领他人悬赏；管理者可采纳/认证自己的回答 | 悬赏结算对 `winner==提问者` 或 `acceptedById==winner` 退款；管理者不能采纳/认证自己的回答（`QA-1021`） | 已修复（自采纳是否彻底禁止待产品确认） |
 | Q-37 | 中 | 发起悬赏与采纳/删除问题存在 TOCTOU，可产生已采纳/已删问题上的 OPEN 悬赏 | `QaQueryApi.findQuestionForUpdate` 锁问题行；`BountyService.open` 改用它 | 已修复（待 MySQL 并发 IT） |
+| Q-38 | 中 | 悬赏结算用处理时间判到期，采纳在到期前但事件积压到到期后会被退款 | `settleOnAccept` 增加 `acceptedAt`，用事件发生时间判断 `isDue` | 已修复 |
+| Q-39 | 中 | 评论/回复与目标删除、父评论删除无锁，可能产生孤儿评论 | 评论 post/delete 先锁问题行，再锁父评论/目标评论（`CommentRepository.findByIdForUpdate`） | 已修复（待 MySQL 交错 IT） |
+| Q-40 | 中 | 投票被日上限截断为 0 时不写幂等标记，跨日重投可补分 | `VoteCastEvent` 用 `ProcessedEventStore` 标记（consumer=`reputation-vote`） | 已修复 |
+| Q-41 | 中 | 教师/助教账户先被懒创建为 0，后到注册事件不再补 1000 分 | 注册事件按 eventId 幂等；仅对 0/0/0 的懒创建空账户补 `grantAvailablePoints(1000)` | 已修复 |
+| Q-42 | 低 | 浏览量失败批次 HINCRBY+HDEL 非原子；刷新锁 TTL 过短 | 合并改为单次 Lua 原子执行；锁 TTL 由 2 分钟提高到 10 分钟 | 已修复（待故障注入 IT） |
+| Q-43 | 低 | 缓存代际 key 被驱逐后 `INCR` 可能重新产生小编号 | `invalidateAll` 用 Lua：代际缺失或过小时先重置为时间戳再 INCR | 已修复 |
+| Q-44 | 低 | 声誉对账漏“有流水但账户行缺失”的用户 | `reconcile()` 遍历账户与流水用户并集，缺失账户按 0 声誉上报 | 已修复 |
+| Q-45 | 低 | 标签计数按输入顺序批量 UPSERT，并发可死锁 500 | `adjustDeltas` 按标签名 `TreeMap` 排序一次批量执行；编辑合并 added/removed 净增量 | 已修复（待 MySQL 并发 IT） |
+| Q-46 | 低 | 并发首票测试仍固化旧 409 路径，未验证生产串行化 | 测试重命名为“唯一键兜底”并注明生产由问题行锁串行化；真实并发需 MySQL IT | 部分修复（验证缺口） |
+| Q-47 | 低 | 问题删除后已入队事件仍发通知 | 通知处理器统一过滤 `QuestionRef.deleted()`；补删除问题用例 | 已修复 |
 
-> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37 的真实 MySQL/多实例集成验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。
+> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37/Q-38/Q-39/Q-42/Q-45/Q-46 的真实 MySQL/多实例/故障注入验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。

@@ -62,7 +62,8 @@ PUT /api/v1/questions/{id}/accepted-answer
 
 - 事务性发件箱（ADR-002）：业务数据与事件同事务写入 `outbox_event`；
 - 消费端按 `(event_id, user_id, reason)`（账本）/ `processed_event`（投影）去重，至少一次投递只生效一次；
-- 对账 FF-8：`GET /api/v1/admin/reputation/reconciliation` 校验「账户余额 = 流水之和」。
+- 对账 FF-8：`GET /api/v1/admin/reputation/reconciliation` 校验「账户余额 = 流水之和」；
+  `GET /api/v1/admin/reputation/reconciliation/points` 校验「冻结积分 = 所有 OPEN 悬赏之和」，指标 `co_reputation_points_mismatches`。
 
 **搜索**
 
@@ -72,7 +73,7 @@ PUT /api/v1/questions/{id}/accepted-answer
 ## 1.5 可观测性
 
 - Actuator 暴露 `/actuator/prometheus`（`health,info,metrics,prometheus`）；
-- 自定义指标：`co_outbox_backlog`、`co_outbox_dead_letters`、`co_reputation_mismatches`；
+- 自定义指标：`co_outbox_backlog`、`co_outbox_dead_letters`、`co_reputation_mismatches`、`co_reputation_points_mismatches`；
 - Grafana 四面板见 [`deploy/grafana/`](../../deploy/grafana/)；Prometheus 抓取配置 [`deploy/prometheus.yml`](../../deploy/prometheus.yml)。
 
 ## 1.6 答辩可能被问到的三点
