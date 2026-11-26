@@ -117,6 +117,15 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public List<LedgerEntry> findAllBetween(Instant from, Instant to) {
+        return ledger.findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByIdAsc(from, to).stream()
+                .map(e -> new LedgerEntry(e.getId(), e.getUserId(), e.getEventId(),
+                        ReputationReason.valueOf(e.getReason()), e.getDelta(), e.getRefType(), e.getRefId(),
+                        e.getCreatedAt()))
+                .toList();
+    }
+
+    @Override
     public Map<Long, Long> sumByUser() {
         Map<Long, Long> result = new HashMap<>();
         for (Object[] row : ledger.sumGroupByUser()) {

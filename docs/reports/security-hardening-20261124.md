@@ -71,7 +71,7 @@
 | 风险 | 现状 | 影响 | 处置 |
 | --- | --- | --- | --- |
 | DB `processed_event` 与 Redis `ZINCRBY` 双写 | 两者在同一 `@Transactional` 内，Redis 抛异常会使 processed 记录一起回滚并重投（不会「标记了但没加分」）；反之若 Redis 成功、DB 提交失败，重投会重复计分 | 重复计分窗口 | outbox 至少一次语义的固有代价；ZSET 仅用于周/月/学期榜，总榜读账户表不受影响 |
-| Redis 数据丢失后**没有重建路径** | `LeaderboardStore` 只有 `increment/top`，无 `rebuild`；Redis 已开 `appendonly yes` 缓解整机重启丢失 | 极端情况下周期榜偏低 | 登记为 v1.1：新增 `rebuild()`，以 `rep_ledger_entry` 为准重算三个 ZSET（需给 `LedgerRepository` 加流式读取方法） |
+| Redis 数据丢失后可重建 | ✅ **已实现（2026-11-25）**：`LeaderboardService.rebuild(window)` 以账本为准重算三个 ZSET | — | `LedgerRepository.findAllBetween(from,to)` 按 id 升序取流水 → `LeaderboardStore.resetFor(时间戳集合)` 只删会被重放到的 key → 逐条 `increment` 重放；入口 `POST /api/v1/admin/leaderboard/rebuild?days=200`（`/api/v1/admin/**` 已限定 ADMIN） |
 
 > 结论：**周期榜属可重建的派生数据**，出现偏差时以声誉账本为准；总榜（ALL）直接读 `rep_reputation_account`，不受上述风险影响。
 
