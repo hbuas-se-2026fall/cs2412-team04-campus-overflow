@@ -36,20 +36,21 @@ public class ReconciliationService {
     public List<Mismatch> reconcile() {
         List<Mismatch> mismatches = new java.util.ArrayList<>();
 
-        // 1. 查出所有账户
-        List<ReputationAccount> allAccounts = accounts.findAll();
-
-        // 2. 一次性查出所有用户的流水汇总 (不需要传参数)
+        // 1. 账户表与流水表取并集：账户行缺失但仍有流水的用户也必须被报出来。
+        Map<Long, ReputationAccount> byUser = new HashMap<>();
+        for (ReputationAccount account : accounts.findAll()) {
+            byUser.put(account.userId(), account);
+        }
         Map<Long, Long> ledgerSums = ledger.sumByUser();
+        java.util.Set<Long> userIds = new java.util.LinkedHashSet<>(byUser.keySet());
+        userIds.addAll(ledgerSums.keySet());
 
-        for (ReputationAccount account : allAccounts) {
-            // 3. 从 Map 里拿出该用户的流水总和，如果没有流水默认是 0
-            long ledgerSum = ledgerSums.getOrDefault(account.userId(), 0L);
-
-            // 4. 对比账户余额与流水总和
-            if (account.reputation() != ledgerSum) {
-                // 如果对不上，记录一条异常
-                mismatches.add(new Mismatch(account.userId(), account.reputation(), ledgerSum));
+        for (Long userId : userIds) {
+            ReputationAccount account = byUser.get(userId);
+            int accountReputation = account == null ? 0 : account.reputation();
+            long ledgerSum = ledgerSums.getOrDefault(userId, 0L);
+            if (accountReputation != ledgerSum) {
+                mismatches.add(new Mismatch(userId, accountReputation, ledgerSum));
             }
         }
 

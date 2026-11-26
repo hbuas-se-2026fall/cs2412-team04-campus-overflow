@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
@@ -124,8 +125,7 @@ class RedisViewCounterTest {
 
         counter.flush();
 
-        verify(hash).increment(RedisViewCounter.PENDING, "7", 3L);
-        verify(hash).delete(RedisViewCounter.FLUSHING, "7");
+        verify(redis).execute(any(RedisScript.class), anyList(), any());
         verify(redis).rename(RedisViewCounter.PENDING, RedisViewCounter.FLUSHING);
     }
 }

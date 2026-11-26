@@ -16,6 +16,7 @@ import com.campusoverflow.reputation.domain.ReputationRulebook;
 import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.domain.NotFoundException;
+import com.campusoverflow.shared.event.ProcessedEventStore;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -42,27 +43,41 @@ public class ReputationEventHandlers {
     private final ReputationLedgerService ledgerService;
     private final BadgeService badges;
     private final BountyService bounties;
+    private final ProcessedEventStore processed;
     private final Clock clock;
 
 
     public ReputationEventHandlers(ReputationAccountRepository accounts, LedgerRepository ledger,
                                    ReputationLedgerService ledgerService, BadgeService badges,
-                                   BountyService bounties, Clock clock) {
+                                   BountyService bounties, ProcessedEventStore processed, Clock clock) {
         this.accounts = accounts;
         this.ledger = ledger;
         this.ledgerService = ledgerService;
         this.badges = badges;
         this.bounties = bounties;
+        this.processed = processed;
         this.clock = clock;
     }
 
     @EventListener
     @Transactional
     public void on(UserRegisteredEvent e) {
-        if (accounts.findByUserId(e.userId()).isPresent()) {
+        // 用事件 ID 判幂等，而不是“账户是否存在”：账户可能先被投票/悬赏事件懒创建为 0，
+        // 后到的注册事件仍必须补发教师/助教的初始积分。
+        if (!processed.markProcessed(e.eventId(), "reputation-user-registered")) {
             return;
         }
-        accounts.save(ReputationAccount.open(e.userId(), ReputationRulebook.initialPoints(e.role())));
+        ReputationAccount account = accounts.findByUserId(e.userId())
+                .orElseGet(() -> ReputationAccount.open(e.userId(), 0));
+        int initialPoints = ReputationRulebook.initialPoints(e.role());
+        // 已存在且有余额/冻结/声誉的账户视为已发过初始积分，避免旧事件重放导致翻倍；
+        // 只有“懒创建的空账户”才补发。
+        boolean untouched = account.availablePoints() == 0 && account.frozenPoints() == 0
+                && account.reputation() == 0;
+        if (initialPoints > 0 && untouched) {
+            account.grantAvailablePoints(initialPoints);
+        }
+        accounts.save(account);
     }
 
     /** 场景 R-2 的异步后半段：采纳 → 回答者 +15 → 徽章 → 悬赏结算。 */
@@ -78,7 +93,7 @@ public class ReputationEventHandlers {
         try {
             // REQUIRES_NEW：悬赏子事务失败只回滚悬赏，不会把本 handler 的 +15/徽章一并标记回滚。
             bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.questionAuthorId(),
-                    e.acceptedById(), e.eventId());
+                    e.acceptedById(), e.occurredAt(), e.eventId());
         } catch (BusinessRuleException | ConflictException | NotFoundException ex) {
             // 悬赏数据脏/已结算不能回滚已经完成的采纳加分/徽章；记录后交给对账处理。
             log.warn("采纳事件 {} 的悬赏结算跳过：{}", e.eventId(), ex.getMessage());
@@ -88,6 +103,10 @@ public class ReputationEventHandlers {
     @EventListener
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public void on(VoteCastEvent e) {
+        // 被日上限截断为 0 时不会写账本；这里用独立 marker 保证跨日重投也不会补发。
+        if (!processed.markProcessed(e.eventId(), "reputation-vote")) {
+            return;
+        }
         int delta = ReputationRulebook.voteDelta(e.oldValue(), e.newValue());
         if (delta == 0) {
             return;

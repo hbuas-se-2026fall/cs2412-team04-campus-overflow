@@ -7,11 +7,14 @@ import com.campusoverflow.shared.page.PageResult;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
+import org.springframework.data.redis.core.script.RedisScript;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -27,6 +30,18 @@ public class RedisQuestionListCache implements QuestionListCache {
     private static final String GEN_KEY = "qa:list:gen";
     private static final TypeReference<PageResult<QuestionSummaryView>> TYPE = new TypeReference<>() {
     };
+    /**
+     * 失效时如果代际 key 不存在或仍是旧的小编号，先用时间戳重置再 INCR，
+     * 避免被 allkeys-lru 驱逐后重新生成 1/2 这类可能与旧缓存碰撞的代际。
+     */
+    private static final RedisScript<Long> NEXT_GENERATION = new DefaultRedisScript<>("""
+            local v = redis.call('GET', KEYS[1])
+            local n = tonumber(v)
+            if not n or n < 1000000000000 then
+                redis.call('SET', KEYS[1], ARGV[1])
+            end
+            return redis.call('INCR', KEYS[1])
+            """, Long.class);
 
     private final StringRedisTemplate redis;
     private final ObjectMapper mapper;
@@ -72,7 +87,7 @@ public class RedisQuestionListCache implements QuestionListCache {
     public void invalidateAll() {
         Runnable bump = () -> {
             try {
-                redis.opsForValue().increment(GEN_KEY);
+                redis.execute(NEXT_GENERATION, List.of(GEN_KEY), String.valueOf(System.currentTimeMillis()));
             } catch (RuntimeException e) {
                 log.warn("列表缓存失效失败（最多 75 秒后自然过期）: {}", e.getMessage());
             }

@@ -2,6 +2,8 @@ package com.campusoverflow.qa.infrastructure.persistence;
 
 import com.campusoverflow.qa.domain.TagRepository;
 import java.util.Collection;
+import java.util.Map;
+import java.util.TreeMap;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -26,9 +28,24 @@ public class JdbcTagRepository implements TagRepository {
         if (tagNames == null || tagNames.isEmpty() || delta == 0) {
             return;
         }
-        MapSqlParameterSource[] batch = tagNames.stream()
-                .map(n -> new MapSqlParameterSource().addValue("name", n).addValue("delta", delta))
+        Map<String, Integer> deltas = new TreeMap<>();
+        tagNames.forEach(name -> deltas.merge(name, delta, Integer::sum));
+        adjustDeltas(deltas);
+    }
+
+    @Override
+    public void adjustDeltas(Map<String, Integer> deltas) {
+        if (deltas == null || deltas.isEmpty()) {
+            return;
+        }
+        // 固定按 tag 名排序：并发请求即使输入顺序相反，也会以同一顺序获取行锁。
+        MapSqlParameterSource[] batch = new TreeMap<>(deltas).entrySet().stream()
+                .filter(entry -> entry.getValue() != 0)
+                .map(entry -> new MapSqlParameterSource()
+                        .addValue("name", entry.getKey()).addValue("delta", entry.getValue()))
                 .toArray(MapSqlParameterSource[]::new);
-        jdbc.batchUpdate(UPSERT, batch);
+        if (batch.length > 0) {
+            jdbc.batchUpdate(UPSERT, batch);
+        }
     }
 }

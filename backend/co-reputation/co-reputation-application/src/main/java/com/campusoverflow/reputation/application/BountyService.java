@@ -119,7 +119,7 @@ public class BountyService {
     /** 由 AnswerAccepted 事件触发（在处理器事务内）。幂等：悬赏已结束则直接返回。 */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void settleOnAccept(long questionId, long answerId, long winnerId, long questionAuthorId,
-                               long acceptedById, String sourceEventId) {
+                               long acceptedById, Instant acceptedAt, String sourceEventId) {
         Optional<Bounty> found = bounties.findOpenByQuestion(questionId);
         if (found.isEmpty()) {
             return;
@@ -129,8 +129,9 @@ public class BountyService {
                 .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
         Instant now = clock.instant();
 
-        // 已到期但定时任务尚未处理：采纳不能再发奖，按到期规则退款。
-        if (bounty.isDue(now)) {
+        // 用“采纳事件发生时间”判断是否到期，而不是事件被消费的时间：
+        // 采纳发生在到期前、只是 outbox 积压到到期后才处理时，仍应发奖。
+        if (bounty.isDue(acceptedAt)) {
             closeAndRefund(bounty, sponsor, now);
             return;
         }
