@@ -14,6 +14,7 @@ import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.reputation.domain.ReputationRulebook;
 import com.campusoverflow.shared.domain.BusinessRuleException;
+import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import java.time.Clock;
 import java.time.Instant;
@@ -23,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -74,15 +76,17 @@ public class ReputationEventHandlers {
         BadgePolicy.forAcceptedCount(acceptedCount)
                 .forEach(type -> badges.grant(e.answerAuthorId(), type));
         try {
-            bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.eventId());
-        } catch (BusinessRuleException | NotFoundException ex) {
-            // 悬赏数据脏（如发起人账户缺失）不能回滚已经完成的采纳加分/徽章；记录后交给对账处理。
+            // REQUIRES_NEW：悬赏子事务失败只回滚悬赏，不会把本 handler 的 +15/徽章一并标记回滚。
+            bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.questionAuthorId(),
+                    e.acceptedById(), e.eventId());
+        } catch (BusinessRuleException | ConflictException | NotFoundException ex) {
+            // 悬赏数据脏/已结算不能回滚已经完成的采纳加分/徽章；记录后交给对账处理。
             log.warn("采纳事件 {} 的悬赏结算跳过：{}", e.eventId(), ex.getMessage());
         }
     }
 
     @EventListener
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void on(VoteCastEvent e) {
         int delta = ReputationRulebook.voteDelta(e.oldValue(), e.newValue());
         if (delta == 0) {
@@ -118,7 +122,7 @@ public class ReputationEventHandlers {
         if ("QUESTION".equalsIgnoreCase(e.targetType())) {
             try {
                 bounties.closeForDeletedQuestion(e.targetId());
-            } catch (BusinessRuleException | NotFoundException ex) {
+            } catch (BusinessRuleException | ConflictException | NotFoundException ex) {
                 // 不让脏悬赏数据回滚删除事件本身；退款欠账交给对账/人工处理。
                 log.warn("删除问题 {} 时关闭悬赏失败：{}", e.targetId(), ex.getMessage());
             }

@@ -88,6 +88,10 @@ public class Question {
         if (actor.userId() != authorId && !actorManagesCourse) {
             throw new ForbiddenException("QA-3001", "只有提问者或课程管理者可以采纳回答");
         }
+        // 防管理者自采纳刷分：课程管理者不能采纳自己写的回答；提问者自答采纳仍允许（声誉 +0）。
+        if (actor.userId() == answer.authorId() && actor.userId() != authorId) {
+            throw new BusinessRuleException("QA-1021", "不能采纳自己的回答");
+        }
         if (acceptedAnswerId != null) {
             throw new ConflictException("QA-2002", "问题已经采纳过回答");
         }

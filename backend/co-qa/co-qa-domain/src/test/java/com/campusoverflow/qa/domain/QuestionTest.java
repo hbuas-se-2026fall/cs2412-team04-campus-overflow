@@ -203,6 +203,16 @@ class QuestionTest {
         }
 
         @Test
+        void courseManagerCannotAcceptOwnAnswer() {
+            Question q = persistedQuestion();
+            Answer own = persistedAnswer(q, TEACHER.userId(), 50);
+
+            assertThatThrownBy(() -> q.accept(own, TEACHER, true))
+                    .isInstanceOf(BusinessRuleException.class)
+                    .hasMessageContaining("自己");
+        }
+
+        @Test
         void otherStudentsCannotAccept() {
             Question q = persistedQuestion();
             Answer a = persistedAnswer(q, 3, 50);

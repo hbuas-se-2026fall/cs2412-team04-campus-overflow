@@ -70,6 +70,10 @@ public class Answer {
         if (!actorManagesCourse) {
             throw new ForbiddenException("QA-3004", "只有课程教师或助教可以认证回答");
         }
+        // 防自认证刷徽章：课程管理者不能认证自己写的回答。
+        if (actor.userId() == authorId) {
+            throw new BusinessRuleException("QA-1021", "不能认证自己的回答");
+        }
         if (endorsedBy != null) {
             throw new ConflictException("QA-2003", "回答已经认证过");
         }

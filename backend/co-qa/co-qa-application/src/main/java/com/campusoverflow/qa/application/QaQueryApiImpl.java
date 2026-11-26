@@ -33,6 +33,13 @@ public class QaQueryApiImpl implements QaQueryApi {
         return questions.findById(questionId).map(QaQueryApiImpl::toRef);
     }
 
+    /** 加入调用方事务并对问题行加锁；跨上下文“校验后写入”用它消除 TOCTOU。 */
+    @Override
+    @Transactional
+    public Optional<QuestionRef> findQuestionForUpdate(long questionId) {
+        return questions.findByIdForUpdate(questionId).map(QaQueryApiImpl::toRef);
+    }
+
     @Override
     public boolean hasVisibleAcceptedAnswer(long questionId) {
         return questions.findById(questionId)

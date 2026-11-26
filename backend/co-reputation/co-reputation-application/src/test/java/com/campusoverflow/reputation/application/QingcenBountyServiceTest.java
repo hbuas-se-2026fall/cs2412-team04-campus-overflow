@@ -73,6 +73,8 @@ class QingcenBountyServiceTest {
         when(accounts.findByUserId(SPONSOR_ID)).thenReturn(Optional.of(sponsor));
         when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
                 new QuestionRef(QUESTION_ID, 1L, 100L, "红黑树插入后为什么必须旋转？", null, false)));
+        when(qa.findQuestionForUpdate(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "红黑树插入后为什么必须旋转？", null, false)));
         when(identity.canManageCourse(SPONSOR_ID, 100L)).thenReturn(true);
 
         IntegrationEventPublisher publisher = events::add;
@@ -105,6 +107,8 @@ class QingcenBountyServiceTest {
     void openRejectsPublicQuestionWithoutCourse() {
         when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
                 new QuestionRef(QUESTION_ID, 1L, null, "没有关联课程的公开问题", null, false)));
+        when(qa.findQuestionForUpdate(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, null, "没有关联课程的公开问题", null, false)));
 
         assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
                 .isInstanceOf(com.campusoverflow.shared.domain.BusinessRuleException.class)
@@ -125,6 +129,8 @@ class QingcenBountyServiceTest {
     void openRejectsWhenAcceptedAnswerStillVisible() {
         when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
                 new QuestionRef(QUESTION_ID, 1L, 100L, "已采纳的问题", 50L, false)));
+        when(qa.findQuestionForUpdate(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "已采纳的问题", 50L, false)));
         when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
 
         assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
@@ -136,6 +142,8 @@ class QingcenBountyServiceTest {
     @Test
     void openAllowsStaleAcceptedAnswerId() {
         when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "采纳回答已被删除的问题", 50L, false)));
+        when(qa.findQuestionForUpdate(QUESTION_ID)).thenReturn(Optional.of(
                 new QuestionRef(QUESTION_ID, 1L, 100L, "采纳回答已被删除的问题", 50L, false)));
         when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(false);
 
@@ -150,6 +158,8 @@ class QingcenBountyServiceTest {
         // 与 docs/final/user-guide.md「必须是该课程的问题」一致。
         when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
                 new QuestionRef(QUESTION_ID, 1L, null, "不挂课程的公开提问", null, false)));
+        when(qa.findQuestionForUpdate(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, null, "不挂课程的公开提问", null, false)));
 
         assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
                 .isInstanceOf(BusinessRuleException.class)
@@ -161,7 +171,7 @@ class QingcenBountyServiceTest {
     void settleAwardsWinnerAndRecordsLedger() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.AWARDED);
         assertThat(bounty.winnerId()).isEqualTo(3L);
@@ -177,10 +187,34 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void settleRefundsWhenQuestionAuthorWinsOwnAnswer() {
+        Bounty bounty = seedBounty(50, 7);
+
+        service.settleOnAccept(QUESTION_ID, 50L, 1L, 1L, 1L, "event-self-answer");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
+        verify(sponsor).refundFrozen(50);
+        verify(sponsor, never()).spendFrozen(anyInt());
+        verifyNoInteractions(ledgerService);
+    }
+
+    @Test
+    void settleRefundsWhenAcceptorIsTheWinningAnswerAuthor() {
+        Bounty bounty = seedBounty(50, 7);
+
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 3L, "event-self-accept");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
+        verify(sponsor).refundFrozen(50);
+        verify(sponsor, never()).spendFrozen(anyInt());
+        verifyNoInteractions(ledgerService);
+    }
+
+    @Test
     void selfWinClosesAndRefundsWithoutLedger() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, SPONSOR_ID, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, SPONSOR_ID, 1L, 1L, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         assertThat(bounty.winnerId()).isNull();
@@ -194,7 +228,7 @@ class QingcenBountyServiceTest {
 
     @Test
     void settleIsNoOpWhenNoOpenBounty() {
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
 
         verifyNoInteractions(ledgerService);
         assertThat(events).isEmpty();
@@ -287,7 +321,7 @@ class QingcenBountyServiceTest {
         Bounty bounty = seedBounty(50, 1);
         BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
 
-        later.settleOnAccept(QUESTION_ID, 50L, 3L, "event-late");
+        later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-late");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);
@@ -329,7 +363,7 @@ class QingcenBountyServiceTest {
     @Test
     void settledBountyIsNotReturnedByExpireDue() {
         Bounty bounty = seedBounty(50, 1);
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
 
         int expired = serviceAt(NOW.plus(Duration.ofDays(3))).expireDue();
 
@@ -344,7 +378,7 @@ class QingcenBountyServiceTest {
         Bounty bounty = seedBounty(50, 1);
         serviceAt(NOW.plus(Duration.ofDays(3))).expireDue();
 
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);

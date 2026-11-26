@@ -68,11 +68,16 @@ public class ReputationLedgerService {
     @Transactional(propagation = Propagation.MANDATORY)
     public boolean recordVoteCapped(long userId, String sourceEventId, ReputationReason reason, int rawDelta,
                                     String refType, long refId, java.util.function.IntSupplier gainedToday) {
-        if (rawDelta == 0 || ledger.exists(sourceEventId, userId, reason)) {
+        if (rawDelta == 0) {
             return false;
         }
+        // 先锁账户行、再做幂等 exists 与日累计读取：避免 exists 的普通 SELECT
+        // 在 REPEATABLE READ 下先建立旧快照，锁后仍按旧快照重算日上限。
         ReputationAccount account = accounts.findByUserIdForUpdate(userId)
                 .orElseGet(() -> ReputationAccount.open(userId, 0));
+        if (ledger.exists(sourceEventId, userId, reason)) {
+            return false;
+        }
         int capped = com.campusoverflow.reputation.domain.ReputationRulebook
                 .applyDailyCap(rawDelta, gainedToday.getAsInt());
         if (capped == 0) {
