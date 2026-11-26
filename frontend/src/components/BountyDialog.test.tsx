@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import { ApiError } from '../api';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BountyDialog } from './BountyDialog';
 import { api } from '../api';
@@ -60,6 +61,31 @@ describe('BountyDialog 发起悬赏门控', () => {
     render(<BountyDialog questionId={1} courseId={100} accepted={false} canOpen={false} />);
 
     expect(await screen.findByText('该问题还没有悬赏。')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '发起悬赏' })).not.toBeInTheDocument();
+  });
+});
+
+describe('BountyDialog 加载失败态（审计 2-11）', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('加载失败时显示失败与重试，而不是「该问题还没有悬赏」', async () => {
+    vi.mocked(api.bountyOf).mockRejectedValue(new ApiError(500, 'SYS-000', 'boom'));
+
+    render(<BountyDialog questionId={1} courseId={100} accepted={false} canOpen />);
+
+    expect(await screen.findByText(/悬赏信息加载失败/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '重试' })).toBeInTheDocument();
+    expect(screen.queryByText('该问题还没有悬赏。')).not.toBeInTheDocument();
+  });
+
+  it('加载失败时不允许发起悬赏（状态未知）', async () => {
+    vi.mocked(api.bountyOf).mockRejectedValue(new ApiError(502, 'SYS-000', 'bad gateway'));
+
+    render(<BountyDialog questionId={1} courseId={100} accepted={false} canOpen />);
+
+    await screen.findByText(/悬赏信息加载失败/);
     expect(screen.queryByRole('button', { name: '发起悬赏' })).not.toBeInTheDocument();
   });
 });

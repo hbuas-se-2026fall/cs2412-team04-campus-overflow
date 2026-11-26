@@ -44,7 +44,7 @@ public class RedisLoginThrottle implements LoginThrottle {
     private final int windowSeconds;
 
     public RedisLoginThrottle(StringRedisTemplate redis,
-                              @Value("${co.security.login-max-failures:5}") int maxFailures,
+                              @Value("${co.security.login.max-failures:5}") int maxFailures,
                               @Value("${co.security.login.window-seconds:60}") int windowSeconds) {
         this.redis = redis;
         this.maxFailures = maxFailures;

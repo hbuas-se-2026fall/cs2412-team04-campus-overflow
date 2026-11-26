@@ -66,6 +66,16 @@
 > **不会回滚已执行的第 1 条 `ZINCRBY`**。此外 `LeaderboardService.on` 先写 `ProcessedEventStore`（DB）再写 Redis，
 > 若 DB 提交失败而 Redis 已累加，重试会再累加一次（at-least-once，存在重复计分窗口），该限制仍待后续收敛。
 
+**已知限制（审计 2-9，2026-11-25）**：排行榜读写路径仍有两处不一致风险，本轮只做**如实记录**，未改实现：
+
+| 风险 | 现状 | 影响 | 处置 |
+| --- | --- | --- | --- |
+| DB `processed_event` 与 Redis `ZINCRBY` 双写 | 两者在同一 `@Transactional` 内，Redis 抛异常会使 processed 记录一起回滚并重投（不会「标记了但没加分」）；反之若 Redis 成功、DB 提交失败，重投会重复计分 | 重复计分窗口 | outbox 至少一次语义的固有代价；ZSET 仅用于周/月/学期榜，总榜读账户表不受影响 |
+| Redis 数据丢失后**没有重建路径** | `LeaderboardStore` 只有 `increment/top`，无 `rebuild`；Redis 已开 `appendonly yes` 缓解整机重启丢失 | 极端情况下周期榜偏低 | 登记为 v1.1：新增 `rebuild()`，以 `rep_ledger_entry` 为准重算三个 ZSET（需给 `LedgerRepository` 加流式读取方法） |
+
+> 结论：**周期榜属可重建的派生数据**，出现偏差时以声誉账本为准；总榜（ALL）直接读 `rep_reputation_account`，不受上述风险影响。
+
+
 ## 二、需要 PO / 产品决策（未改代码）
 
 ### QA-02 课程问题可见性冲突（已被 2026-11-25 最终裁决取代）

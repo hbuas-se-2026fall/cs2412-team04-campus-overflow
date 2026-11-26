@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { BrowserRouter, Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './auth';
 import { api } from './api';
+import { errorMessage } from './errors';
 import { QuestionListPage } from './pages/QuestionListPage';
 import { QuestionDetailPage } from './pages/QuestionDetailPage';
 import { AskPage } from './pages/AskPage';
@@ -19,6 +20,7 @@ function Header() {
   const { me, logout } = useAuth();
   const navigate = useNavigate();
   const [unread, setUnread] = useState(0);
+  const [logoutError, setLogoutError] = useState('');
 
   useEffect(() => {
     if (!me) return;
@@ -29,7 +31,16 @@ function Header() {
         .catch(() => undefined);
     load();
     const timer = setInterval(load, 30_000);
-    return () => clearInterval(timer);
+    // 审计 2-6：通知页标记已读后立即刷新角标，不等 30 秒轮询；
+    // 路由切换时也重拉一次（角标可能因其他页面操作而变）。
+    const onChanged = () => void load();
+    window.addEventListener('co:notifications-changed', onChanged);
+    window.addEventListener('focus', onChanged);
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('co:notifications-changed', onChanged);
+      window.removeEventListener('focus', onChanged);
+    };
   }, [me]);
 
   return (
@@ -51,7 +62,18 @@ function Header() {
         <div className="user">
           <span>{me.displayName}</span>
           <span className="role">{me.role}</span>
-          <button onClick={() => logout().then(() => navigate('/'))}>退出</button>
+          {/* 审计 2-8：退出失败要给出提示，不能静默（未捕获的 rejection 会被当成没反应） */}
+          <button
+            onClick={() => {
+              setLogoutError('');
+              logout()
+                .then(() => navigate('/'))
+                .catch((e) => setLogoutError(errorMessage(e)));
+            }}
+          >
+            退出
+          </button>
+          {logoutError && <span className="error">退出失败：{logoutError}</span>}
         </div>
       ) : (
         <Link className="primary" to="/login">
@@ -63,8 +85,21 @@ function Header() {
 }
 
 function RequireAuth({ children }: { children: JSX.Element }) {
-  const { me, loading } = useAuth();
+  const { me, loading, authError, refresh } = useAuth();
   if (loading) return <p className="muted">加载中…</p>;
+  // 审计 2-8：冷启动 5xx/网络错时登录态「未知」，直接跳登录页会误导用户以为被登出；
+  // 给一个可重试的失败态，保留用户的继续操作的可能。
+  if (!me && authError) {
+    return (
+      <div className="state-page">
+        <h1>无法确认登录状态</h1>
+        <p className="muted">服务器暂时无响应或网络异常，请重试。</p>
+        <button className="primary" onClick={() => void refresh()}>
+          重试
+        </button>
+      </div>
+    );
+  }
   return me ? children : <Navigate to="/login" replace />;
 }
 

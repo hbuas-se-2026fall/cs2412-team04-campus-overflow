@@ -90,7 +90,9 @@ export const api = {
     get<Page<QuestionSummary>>(
       `/v1/questions?page=${page}&size=${size}${courseId ? `&courseId=${courseId}` : ''}`,
     ),
-  question: (id: number) => get<QuestionDetail>(`/v1/questions/${id}`),
+  /** countView=false 用于写操作后的重载，避免同一次访问重复计入浏览量（审计 2-2） */
+  question: (id: number, countView = true) =>
+    get<QuestionDetail>(`/v1/questions/${id}?countView=${countView}`),
   ask: (body: { courseId?: number; title: string; body: string; tags: string[] }) =>
     request<{ id: number }>('POST', '/v1/questions', body),
   editQuestion: (id: number, body: { title: string; body: string; tags: string[] }) =>

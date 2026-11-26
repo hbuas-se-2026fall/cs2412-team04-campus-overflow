@@ -21,36 +21,39 @@ export function QuestionDetailPage() {
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
 
-  const load = useCallback(() => {
-    setState('loading');
-    api
-      .question(questionId)
-      .then((data) => {
-        setQ(data);
-        setState('ok');
-        setError('');
-      })
-      .catch((e: unknown) => {
-        const kind = errorKind(e);
-        setState(kind === 'notfound' ? 'notfound' : kind === 'forbidden' ? 'forbidden' : 'error');
-        setError(errorMessage(e));
-      });
-  }, [questionId]);
+  const load = useCallback(
+    (countView = true) => {
+      setState('loading');
+      api
+        .question(questionId, countView)
+        .then((data) => {
+          setQ(data);
+          setState('ok');
+          setError('');
+        })
+        .catch((e: unknown) => {
+          const kind = errorKind(e);
+          setState(kind === 'notfound' ? 'notfound' : kind === 'forbidden' ? 'forbidden' : 'error');
+          setError(errorMessage(e));
+        });
+    },
+    [questionId],
+  );
 
   useEffect(() => {
-    load();
+    load(true);
     api
       .related(questionId)
       .then(setRelated)
       .catch(() => undefined);
   }, [load, questionId]);
 
-  /** 所有写操作统一走这里：失败时把业务码翻成中文，成功后重新拉一次详情。 */
+  /** 所有写操作统一走这里：失败时把业务码翻成中文，成功后重新拉一次详情（不计浏览）。 */
   const act = async (fn: () => Promise<unknown>) => {
     setError('');
     try {
       await fn();
-      load();
+      load(false);
     } catch (e) {
       setError(errorMessage(e));
     }
@@ -102,7 +105,7 @@ export function QuestionDetailPage() {
       <div className="state-page">
         <h1>加载失败</h1>
         <p className="error">{error}</p>
-        <button className="primary" onClick={load}>
+        <button className="primary" onClick={() => load(true)}>
           重试
         </button>
       </div>
@@ -129,7 +132,7 @@ export function QuestionDetailPage() {
             onCancel={() => setEditing(false)}
             onSaved={() => {
               setEditing(false);
-              load();
+              load(false); // 写操作后重载不计浏览（审计 2-2）
             }}
             onError={setError}
           />
@@ -188,7 +191,7 @@ export function QuestionDetailPage() {
                   courseId={q.course?.id}
                   accepted={q.acceptedAnswerId != null}
                   canOpen={canManage}
-                  onChanged={load}
+                  onChanged={() => load(false)}
                 />
               </div>
 
@@ -214,7 +217,7 @@ export function QuestionDetailPage() {
             canManage={canManage}
             canVote={!!me}
             onAct={act}
-            onReload={load}
+            onReload={() => load(false)}
             onError={setError}
           />
         ))}

@@ -10,3 +10,8 @@
 frontend/package-lock.json.bak
 docs/final/*.mp4
 docs/final/*.webm
+
+# 审计 2-3b：绝不把环境变量/密钥文件打进构建上下文（deploy/.env、根 .env*）
+**/.env
+**/.env.*
+!**/.env.example

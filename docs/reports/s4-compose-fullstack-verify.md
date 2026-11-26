@@ -23,6 +23,11 @@ docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
 
 ## 二、容器状态
 
+> ⚠️ **口径提醒（2026-11-25，审计 2-14）**：下表是 2026-11-18 当时的实测结果，当时 `deploy/docker-compose.yml`
+> **仍把后端 8080 映射到 host**。之后的部署收敛 PR 已把 `backend` 的 host 端口映射**删除**（流量只能经 Nginx 80），
+> 因此今天重跑本报告 §二 不会再看到 `0.0.0.0:8080->8080/tcp`，健康检查应改走 `http://localhost/actuator/health`。
+> 本表保留为历史实测记录，不代表当前 compose 的端口策略；以 `deploy/docker-compose.yml` 与 README §5 为准。
+
 | 容器 | 镜像 | 状态 | 端口 |
 | --- | --- | --- | --- |
 | co-mysql | mysql:8.0.39 | Up (healthy) | 3306（本机映射 3307，见 §五） |
@@ -44,7 +49,7 @@ co-redis     Up (healthy)              0.0.0.0:6379->6379/tcp
 
 | 验证项 | 命令 | 结果 |
 | --- | --- | --- |
-| 后端健康 | `curl http://localhost:8080/actuator/health` | `{"status":"UP","groups":["liveness","readiness"]}` |
+| 后端健康 | `curl http://localhost:8080/actuator/health`（当时 8080 仍直接映射；当前改为 `curl http://localhost/actuator/health`） | `{"status":"UP","groups":["liveness","readiness"]}` |
 | 前端可达 | `curl -o /dev/null -w "%{http_code}" http://localhost` | `200` |
 | **Nginx 反代后端** | `curl "http://localhost/api/v1/questions?page=1&size=2"` | 返回问题列表 JSON（含 3 条演示数据） |
 | 课程接口 | `curl http://localhost/api/v1/courses` | `[{"id":1,"code":"CS2001","name":"数据结构",...}]` |

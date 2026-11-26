@@ -66,7 +66,7 @@
 
 ## 五、验收清单（S3 收口，2026-11-17）
 
-- [x] `mvn verify` 全绿（5 个后端阶段 + 前端阶段），CI 完整门禁恢复（E 复核 2026-11-16）
+- [x] `mvn verify` 全绿（5 个后端阶段 + 前端阶段）——**S3 收口时（2026-11-17 上午）CI 门禁尚未收紧**：移除集成测试容错是 `b586eda`（11-17 17:11），删 `SPRINT_MODULES` 恢复全量 test/verify 是 `dfbc8f4`（11-18 09:06）。两项均晚于 S3 收口，属 S4 质量收口范围（审计 2-19 更正，2026-11-25）。
 - [x] co-discovery 模块 **0 TODO**（`DiscoveryQueryService`、`SearchIndexProjector`）
 - [x] `domain.coverage.minimum=0.70` 通过；ADR-009 状态改“已完成”
 - [x] 中文搜索命中（ADR-005 ngram 口径）：`q=红黑树` → `total=2`，命中 id=7/id=8，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-hit.png`](sprint-3-search-hit.png)
@@ -80,7 +80,8 @@
     - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)
     - 通知页未读数角标（`通知 6`）与 6 条未读列表：[`s3-front-notifications.png`](s3-front-notifications.png)
     - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)
-- [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频；缺陷台账 BUG-001～BUG-006 全部关闭，无 P0/P1 遗留（[`docs/qa/defects.md`](../qa/defects.md)）
+- [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频（[`docs/qa/defects.md`](../qa/defects.md)）
+- [x] 缺陷台账：S3 收口时 BUG-001/002/003/005/006 已关闭；**BUG-004 当时仍为「部分修复」**，其最终关闭发生在 S4（2026-11-25 重写 `events.md` 与 `event-storming.png` 为 14 事件；审计 2-19 更正）
 - [x] T3-12 功能冻结：S3 范围 31 SP 全部合入 `develop`，v1.0.0 于 2026-11-17 发布
 - [x] 燃尽图归档 [`sprint-3-burndown.png`](sprint-3-burndown.png)
 

@@ -21,6 +21,8 @@ public class EnvironmentGuard implements ApplicationRunner {
 
     private static final String DEV_FIELD_KEY = "GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I=";
     private static final String DEV_DB_PASSWORD = "campus_dev_pwd";
+    /** application-dev.yml 里公开的 HMAC 密钥；审计 2-15：原先漏拦，生产注入它等于用仓库里的公开密钥 */
+    private static final String DEV_MAC_KEY = "ZGV2LW1hYy1rZXktMzItYnl0ZXMtZm9yLWRldi1vayE=";
 
     private final Environment env;
 
@@ -44,6 +46,13 @@ public class EnvironmentGuard implements ApplicationRunner {
         }
         if (macKey.isBlank()) {
             throw new IllegalStateException("生产环境必须通过 CO_FIELD_MAC_KEY 注入独立的 HMAC 密钥");
+        }
+        // 审计 2-15：与加密密钥同值、或直接沿用仓库里公开的 dev MAC 密钥，均视为未配置。
+        if (DEV_MAC_KEY.equals(macKey)) {
+            throw new IllegalStateException("生产环境不能使用 application-dev.yml 中的公开 HMAC 密钥");
+        }
+        if (macKey.equals(fieldKey)) {
+            throw new IllegalStateException("CO_FIELD_MAC_KEY 必须与 CO_FIELD_KEY 不同（AES 与 HMAC 不得共用同一密钥）");
         }
         String dbPassword = env.getProperty("spring.datasource.password", "");
         if (dbPassword.isBlank() || DEV_DB_PASSWORD.equals(dbPassword)) {

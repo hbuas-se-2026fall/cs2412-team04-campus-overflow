@@ -14,9 +14,11 @@
 | 3 架构约束 | `mvn test -pl co-bootstrap -Dtest=ArchitectureTest` | ArchUnit 分层/依赖（FF-4） |
 | 4 覆盖率门禁 | `mvn verify -DskipITs -Djacoco.skip=false` | 全量 domain 行覆盖 ≥ 0.70 |
 | 5 集成测试 | `mvn verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=false` | 硬门禁：Testcontainers 起 MySQL/Redis，失败即阻断 |
-| 前端 | `npm run typecheck` + `npm run build` | 类型检查与构建 |
+| 前端 | `npm run lint` + `npm run format:check` + `npm run typecheck` + `npm run test:run` + `npm run build` | ESLint、Prettier、类型检查、组件单测（Vitest）、构建 |
 
 S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量模块；集成测试同时改为硬门禁。
+
+> 前端阶段自 PR #231 起增加「单元测试（组件）」步骤（`npm run test:run`），与 ESLint、Prettier、typecheck、build 共同构成前端门禁。
 
 ## 3.2 测试与覆盖率
 

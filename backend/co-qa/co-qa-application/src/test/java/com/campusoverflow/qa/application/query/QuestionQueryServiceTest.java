@@ -137,7 +137,7 @@ class QuestionQueryServiceTest {
         readModel.myVotes.put("QUESTION:12", 1);
         readModel.myVotes.put("ANSWER:50", -1);
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         assertThat(detail.myVote()).isEqualTo(1);
         assertThat(detail.permissions().canEdit()).isTrue();
@@ -169,7 +169,7 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
         readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         // 幽灵标记清除：详情不带采纳 ID，回答也不显示已采纳
         assertThat(detail.acceptedAnswerId()).isNull();
@@ -197,7 +197,7 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
         readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         assertThat(detail.acceptedAnswerId()).isEqualTo(50L);
         assertThat(detail.answers().get(0).accepted()).isTrue();
@@ -234,7 +234,7 @@ class QuestionQueryServiceTest {
     void detailForAnonymous() {
         readModel.questions.add(publicQuestionRow(12L, 1L, "没有关联课程的公开问题标题", "公开问题对所有用户可见。"));
 
-        QuestionDetailView detail = service.detail(12L, null);
+        QuestionDetailView detail = service.detail(12L, null, true);
 
         assertThat(detail.myVote()).isZero();
         assertThat(detail.permissions()).isEqualTo(PermissionsView.NONE);
@@ -246,7 +246,7 @@ class QuestionQueryServiceTest {
     void anonymousCannotViewCourseQuestion() {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
 
-        assertThatThrownBy(() -> service.detail(12L, null))
+        assertThatThrownBy(() -> service.detail(12L, null, true))
                 .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
     }
 
@@ -256,14 +256,14 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
         Actor outsider = new Actor(3, "路人", Role.STUDENT);
 
-        assertThatThrownBy(() -> service.detail(12L, outsider))
+        assertThatThrownBy(() -> service.detail(12L, outsider, true))
                 .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
     }
 
     @Test
     @DisplayName("详情：问题不存在或已删除时返回 404")
     void detailOfMissingQuestionIsNotFound() {
-        assertThatThrownBy(() -> service.detail(999L, ming)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> service.detail(999L, ming, true)).isInstanceOf(NotFoundException.class);
     }
 
     @Test

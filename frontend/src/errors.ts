@@ -61,12 +61,26 @@ const BY_STATUS: Record<number, string> = {
   500: '服务器开小差了，请稍后重试',
 };
 
+/** 后端 message 可能是英文（如网关 HTML 错误、Spring 默认文案），中文界面不能直接透出。 */
+function hasCjk(text: string): boolean {
+  return /[\u4e00-\u9fa5]/.test(text);
+}
+
 export function errorMessage(e: unknown): string {
   if (e instanceof ApiError) {
-    return BY_CODE[e.code] ?? BY_STATUS[e.status] ?? e.message;
+    const byCode = BY_CODE[e.code];
+    if (byCode) return byCode;
+    const byStatus = BY_STATUS[e.status];
+    if (byStatus) return byStatus;
+    // 审计 2-8：没有码也没有状态映射时，只在后端文案本身是中文时透出，
+    // 否则回退到一句中文，避免界面出现英文原文。
+    return hasCjk(e.message) ? e.message : '请求失败，请稍后重试';
   }
   if (e instanceof Error) {
-    return e.message || '网络异常，请检查网络后重试';
+    const msg = e.message || '';
+    // fetch 失败在各浏览器/环境下的英文文案：Failed to fetch / NetworkError / Load failed …
+    if (!msg || !hasCjk(msg)) return '网络异常，请检查网络后重试';
+    return msg;
   }
   return '未知错误，请稍后重试';
 }
