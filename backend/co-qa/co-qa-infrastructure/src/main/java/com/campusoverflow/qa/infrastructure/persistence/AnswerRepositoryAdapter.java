@@ -23,6 +23,11 @@ public class AnswerRepositoryAdapter implements AnswerRepository {
     }
 
     @Override
+    public Optional<Long> findQuestionId(long answerId) {
+        return jpa.findQuestionIdById(answerId);
+    }
+
+    @Override
     public Answer save(Answer a) {
         AnswerJpaEntity e = a.id() == null
                 ? new AnswerJpaEntity(a.questionId(), a.authorId(), a.createdAt())

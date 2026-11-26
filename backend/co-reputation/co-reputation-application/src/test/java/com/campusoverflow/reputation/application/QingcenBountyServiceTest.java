@@ -297,6 +297,24 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void expireDueSkipsSnapshotThatWasAlreadyClosed() {
+        Bounty closed = seedBounty(50, 1);
+        closed.close(NOW.plus(Duration.ofDays(2)));
+
+        BountyRepository repo = mock(BountyRepository.class);
+        when(repo.findDue(org.mockito.ArgumentMatchers.any(), anyInt())).thenReturn(List.of(closed));
+        when(repo.findByIdForUpdate(closed.id())).thenReturn(Optional.of(closed));
+        BountyService later = new BountyService(repo, accounts, ledgerService, qa, identity, events::add,
+                (action, actorId, targetType, targetId, detail) -> audits.add(action),
+                Clock.fixed(NOW.plus(Duration.ofDays(2)), ZoneOffset.UTC));
+
+        int count = later.expireDue();
+
+        assertThat(count).isZero();
+        verify(sponsor, never()).refundFrozen(anyInt());
+    }
+
+    @Test
     void deleteQuestionClosesOpenBountyOnceAndRefunds() {
         Bounty bounty = seedBounty(50, 7);
 
@@ -357,6 +375,11 @@ class QingcenBountyServiceTest {
         }
 
         @Override
+        public Optional<Bounty> findByIdForUpdate(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
         public Optional<Bounty> findLatestByQuestion(long questionId) {
             return store.values().stream()
                     .filter(b -> b.questionId() == questionId)
@@ -366,6 +389,14 @@ class QingcenBountyServiceTest {
         @Override
         public List<Bounty> findDue(Instant now, int limit) {
             return store.values().stream().filter(b -> b.isDue(now)).limit(limit).toList();
+        }
+
+        @Override
+        public Map<Long, Long> sumOpenPointsBySponsor() {
+            return store.values().stream()
+                    .filter(b -> b.status() == BountyStatus.OPEN)
+                    .collect(java.util.stream.Collectors.groupingBy(Bounty::sponsorId,
+                            java.util.stream.Collectors.summingLong(Bounty::points)));
         }
 
         @Override

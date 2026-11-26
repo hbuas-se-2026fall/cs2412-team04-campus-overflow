@@ -69,10 +69,11 @@ public class AnswerCommandService {
 
     @Transactional
     public void edit(Actor actor, long answerId, String body) {
+        // 先用标量投影拿 questionId，不把 Answer 加载进一级缓存；锁问题后再读一次回答。
+        long questionId = loadAnswerQuestionId(answerId);
+        Question question = loadQuestionForUpdate(questionId);
+        // 拿到问题锁后首次加载回答：若并发删除已先提交，这里会按 404 失败，而不是用旧快照把它写回复活。
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestionForUpdate(answer.questionId());
-        // 拿到问题锁后重读回答：若并发删除已先提交，这里会按 404 失败，而不是用旧快照把它写回复活。
-        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         // 修正 3：参数类型改为 MarkdownBody 和 Instant
@@ -82,10 +83,10 @@ public class AnswerCommandService {
 
     @Transactional
     public void delete(Actor actor, long answerId) {
+        long questionId = loadAnswerQuestionId(answerId);
+        Question question = loadQuestionForUpdate(questionId);
+        // 锁住问题后首次加载回答：与采纳串行化，确保 accepted 判断基于最新状态。
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestionForUpdate(answer.questionId());
-        // 锁住问题后重读回答：与采纳串行化，确保 accepted 判断基于最新状态。
-        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         boolean accepted = question.isAccepted(answer.id());
@@ -139,9 +140,9 @@ public class AnswerCommandService {
 
     @Transactional
     public void endorse(Actor actor, long answerId) {
+        long questionId = loadAnswerQuestionId(answerId);
+        Question question = loadQuestionForUpdate(questionId);
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestionForUpdate(answer.questionId());
-        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         answer.endorse(actor, manages); // 如果这里报错，说明 endorse 要的参数不一样
@@ -169,6 +170,11 @@ public class AnswerCommandService {
     private Answer loadAnswer(long id) {
         return answers.findById(id)
                 .filter(a -> !a.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+    }
+
+    private long loadAnswerQuestionId(long answerId) {
+        return answers.findQuestionId(answerId)
                 .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
     }
 

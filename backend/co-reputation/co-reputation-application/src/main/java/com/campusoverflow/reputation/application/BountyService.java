@@ -9,6 +9,7 @@ import com.campusoverflow.reputation.api.event.BountyClosedEvent;
 import com.campusoverflow.reputation.api.event.BountyOpenedEvent;
 import com.campusoverflow.reputation.domain.Bounty;
 import com.campusoverflow.reputation.domain.BountyRepository;
+import com.campusoverflow.reputation.domain.BountyStatus;
 import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
@@ -161,27 +162,40 @@ public class BountyService {
         Instant now = clock.instant();
         List<Bounty> due = bounties.findDue(now, 100);
         int closed = 0;
-        for (Bounty bounty : due) {
+        for (Bounty snapshot : due) {
             try {
-                if (expiryTx == null) {
-                    expireOne(bounty, now);
-                } else {
-                    expiryTx.executeWithoutResult(status -> expireOne(bounty, now));
+                boolean done = expiryTx == null
+                        ? expireOne(snapshot.id(), now)
+                        : Boolean.TRUE.equals(expiryTx.execute(status -> expireOne(snapshot.id(), now)));
+                if (done) {
+                    closed++;
                 }
-                closed++;
             } catch (BusinessRuleException | NotFoundException e) {
-                log.warn("悬赏 {} 到期处理跳过：{}", bounty.id(), e.getMessage());
+                log.warn("悬赏 {} 到期处理跳过：{}", snapshot.id(), e.getMessage());
             } catch (RuntimeException e) {
-                log.error("悬赏 {} 到期处理失败，下一轮重试", bounty.id(), e);
+                log.error("悬赏 {} 到期处理失败，下一轮重试", snapshot.id(), e);
             }
         }
         return closed;
     }
 
-    private void expireOne(Bounty bounty, Instant now) {
+    /**
+     * 必须在独立事务内按 id 重读并加锁，不能使用 findDue 返回的事务外快照：
+     * 否则并发采纳已经关闭/发放的悬赏会被旧快照二次退款并覆盖状态。
+     */
+    private boolean expireOne(long bountyId, Instant now) {
+        Optional<Bounty> found = bounties.findByIdForUpdate(bountyId);
+        if (found.isEmpty()) {
+            return false;
+        }
+        Bounty bounty = found.get();
+        if (bounty.status() != BountyStatus.OPEN || !bounty.isDue(now)) {
+            return false;
+        }
         ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
                 .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
         closeAndRefund(bounty, sponsor, now);
+        return true;
     }
 
     /** 问题被删除时关闭其进行中的悬赏并退款；幂等，没有 OPEN 悬赏时无操作。 */
