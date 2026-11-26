@@ -79,7 +79,8 @@ public class BountyService {
 
     @Transactional
     public long open(Actor actor, long questionId, int points, int days) {
-        QuestionRef question = qa.findQuestion(questionId)
+        // 锁问题行：与采纳/删除问题串行化，避免“校验通过后又发生采纳/删除”仍开出 OPEN 悬赏。
+        QuestionRef question = qa.findQuestionForUpdate(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
 
         // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，与 docs/final/user-guide.md
@@ -116,8 +117,9 @@ public class BountyService {
     }
 
     /** 由 AnswerAccepted 事件触发（在处理器事务内）。幂等：悬赏已结束则直接返回。 */
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void settleOnAccept(long questionId, long answerId, long winnerId, String sourceEventId) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void settleOnAccept(long questionId, long answerId, long winnerId, long questionAuthorId,
+                               long acceptedById, String sourceEventId) {
         Optional<Bounty> found = bounties.findOpenByQuestion(questionId);
         if (found.isEmpty()) {
             return;
@@ -135,6 +137,11 @@ public class BountyService {
 
         // 自己的回答获得采纳：悬赏作废，冻结积分退回，不进入声誉流水。
         if (winnerId == bounty.sponsorId()) {
+            closeAndRefund(bounty, sponsor, now);
+            return;
+        }
+        // 防自问自答领奖：提问者采纳自己的回答，或采纳操作者自己就是获奖回答作者，均退款。
+        if (winnerId == questionAuthorId || acceptedById == winnerId) {
             closeAndRefund(bounty, sponsor, now);
             return;
         }
@@ -199,7 +206,7 @@ public class BountyService {
     }
 
     /** 问题被删除时关闭其进行中的悬赏并退款；幂等，没有 OPEN 悬赏时无操作。 */
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void closeForDeletedQuestion(long questionId) {
         bounties.findOpenByQuestion(questionId).ifPresent(bounty -> {
             ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())

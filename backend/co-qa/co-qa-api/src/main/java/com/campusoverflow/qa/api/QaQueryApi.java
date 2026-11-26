@@ -7,6 +7,14 @@ public interface QaQueryApi {
     Optional<QuestionRef> findQuestion(long questionId);
 
     /**
+     * 以行级锁读取问题，供跨上下文“先校验再写入”的用例使用（如发起悬赏）。
+     * 默认实现退化为普通查询，便于测试替身；生产实现必须在调用方事务内真正加锁。
+     */
+    default Optional<QuestionRef> findQuestionForUpdate(long questionId) {
+        return findQuestion(questionId);
+    }
+
+    /**
      * 问题的 accepted_answer_id 是否仍指向一条可见（未软删除、属于该问题）的回答。
      * 供悬赏等下游判断“是否真的已采纳”，避免历史脏数据把问题永久锁死。
      *

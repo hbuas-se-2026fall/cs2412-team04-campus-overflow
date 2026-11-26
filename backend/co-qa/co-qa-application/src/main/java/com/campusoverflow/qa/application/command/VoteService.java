@@ -61,20 +61,21 @@ public class VoteService {
             throw new BusinessRuleException("QA-1014", "投票值只能是 -1、0 或 1");
         }
 
-        Target target = resolve(type, targetId);
-        // 对所有投票先锁住所属问题行：首票也走同一把锁，避免并发首次投票同时插入、
-        // 其中一方被唯一键拒绝而返回 409（与 PUT 幂等语义不符）。
-        com.campusoverflow.qa.domain.Question locked = questions.findByIdForUpdate(target.questionId())
-                .filter(question -> !question.isDeleted())
-                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
-        if (type == TargetType.ANSWER) {
-            // 锁后重读回答：与删除回答串行化，避免给已删回答投票。
-            Answer fresh = answers.findById(targetId)
-                    .filter(answer -> !answer.isDeleted())
-                    .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
+        Target target;
+        if (type == TargetType.QUESTION) {
+            // 问题投票直接锁问题行；锁后的 Question 是当前读，不会命中旧快照。
+            Question locked = loadQuestionForUpdate(targetId);
+            target = new Target(locked.authorId(), locked.id(), locked.courseId());
+        } else if (type == TargetType.ANSWER) {
+            // 先用标量投影拿 questionId（不加载 Answer），锁问题行后再首次加载 Answer，
+            // 避免 resolve() 预加载 + 锁后 findById 命中一级缓存，看不到并发软删除。
+            long questionId = answers.findQuestionId(targetId)
+                    .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+            Question locked = loadQuestionForUpdate(questionId);
+            Answer fresh = loadAnswer(targetId);
             target = new Target(fresh.authorId(), fresh.questionId(), locked.courseId());
         } else {
-            target = new Target(locked.authorId(), locked.id(), locked.courseId());
+            throw new BusinessRuleException("QA-1014", "不支持的投票目标");
         }
         requireCanParticipate(target.courseId(), actor);
         if (actor.userId() == target.authorId()) {
@@ -113,23 +114,16 @@ public class VoteService {
         return new VoteResult(value, delta);
     }
 
-    private Target resolve(TargetType type, long targetId) {
-        if (type == TargetType.QUESTION) {
-            Question question = questions.findById(targetId)
-                    .filter(q -> !q.isDeleted())
-                    .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
-            return new Target(question.authorId(), question.id(), question.courseId());
-        }
-        if (type == TargetType.ANSWER) {
-            Answer answer = answers.findById(targetId)
-                    .filter(a -> !a.isDeleted())
-                    .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
-            Question question = questions.findById(answer.questionId())
-                    .filter(q -> !q.isDeleted())
-                    .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
-            return new Target(answer.authorId(), answer.questionId(), question.courseId());
-        }
-        throw new BusinessRuleException("QA-1014", "不支持的投票目标");
+    private Question loadQuestionForUpdate(long questionId) {
+        return questions.findByIdForUpdate(questionId)
+                .filter(question -> !question.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+    }
+
+    private Answer loadAnswer(long answerId) {
+        return answers.findById(answerId)
+                .filter(answer -> !answer.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
     }
 
     /** 课程问题及其回答只允许课程成员投票；公开问题不受限制。 */
