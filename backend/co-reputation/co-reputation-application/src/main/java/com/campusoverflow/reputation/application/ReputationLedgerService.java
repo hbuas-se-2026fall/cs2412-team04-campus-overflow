@@ -52,4 +52,38 @@ public class ReputationLedgerService {
         BadgePolicy.forReputation(account.reputation()).forEach(b -> badges.grant(userId, b));
         return true;
     }
+
+    /**
+     * 带每日上限的投票记账（审计魏-11）：**在账户行锁内**重算当日已得正向票分，再决定本次实际入账值。
+     *
+     * <p>修复前的窗口：调用方先 {@code sumPositiveVoteDeltaSince} 求和、再进入本方法加载账户写入，
+     * 两次并发投票可能都读到「未达上限」的旧值；行锁把「读累计 → 截断 → 改余额 → 写流水」收进同一临界区。
+     *
+     * <p>截断语义（明确）：正向票被上限截断为 0 时**不写流水、返回 false**（不产生 0 值流水）；
+     * 负数（踩票）不受上限约束，按原值入账。
+     *
+     * @param rawDelta 未截断的票分变化（已由 Rulebook 的 voteDelta 算出 old/new 差值）
+     * @param gainedToday 由调用方提供的「当日已得正向票分」计算函数（在锁内求值）
+     */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public boolean recordVoteCapped(long userId, String sourceEventId, ReputationReason reason, int rawDelta,
+                                    String refType, long refId, java.util.function.IntSupplier gainedToday) {
+        if (rawDelta == 0 || ledger.exists(sourceEventId, userId, reason)) {
+            return false;
+        }
+        ReputationAccount account = accounts.findByUserIdForUpdate(userId)
+                .orElseGet(() -> ReputationAccount.open(userId, 0));
+        int capped = com.campusoverflow.reputation.domain.ReputationRulebook
+                .applyDailyCap(rawDelta, gainedToday.getAsInt());
+        if (capped == 0) {
+            return false;
+        }
+        account.applyReputation(capped);
+        accounts.save(account);
+        ledger.append(LedgerEntry.of(userId, sourceEventId, reason, capped, refType, refId, clock.instant()));
+        events.publish(new ReputationChangedEvent(EventIds.next(), clock.instant(), userId, capped,
+                account.reputation(), reason.name()));
+        BadgePolicy.forReputation(account.reputation()).forEach(b -> badges.grant(userId, b));
+        return true;
+    }
 }

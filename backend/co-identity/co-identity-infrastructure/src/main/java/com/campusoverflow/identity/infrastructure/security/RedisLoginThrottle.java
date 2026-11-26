@@ -41,14 +41,29 @@ public class RedisLoginThrottle implements LoginThrottle {
 
     private final StringRedisTemplate redis;
     private final int maxFailures;
-    private final int windowSeconds;
+    private final Duration window;
 
+    /**
+     * 配置键与 {@code application.yml} 的嵌套结构对齐（{@code co.security.login.max-failures} /
+     * {@code .window-seconds}）——审计魏-10：此前代码读连字符键 {@code co.security.login-max-failures}，
+     * 与 yml 不匹配，配置永远不生效（恒为默认 5 / 60s）。
+     * <p>构造期校验：非法值直接启动失败，避免"配错静默用默认值"。
+     */
     public RedisLoginThrottle(StringRedisTemplate redis,
-                              @Value("${co.security.login-max-failures:5}") int maxFailures,
+                              @Value("${co.security.login.max-failures:5}") int maxFailures,
                               @Value("${co.security.login.window-seconds:60}") int windowSeconds) {
+        if (maxFailures < 1) {
+            throw new IllegalArgumentException(
+                    "co.security.login.max-failures 必须 >= 1（当前 " + maxFailures + "）");
+        }
+        if (windowSeconds < 1) {
+            throw new IllegalArgumentException(
+                    "co.security.login.window-seconds 必须 >= 1（当前 " + windowSeconds + "）");
+        }
         this.redis = redis;
         this.maxFailures = maxFailures;
-        this.windowSeconds = windowSeconds;
+        this.window = Duration.ofSeconds(windowSeconds);
+
     }
 
     @Override
@@ -57,7 +72,7 @@ public class RedisLoginThrottle implements LoginThrottle {
         Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
         if (ttl != null && ttl == -1L) {
             // 兼容旧版本遗留的无 TTL 计数 key：补上过期时间，避免永久锁定
-            redis.expire(key, Duration.ofSeconds(windowSeconds));
+            redis.expire(key, window);
         }
         String v = redis.opsForValue().get(key);
         if (v == null) {
@@ -74,7 +89,8 @@ public class RedisLoginThrottle implements LoginThrottle {
 
     @Override
     public void recordFailure(String username) {
-        redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(windowSeconds * 1000L));
+        redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(window.toMillis()));
+
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.reputation.domain.ReputationRulebook;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import org.springframework.context.event.EventListener;
@@ -78,11 +79,13 @@ public class ReputationEventHandlers {
         }
         ReputationReason reason = "QUESTION".equalsIgnoreCase(e.targetType())
                 ? ReputationReason.QUESTION_VOTE : ReputationReason.ANSWER_VOTE;
-        LocalDate today = LocalDate.now(clock.withZone(ZoneOffset.UTC));
-        int gainedToday = ledger.sumPositiveVoteDeltaSince(e.targetAuthorId(),
-                today.atStartOfDay(ZoneOffset.UTC).toInstant());
-        int capped = ReputationRulebook.applyDailyCap(delta, gainedToday);
-        ledgerService.record(e.targetAuthorId(), e.eventId(), reason, capped, e.targetType(), e.targetId());
+        // 审计魏-11：日累计的求和已移入 ledgerService 的账户行锁内（recordVoteCapped），
+        // 避免「先求和、后加载账户」两步之间被并发投票读到旧值；截断为 0 时不写流水。
+        Instant todayStart = LocalDate.now(clock.withZone(ZoneOffset.UTC))
+                .atStartOfDay(ZoneOffset.UTC).toInstant();
+        ledgerService.recordVoteCapped(e.targetAuthorId(), e.eventId(), reason, delta,
+                e.targetType(), e.targetId(),
+                () -> ledger.sumPositiveVoteDeltaSince(e.targetAuthorId(), todayStart));
     }
 
     @EventListener

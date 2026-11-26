@@ -164,6 +164,12 @@ public class ReputationTestFixtures {
         }
 
         @Override
+        public Optional<ReputationAccount> findByUserIdForUpdate(long userId) {
+            // 内存夹具无并发：行锁读取等价于普通读取
+            return findByUserId(userId);
+        }
+
+        @Override
         public List<ReputationAccount> findAllByUserId(Collection<Long> userIds) {
             return userIds.stream().map(store::get).filter(Objects::nonNull).toList();
         }
