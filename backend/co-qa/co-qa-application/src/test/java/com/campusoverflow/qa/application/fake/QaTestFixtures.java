@@ -123,6 +123,11 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public Optional<Long> findQuestionId(long answerId) {
+            return Optional.ofNullable(store.get(answerId)).map(Answer::questionId);
+        }
+
+        @Override
         public Answer save(Answer answer) {
             if (answer.id() == null) {
                 answer.assignId(sequence.incrementAndGet());

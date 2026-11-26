@@ -311,6 +311,11 @@ public class ReputationTestFixtures {
         }
 
         @Override
+        public Optional<Bounty> findByIdForUpdate(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
         public Optional<Bounty> findLatestByQuestion(long questionId) {
             return store.values().stream()
                     .filter(b -> b.questionId() == questionId)
@@ -320,6 +325,14 @@ public class ReputationTestFixtures {
         @Override
         public List<Bounty> findDue(Instant now, int limit) {
             return store.values().stream().filter(b -> b.isDue(now)).limit(limit).toList();
+        }
+
+        @Override
+        public Map<Long, Long> sumOpenPointsBySponsor() {
+            return store.values().stream()
+                    .filter(b -> b.status() == BountyStatus.OPEN)
+                    .collect(java.util.stream.Collectors.groupingBy(Bounty::sponsorId,
+                            java.util.stream.Collectors.summingLong(Bounty::points)));
         }
 
         @Override

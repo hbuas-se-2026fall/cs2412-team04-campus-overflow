@@ -140,7 +140,7 @@ class ReputationSettlementTest {
         fx.handlers.on(new VoteCastEvent("evt-vote-1", fx.clock.instant(),
                 "ANSWER", 50, 2, 1, 10, 0, 1));
 
-        ReconciliationService reconciliation = new ReconciliationService(fx.accounts, fx.ledger);
+        ReconciliationService reconciliation = new ReconciliationService(fx.accounts, fx.ledger, fx.bounties);
         assertThat(reconciliation.reconcile()).isEmpty();
         assertThat(fx.accounts.findByUserId(2).orElseThrow().reputation()).isEqualTo(25);
     }
