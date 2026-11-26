@@ -97,7 +97,11 @@ public class QuestionQueryService {
     }
 
     /** 详情：正文渲染成安全 HTML，回答按“已采纳 → 得分 → 时间”排序，评论挂到各自的宿主上。 */
-    public QuestionDetailView detail(long questionId, Actor actorOrNull) {
+    /**
+     * 详情读取。默认计入一次浏览（页面首次打开）；写操作后的重载应传 countView=false，
+     * 否则同一次访问会因投票/评论/采纳后的 reload 而重复计数（审计 2-2）。
+     */
+    public QuestionDetailView detail(long questionId, Actor actorOrNull, boolean countView) {
         QuestionRow row = readModel.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
         requireCanView(row, actorOrNull);
@@ -139,7 +143,9 @@ public class QuestionQueryService {
                 .toList();
 
         // 浏览数只写 Redis，由定时任务批量落库，所以放在最后、且不影响读取结果
-        viewCounter.increment(questionId);
+        if (countView) {
+            viewCounter.increment(questionId);
+        }
 
         return new QuestionDetailView(row.id(), row.title(), row.body(), renderer.toSafeHtml(row.body()),
                 row.tags(), courseRefOf(row), AuthorView.of(row.authorId(), users.get(row.authorId())),

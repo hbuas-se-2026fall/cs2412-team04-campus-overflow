@@ -162,14 +162,20 @@ mvn verify               # 单元测试 + 架构检查 + 覆盖率门禁 + 集�
 
 ```bash
 cd frontend
+npm run lint
+npm run format:check
 npm run typecheck
+npm run test:run
 npm run build
 ```
+
+> Vitest + Testing Library 组件测试（`src/**/*.test.tsx`）；首次需 `npm install`。
 
 ### 4.3 CI
 
 GitHub Actions 的 `CI` 流水线包含后端编译、全量单元测试、ArchUnit、覆盖率门禁、
-集成测试（Testcontainers，硬门禁，失败即阻断）和前端类型检查/构建。
+集成测试（Testcontainers，硬门禁，失败即阻断），以及前端 ESLint、Prettier 格式检查、
+类型检查、组件单元测试（Vitest）与构建。
 目标为 `main` 的 PR / `main` push 还会构建前后端镜像；`main` push 同时推送 GHCR（sha + latest）。
 
 ## 5. Docker 一键部署
@@ -203,7 +209,20 @@ docker compose -f deploy/docker-compose.dev.yml up -d --build
 
 > 生产 compose **不映射后端 8080 到 host**：直出会绕过 Nginx 的 `client_max_body_size 2m`
 > 和 actuator 端点白名单（`/actuator/prometheus`、`/actuator/info` 等敏感端点）。
-> 需要在容器内诊断时用 `docker compose -f deploy/docker-compose.yml exec backend wget -qO- http://localhost:8080/actuator/health`。
+> 需要在容器内诊断时用：
+>
+> ```bash
+> docker compose --env-file deploy/.env -f deploy/docker-compose.yml exec backend \
+>   wget -qO- http://localhost:8080/actuator/health
+> ```
+>
+> 从宿主机看健康检查走 Nginx：`curl http://localhost/actuator/health`（审计 2-3c：原诊断命令缺 `--env-file`）。
+
+> ⚠️ **公网部署风险（待 PO 裁决，审计 2-3e）**：默认场景是 **HTTP 80 + `COOKIE_SECURE=false`**，
+> 会话 Cookie 与登录凭据在链路上是明文。校内网/本机演示可以接受；若要对公网开放，必须二选一：
+> ① 前面加 TLS（Nginx 443 + 证书）并把 `COOKIE_SECURE=true`；
+> ② 只在内网/隧道内访问，不直接暴露 80 端口。
+> 该取舍属产品/运维决策，代码侧不做强制（强制 `secure=true` 会让当前 HTTP 演示环境登录后立即丢会话）。
 
 加上监控（Prometheus + Grafana）：
 

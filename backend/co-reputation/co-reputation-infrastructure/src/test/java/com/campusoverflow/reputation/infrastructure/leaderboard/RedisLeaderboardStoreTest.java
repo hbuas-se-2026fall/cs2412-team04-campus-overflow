@@ -1,9 +1,12 @@
 package com.campusoverflow.reputation.infrastructure.leaderboard;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.campusoverflow.reputation.domain.AcademicTerm;
 import java.time.Instant;
@@ -57,5 +60,29 @@ class RedisLeaderboardStoreTest {
                 "lb:term:" + AcademicTerm.termKey(at));
         assertThat(script.getValue().getScriptAsString())
                 .contains("for i = 1, 3 do", "ZINCRBY", "EXPIRE");
+    }
+
+    @Test
+    void resetForDeletesOnlyKeysDerivedFromGivenInstants() {
+        Instant at = Instant.parse("2026-10-08T02:00:00Z");
+        when(redis.delete(anyCollection())).thenReturn(3L);
+
+        int deleted = store.resetFor(List.of(at, at));
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<java.util.Collection<String>> keys = ArgumentCaptor.forClass(java.util.Collection.class);
+        verify(redis).delete(keys.capture());
+        // 同一时间戳重复传入不能重复拼 key（用 LinkedHashSet 去重）
+        assertThat(keys.getValue()).containsExactly(
+                "lb:week:" + AcademicTerm.weekKey(at),
+                "lb:month:" + AcademicTerm.monthKey(at),
+                "lb:term:" + AcademicTerm.termKey(at));
+        assertThat(deleted).isEqualTo(3);
+    }
+
+    @Test
+    void resetForWithoutInstantsDoesNotTouchRedis() {
+        assertThat(store.resetFor(List.of())).isZero();
+        verify(redis, never()).delete(anyCollection());
     }
 }

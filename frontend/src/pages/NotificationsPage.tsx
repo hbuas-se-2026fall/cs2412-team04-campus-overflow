@@ -11,13 +11,27 @@ export function NotificationsPage() {
   const [error, setError] = useState('');
   const [loadingMore, setLoadingMore] = useState(false);
   const [markingAll, setMarkingAll] = useState(false);
+  // 审计 2-10：未读数必须来自服务端 unread-count，不能用「当前已加载页」里未读的条数——
+  // 分页后第 2 页起的未读会被漏算，导致「全部标记为已读」在仍有未读时被错误禁用。
+  const [unreadTotal, setUnreadTotal] = useState<number | null>(null);
+
+  const refreshUnread = () =>
+    api
+      .unreadCount()
+      .then((r) => setUnreadTotal(r.count))
+      .catch(() => setUnreadTotal(null));
 
   const load = (pageNum = 1, append = false) => {
     if (append) setLoadingMore(true);
     return api
       .notifications(pageNum, size)
       .then((p) => {
-        setItems((prev) => (append && prev ? [...prev, ...p.items] : p.items));
+        // offset 分页在新通知插入时会整体下移，翻页可能与上一页重叠；这里按 id 去重。
+        setItems((prev) => {
+          if (!append || !prev) return p.items;
+          const seen = new Set(prev.map((n) => n.id));
+          return [...prev, ...p.items.filter((n) => !seen.has(n.id))];
+        });
         setTotal(p.total);
         setSize(p.size);
         setPage(pageNum);
@@ -34,8 +48,15 @@ export function NotificationsPage() {
 
   useEffect(() => {
     load();
+    refreshUnread();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  /** 通知已读状态变化后：同时刷新本页与顶栏角标（审计 2-6：角标不再等 30 秒轮询）。 */
+  const afterReadChange = () => {
+    refreshUnread();
+    window.dispatchEvent(new Event('co:notifications-changed'));
+  };
 
   const readOne = async (id: number) => {
     // FE-10：接口失败时不能本地标已读，否则界面与后端不一致（刷新后又变回未读）
@@ -46,6 +67,8 @@ export function NotificationsPage() {
       return;
     }
     setItems((prev) => prev?.map((n) => (n.id === id ? { ...n, read: true } : n)) ?? prev);
+    setUnreadTotal((prev) => (prev === null ? null : Math.max(0, prev - 1)));
+    afterReadChange();
   };
 
   const markAll = async () => {
@@ -54,6 +77,8 @@ export function NotificationsPage() {
     try {
       await api.readAll();
       await load();
+      setUnreadTotal(0);
+      afterReadChange();
     } catch (e) {
       setError((e as Error).message || '标记已读失败，请重试');
     } finally {
@@ -66,7 +91,8 @@ export function NotificationsPage() {
     void load(page + 1, true);
   };
 
-  const unread = items?.filter((n) => !n.read).length ?? 0;
+  const unreadOnPage = items?.filter((n) => !n.read).length ?? 0;
+  const unread = unreadTotal ?? unreadOnPage; // 服务端数量不可用时退化为本页计数
 
   return (
     <div className="form-page">

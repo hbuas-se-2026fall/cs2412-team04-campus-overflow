@@ -89,6 +89,12 @@ export function BountyDialog({
       onChanged?.();
     } catch (e) {
       setError(describe(e));
+      // 审计 2-7：409（REP-2001 已结束 / REP-2002 已有进行中的悬赏）说明本地状态已过期，
+      // 只报错不刷新会让用户反复提交同一个必败请求，这里同步重拉一次悬赏状态。
+      if (e instanceof ApiError && e.status === 409) {
+        load();
+        onChanged?.();
+      }
     } finally {
       setBusy(false);
     }
@@ -100,12 +106,24 @@ export function BountyDialog({
 
   return (
     <div className="bounty-box">
-      {bounty ? <BountyStatus bounty={bounty} now={now} /> : <p className="muted">该问题还没有悬赏。</p>}
-      {loadError && <p className="error">{loadError}</p>}
+      {/* 审计 2-11：加载失败时不能显示「该问题还没有悬赏」——那会把「不知道」说成「没有」，
+          并会因为 bounty 为 null 而误展示「发起悬赏」入口。失败只给失败态 + 重试。 */}
+      {loadError ? (
+        <p className="error">
+          悬赏信息加载失败：{loadError}
+          <button className="link" onClick={load}>
+            重试
+          </button>
+        </p>
+      ) : bounty ? (
+        <BountyStatus bounty={bounty} now={now} />
+      ) : (
+        <p className="muted">该问题还没有悬赏。</p>
+      )}
 
-      {/* FE-02：门控 = 可管理 + 必须是课程问题 + 未采纳 + 无进行中悬赏。
+      {/* FE-02：门控 = 可管理 + 必须是课程问题 + 未采纳 + 无进行中悬赏 + 悬赏状态已知。
           公开问题（无 courseId）后端必拒 REP-1007，已采纳必拒 REP-1001，故这里不显示按钮。 */}
-      {canOpen && courseId != null && !accepted && !open && bounty?.status !== 'OPEN' && (
+      {canOpen && !loadError && courseId != null && !accepted && !open && bounty?.status !== 'OPEN' && (
         <button
           onClick={() => {
             setOpen(true);
@@ -196,7 +214,7 @@ function formatRemain(ms: number): string {
   return `${s} 秒`;
 }
 
-/** REP-1001（已关闭/已采纳）、REP-1002（积分不足）、REP-1003/1004（越界）→ 中文提示 */
+/** 悬赏业务码 → 中文提示（含 REP-2001/2002 冲突与 REP-3001 无权限，审计 2-7 补充） */
 function describe(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
@@ -210,6 +228,12 @@ function describe(e: unknown): string {
         return '悬赏积分需在 10–500 之间';
       case 'REP-1004':
         return '悬赏期限需在 1–14 天之间';
+      case 'REP-2001':
+        return '该悬赏已结束，无需再操作';
+      case 'REP-2002':
+        return '该问题已有进行中的悬赏';
+      case 'REP-3001':
+        return '只有课程管理者（教师/助教/管理员）可以发起悬赏';
       case 'QA-3001':
         return '只有课程教师/助教可以发起悬赏';
       case 'QA-1020':
@@ -217,6 +241,7 @@ function describe(e: unknown): string {
       default:
         if (e.status === 403) return '你没有权限发起悬赏';
         if (e.status === 404) return '问题不存在或已被删除';
+        if (e.status === 409) return '悬赏状态已变化，已为你刷新';
         if (e.status === 422) return '提交内容不符合规则，请检查积分与天数';
         return e.message || '发起悬赏失败，请稍后重试';
     }

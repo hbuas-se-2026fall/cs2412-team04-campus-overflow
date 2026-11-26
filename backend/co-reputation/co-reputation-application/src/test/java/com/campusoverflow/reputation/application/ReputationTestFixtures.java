@@ -244,6 +244,13 @@ public class ReputationTestFixtures {
             return sums;
         }
 
+        @Override
+        public List<LedgerEntry> findAllBetween(Instant from, Instant to) {
+            return entries.stream()
+                    .filter(e -> !e.createdAt().isBefore(from) && e.createdAt().isBefore(to))
+                    .toList();
+        }
+
         public int size() {
             return entries.size();
         }

@@ -26,4 +26,7 @@ public interface LedgerJpaRepository extends JpaRepository<LedgerJpaEntity, Long
 
     @Query("select l.userId, sum(l.delta) from LedgerJpaEntity l group by l.userId")
     List<Object[]> sumGroupByUser();
+
+    /** 重建排行榜：按 id 升序取出区间内全部流水，保证重放顺序稳定。 */
+    List<LedgerJpaEntity> findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByIdAsc(Instant from, Instant to);
 }

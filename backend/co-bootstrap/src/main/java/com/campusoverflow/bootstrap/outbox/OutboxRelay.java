@@ -88,8 +88,8 @@ public class OutboxRelay {
             List<Long> ids = jdbc.queryForList("""
                     SELECT id FROM outbox_event
                     WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
-                    ORDER BY id LIMIT 1 FOR UPDATE
-                    """, Long.class, maxAttempts, now);
+                    ORDER BY id LIMIT ? FOR UPDATE
+                    """, Long.class, maxAttempts, now, batchSize);
             if (ids.isEmpty()) {
                 return List.of();
             }

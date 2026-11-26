@@ -85,7 +85,20 @@ services:
     container_name: co-grafana
     profiles: ["observability"]
     environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:?GRAFANA_PASSWORD required}
+      # 审计 2-3a：不用 ${GRAFANA_PASSWORD:?} —— compose 会对整份文件做插值，
+      # 即使没启用 observability profile 也会因缺变量而直接失败。
+      # 改为容器内启动前自检：启用监控但没配密码时，Grafana 自己报错退出。
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        if [ -z "$$GF_SECURITY_ADMIN_PASSWORD" ]; then
+          echo "GRAFANA_PASSWORD 未设置：启用 --profile observability 时必须在 deploy/.env 中填写" >&2
+          exit 1
+        fi
+        exec /run.sh
     depends_on: [prometheus]
     ports: ["3000:3000"]
     volumes:

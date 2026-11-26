@@ -5,6 +5,8 @@ import com.campusoverflow.reputation.application.LeaderboardStore;
 import com.campusoverflow.reputation.domain.AcademicTerm;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -43,6 +45,24 @@ public class RedisLeaderboardStore implements LeaderboardStore {
                 String.valueOf(Duration.ofDays(15).toSeconds()),
                 String.valueOf(Duration.ofDays(40).toSeconds()),
                 String.valueOf(Duration.ofDays(200).toSeconds()));
+    }
+
+    /**
+     * 重建前清空：只删除这些时间戳真的会写到的周/月/学期 key，避免误删其他周期的数据。
+     */
+    @Override
+    public int resetFor(Collection<Instant> instants) {
+        Set<String> keys = new LinkedHashSet<>();
+        for (Instant at : instants) {
+            keys.add("lb:week:" + AcademicTerm.weekKey(at));
+            keys.add("lb:month:" + AcademicTerm.monthKey(at));
+            keys.add("lb:term:" + AcademicTerm.termKey(at));
+        }
+        if (keys.isEmpty()) {
+            return 0;
+        }
+        Long deleted = redis.delete(keys);
+        return deleted == null ? 0 : deleted.intValue();
     }
 
     @Override
