@@ -111,14 +111,16 @@ public class QuestionCommandService {
                 clock.instant());
         questions.save(question);
 
-        // 标签用量按差集调整：只对新增的 +1、被去掉的 -1，没变的标签不动
+        // 标签用量按净差一次调整：added/removed 合并后单批排序执行，避免两个并发编辑
+        // 以相反顺序锁标签行导致 InnoDB 死锁。
         List<String> added = after.stream().filter(tag -> !before.contains(tag)).toList();
         List<String> removed = before.stream().filter(tag -> !after.contains(tag)).toList();
-        if (!added.isEmpty()) {
-            tags.adjustUsage(added, 1);
-        }
-        if (!removed.isEmpty()) {
-            tags.adjustUsage(removed, -1);
+        java.util.Map<String, Integer> tagDeltas = new java.util.LinkedHashMap<>();
+        added.forEach(tag -> tagDeltas.merge(tag, 1, Integer::sum));
+        removed.forEach(tag -> tagDeltas.merge(tag, -1, Integer::sum));
+        tagDeltas.entrySet().removeIf(entry -> entry.getValue() == 0);
+        if (!tagDeltas.isEmpty()) {
+            tags.adjustDeltas(tagDeltas);
         }
 
         events.publish(new QuestionEditedEvent(EventIds.next(), clock.instant(), questionId,

@@ -55,6 +55,22 @@ class ReputationSettlementTest {
     }
 
     @Test
+    @DisplayName("被日上限截断为 0 的投票事件，跨日重投也不补分")
+    void cappedVoteEventIsNotReplayedNextDay() {
+        fx.seedAccount(2, 195, 0, 0);
+        fx.seedVoteGain(2, 195);
+        VoteCastEvent event = new VoteCastEvent("evt-cap-replay", fx.clock.instant(),
+                "ANSWER", 60, 2, 1, 10, 0, 1);
+
+        fx.handlers.on(event);
+        fx.clock.advance(Duration.ofDays(1));
+        fx.handlers.on(event);
+
+        assertThat(fx.accounts.findByUserId(2).orElseThrow().reputation()).isEqualTo(200);
+        assertThat(fx.ledger.countByUserAndReason(2, ReputationReason.ANSWER_VOTE)).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("改投：赞→踩按「新效果 − 旧效果」记 −12")
     void voteChangeAppliesDifference() {
         fx.seedAccount(2, 0, 0, 0);

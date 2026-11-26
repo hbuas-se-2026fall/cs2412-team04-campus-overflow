@@ -171,7 +171,7 @@ class QingcenBountyServiceTest {
     void settleAwardsWinnerAndRecordsLedger() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.AWARDED);
         assertThat(bounty.winnerId()).isEqualTo(3L);
@@ -190,7 +190,7 @@ class QingcenBountyServiceTest {
     void settleRefundsWhenQuestionAuthorWinsOwnAnswer() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, 1L, 1L, 1L, "event-self-answer");
+        service.settleOnAccept(QUESTION_ID, 50L, 1L, 1L, 1L, NOW, "event-self-answer");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);
@@ -202,7 +202,7 @@ class QingcenBountyServiceTest {
     void settleRefundsWhenAcceptorIsTheWinningAnswerAuthor() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 3L, "event-self-accept");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 3L, NOW, "event-self-accept");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);
@@ -214,7 +214,7 @@ class QingcenBountyServiceTest {
     void selfWinClosesAndRefundsWithoutLedger() {
         Bounty bounty = seedBounty(50, 7);
 
-        service.settleOnAccept(QUESTION_ID, 50L, SPONSOR_ID, 1L, 1L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, SPONSOR_ID, 1L, 1L, NOW, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         assertThat(bounty.winnerId()).isNull();
@@ -228,7 +228,7 @@ class QingcenBountyServiceTest {
 
     @Test
     void settleIsNoOpWhenNoOpenBounty() {
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
         verifyNoInteractions(ledgerService);
         assertThat(events).isEmpty();
@@ -321,7 +321,7 @@ class QingcenBountyServiceTest {
         Bounty bounty = seedBounty(50, 1);
         BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
 
-        later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-late");
+        later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW.plus(Duration.ofDays(2)), "event-late");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);
@@ -361,9 +361,22 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void settleAcceptedBeforeExpiryAwardsEvenIfProcessedLater() {
+        Bounty bounty = seedBounty(50, 1);
+        BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
+
+        later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-before-expiry");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.AWARDED);
+        verify(sponsor).spendFrozen(50);
+        verify(ledgerService).record(3L, "event-before-expiry", ReputationReason.BOUNTY_AWARDED, 50,
+                "BOUNTY", bounty.id());
+    }
+
+    @Test
     void settledBountyIsNotReturnedByExpireDue() {
         Bounty bounty = seedBounty(50, 1);
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
         int expired = serviceAt(NOW.plus(Duration.ofDays(3))).expireDue();
 
@@ -378,7 +391,7 @@ class QingcenBountyServiceTest {
         Bounty bounty = seedBounty(50, 1);
         serviceAt(NOW.plus(Duration.ofDays(3))).expireDue();
 
-        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, "event-1");
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
         assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
         verify(sponsor).refundFrozen(50);

@@ -159,6 +159,11 @@ final class NotificationTestFixtures {
             return this;
         }
 
+        StubQa withDeletedQuestion(long id, long authorId, String title) {
+            questions.put(id, new QuestionRef(id, authorId, 100L, title, null, true));
+            return this;
+        }
+
         @Override
         public Optional<QuestionRef> findQuestion(long questionId) {
             return Optional.ofNullable(questions.get(questionId));

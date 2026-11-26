@@ -93,6 +93,9 @@ public class ReputationTestFixtures {
     public final RecordingAudit audit = new RecordingAudit();
     public final StubIdentity identity = new StubIdentity();
     public final StubQa qa = new StubQa();
+    public final java.util.Set<String> processedEvents = new java.util.HashSet<>();
+    public final com.campusoverflow.shared.event.ProcessedEventStore processedStore =
+            (eventId, consumer) -> processedEvents.add(eventId + ":" + consumer);
 
     public final BadgeService badgeService;
     public final ReputationLedgerService ledgerService;
@@ -103,7 +106,8 @@ public class ReputationTestFixtures {
         this.badgeService = new BadgeService(badges, events, clock);
         this.ledgerService = new ReputationLedgerService(accounts, ledger, badgeService, events, clock);
         this.bountyService = new BountyService(bounties, accounts, ledgerService, qa, identity, events, audit, clock);
-        this.handlers = new ReputationEventHandlers(accounts, ledger, ledgerService, badgeService, bountyService, clock);
+        this.handlers = new ReputationEventHandlers(accounts, ledger, ledgerService, badgeService, bountyService,
+                processedStore, clock);
     }
 
     // ---------- 常用构造 ----------

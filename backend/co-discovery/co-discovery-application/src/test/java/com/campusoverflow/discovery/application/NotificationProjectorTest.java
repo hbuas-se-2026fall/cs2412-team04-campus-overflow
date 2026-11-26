@@ -50,6 +50,19 @@ class NotificationProjectorTest {
     }
 
     @Test
+    void deletedQuestionDoesNotNotify() {
+        NotificationTestFixtures.StubQa deleted = new NotificationTestFixtures.StubQa()
+                .withDeletedQuestion(7, 1, "已删除的问题标题");
+        NotificationProjector p = new NotificationProjector(notifications, identity, deleted);
+        AnswerSubmittedEvent event = new AnswerSubmittedEvent("e-deleted", NOW, 50, 7, 2, 1,
+                "已删除的问题标题");
+
+        p.on(event);
+
+        assertThat(notifications.all()).isEmpty();
+    }
+
+    @Test
     void selfAnswerDoesNotNotify() {
         AnswerSubmittedEvent event = new AnswerSubmittedEvent("e2", NOW, 50, 7, 1, 1, "title");
 

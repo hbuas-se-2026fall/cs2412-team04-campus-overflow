@@ -33,7 +33,7 @@ public class RedisViewCounter implements ViewCounter {
     static final String BATCH_ID_FIELD = "__batch_id";
     /** 防止多实例同时执行“recover → rename → 落库”，避免互相覆盖 FLUSHING。 */
     private static final String FLUSH_LOCK = PENDING + ":lock";
-    private static final Duration FLUSH_LOCK_TTL = Duration.ofMinutes(2);
+    private static final Duration FLUSH_LOCK_TTL = Duration.ofMinutes(10);
     private static final String MARK_APPLIED_SQL =
             "INSERT INTO qa_view_batch (batch_id, applied_at) VALUES (?, NOW(6))";
     private static final String IS_APPLIED_SQL = "SELECT COUNT(*) FROM qa_view_batch WHERE batch_id = ?";
@@ -42,6 +42,18 @@ public class RedisViewCounter implements ViewCounter {
     private static final RedisScript<Long> UNLOCK_SCRIPT = new DefaultRedisScript<>(
             "if redis.call('get', KEYS[1]) == ARGV[1] then return redis.call('del', KEYS[1]) else return 0 end",
             Long.class);
+    /** 原子地把失败批次的每个字段“加回 PENDING + 从 FLUSHING 删除”，避免合并中途崩溃重复计数。 */
+    private static final RedisScript<Long> MERGE_FLUSHING_SCRIPT = new DefaultRedisScript<>("""
+            local n = #ARGV
+            for i = 1, n, 2 do
+                redis.call('HINCRBY', KEYS[1], ARGV[i], ARGV[i + 1])
+                redis.call('HDEL', KEYS[2], ARGV[i])
+            end
+            if redis.call('HLEN', KEYS[2]) == 0 then
+                redis.call('DEL', KEYS[2])
+            end
+            return 1
+            """, Long.class);
 
     private final StringRedisTemplate redis;
     private final JdbcTemplate jdbc;
@@ -147,18 +159,25 @@ public class RedisViewCounter implements ViewCounter {
         }
         Map<Object, Object> entries = new HashMap<>(redis.opsForHash().entries(FLUSHING));
         entries.remove(BATCH_ID_FIELD);
+        List<String> args = new ArrayList<>();
         for (Map.Entry<Object, Object> entry : entries.entrySet()) {
             try {
                 long delta = Long.parseLong(entry.getValue().toString());
                 if (delta != 0) {
-                    redis.opsForHash().increment(PENDING, entry.getKey().toString(), delta);
+                    args.add(entry.getKey().toString());
+                    args.add(String.valueOf(delta));
                 }
             } catch (NumberFormatException e) {
                 log.warn("丢弃损坏的浏览量计数 key={} value={}", entry.getKey(), entry.getValue());
+                redis.opsForHash().delete(FLUSHING, entry.getKey());
             }
-            redis.opsForHash().delete(FLUSHING, entry.getKey());
         }
-        redis.delete(FLUSHING);
+        if (args.isEmpty()) {
+            redis.delete(FLUSHING);
+            return;
+        }
+        // 所有字段在一次 Lua 调用内完成 HINCRBY+HDEL：中途崩溃不会出现“已加回但未删除”的重复。
+        redis.execute(MERGE_FLUSHING_SCRIPT, List.of(PENDING, FLUSHING), args.toArray());
     }
 
     private boolean isApplied(String batchId) {

@@ -293,6 +293,14 @@ public final class QaTestFixtures {
                 usage.merge(name, delta, Integer::sum);
             });
         }
+
+        @Override
+        public void adjustDeltas(java.util.Map<String, Integer> deltas) {
+            deltas.forEach((name, delta) -> {
+                adjustments.add((delta > 0 ? "+" : "") + delta + ":" + name);
+                usage.merge(name, delta, Integer::sum);
+            });
+        }
     }
 
     /** 极简渲染器：只做“去标记 + 截断”，够用于断言摘要长度与事件里的纯文本。 */
