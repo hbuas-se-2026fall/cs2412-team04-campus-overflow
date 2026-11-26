@@ -71,6 +71,17 @@ class AdminUserServiceTest {
         assertThat(audit.actions).contains("DISABLE_USER");
     }
 
+    @Test
+    void changeRoleAlsoRevokesSessionsSoStaleRoleCannotOutliveIt() {
+        // 审计魏-9：会话里固化了登录时的角色；不撤会话则变更后的权限要等会话过期才生效
+        service.changeRole(admin, 1L, Role.ADMIN);
+
+        User promoted = users.findById(1L).orElseThrow();
+        assertThat(promoted.role()).isEqualTo(Role.ADMIN);
+        assertThat(sessions.revoked).containsExactly("T2001");
+        assertThat(audit.actions).contains("ROLE_CHANGED");
+    }
+
     private static final class FakeUsers implements UserRepository {
         private final Map<Long, User> store = new HashMap<>();
         private final AtomicLong sequence = new AtomicLong();

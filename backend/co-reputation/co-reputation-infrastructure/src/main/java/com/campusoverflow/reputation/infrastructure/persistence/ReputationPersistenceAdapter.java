@@ -50,6 +50,12 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public Optional<ReputationAccount> findByUserIdForUpdate(long userId) {
+        // 行锁读取：仅限已存在的账户；不存在时由调用方以 open(...) 新建（首个事件路径）
+        return accounts.findByIdForUpdate(userId).map(ReputationPersistenceAdapter::toDomain);
+    }
+
+    @Override
     public List<ReputationAccount> findAllByUserId(Collection<Long> userIds) {
         return accounts.findAllById(userIds).stream().map(ReputationPersistenceAdapter::toDomain).toList();
     }

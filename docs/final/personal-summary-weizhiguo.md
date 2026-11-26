@@ -13,12 +13,13 @@
 | --- | --- | --- |
 | 48 条 PBI Issue 与 Backlog 单一口径 | Issue #27~#74（`[PB-xx]` + User Story + Given/When/Then）、`docs/backlog/product-backlog.md` | 看板状态：初导入时 49 项归位（Done 31 / Sprint Backlog 10 / Backlog 8）；后由 #160 看板同步（board-sync 2026-11-17）按交付事实更新为 **48 条全部处置：44 closed / 3 open（v1.1 候选）/ 1 Won't**，最终口径见 [`docs/backlog/board-sync-2026-11-17.md`](../backlog/board-sync-2026-11-17.md) |
 | 分支保护与必需状态检查（BUG-003 关闭） | Branch Protection API 核验记录 `docs/lab1-submission/README.md`；`develop` 勾上 `后端构建与验证`、`前端构建`（1 Approve + dismiss stale + enforce admins） | main/develop 双分支保护完整，CI 失败阻断合并 |
-| Question.accept 五步校验（T1-03） | `QuestionTest.Accepting` 5 条 | 全绿 |
-| Answer 聚合与 AnswerCommandService（T1-04/08） | `AnswerTest` 3 条、`AnswerAndVoteServiceTest` 4/4；事件参数顺序修复 PR #89 | 全绿 |
+| Question.accept 五步校验（T1-03，**验收与复核**） | 实现：`Question.java` 域逻辑由**青岑**完成（`6edd60b`）；我负责按角色卡梳理五步校验清单并复核 `QuestionTest.Accepting` 5 条 | 全绿（归属已按 git 历史更正） |
+| **AnswerCommandService 应用层编排（T1-08）** | 首版由我实现（`479a42a feat(qa): implement AnswerCommandService for Lab4`）：save → 原子 answerCount → 发事件 → 缓存失效；后续并发/缓存修复由青岑、刘俊琒迭代；事件参数顺序修复 PR #89 | 全绿 |
+| Answer 聚合（T1-04，**验收**） | 实现：**青岑**（`6edd60b feat(qa): implement Answer aggregate invariants`）；`AnswerTest` 3 条、`AnswerAndVoteServiceTest` 4/4 作为验收 | 全绿（归属已按 git 历史更正） |
 | 声誉计分规则/徽章/查询 API（T2-01/05/09） | `ReputationRulebookTest` 9/9、PR #91（`(10,195)→5`、`(10,200)→0` 日上限边界） | 合入 develop |
 | 声誉账户与采纳/投票计分（T2-02/06） | `ReputationAccount` 七方法、`ReputationEventHandlers` 幂等（6/6）、PR #102 | 合入 develop |
 | Lab4 端到端证据 | `docs/lab4-submission/answer-e2e.md` + 4 张截图（POST 问题→回答→采纳→详情 answerCount=1 + SQL 落库） | 入库 |
-| D3 文档统一（4 上下文 / 30 事件） | PR #75：`event-storming.png` 重建、`glossary.md:25-27`、`context-map` | BUG-004 关闭 |
+| D3 文档口径收口（4 上下文 / **14 事件**） | PR #75 先按当时的 30 事件清单重建 `event-storming.png`；2026-11-25 由青岑按代码实际事件重写 `events.md` 为 **14 个**并重绘图，`01-architecture.md` 同步 | BUG-004 已修复（早期 30 事件清单已废弃） |
 | v0.1.0 / v0.2.0 / v0.3.0 发布 | `docs/release/v0.3.0.md`、PR #115（develop→main）、GitHub Releases 三份 | tag 与 Release Notes 齐全 |
 | E3/E4 环境与身份核查表 | `env-weizhiguo.png/txt`、`mvn-test-weizhiguo.png`、PR #123（核查表 5/5） | 三处表口径一致 |
 | Sprint 3 计划与执行收口 | PR #124（PO 代拟计划）→ #160（S3 执行记录收口，刘俊琒） | 已执行并收口 |

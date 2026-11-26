@@ -28,8 +28,6 @@ public class RedisLoginThrottle implements LoginThrottle {
 
     private static final Logger log = LoggerFactory.getLogger(RedisLoginThrottle.class);
 
-    private static final Duration WINDOW = Duration.ofMinutes(1);
-
     /**
      * KEYS[1] = 计数 key，ARGV[1] = 窗口毫秒数。
      * 仅在计数为 1（窗口内首次失败）时设置 TTL，避免每次失败都续期导致"永久锁定"。
@@ -42,10 +40,28 @@ public class RedisLoginThrottle implements LoginThrottle {
 
     private final StringRedisTemplate redis;
     private final int maxFailures;
+    private final Duration window;
 
-    public RedisLoginThrottle(StringRedisTemplate redis, @Value("${co.security.login-max-failures:5}") int maxFailures) {
+    /**
+     * 配置键与 {@code application.yml} 的嵌套结构对齐（{@code co.security.login.max-failures} /
+     * {@code .window-seconds}）——审计魏-10：此前代码读连字符键 {@code co.security.login-max-failures}，
+     * 与 yml 不匹配，配置永远不生效（恒为默认 5 / 60s）。
+     * <p>构造期校验：非法值直接启动失败，避免"配错静默用默认值"。
+     */
+    public RedisLoginThrottle(StringRedisTemplate redis,
+                              @Value("${co.security.login.max-failures:5}") int maxFailures,
+                              @Value("${co.security.login.window-seconds:60}") int windowSeconds) {
+        if (maxFailures < 1) {
+            throw new IllegalArgumentException(
+                    "co.security.login.max-failures 必须 >= 1（当前 " + maxFailures + "）");
+        }
+        if (windowSeconds < 1) {
+            throw new IllegalArgumentException(
+                    "co.security.login.window-seconds 必须 >= 1（当前 " + windowSeconds + "）");
+        }
         this.redis = redis;
         this.maxFailures = maxFailures;
+        this.window = Duration.ofSeconds(windowSeconds);
     }
 
     @Override
@@ -66,7 +82,7 @@ public class RedisLoginThrottle implements LoginThrottle {
 
     @Override
     public void recordFailure(String username) {
-        redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(WINDOW.toMillis()));
+        redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(window.toMillis()));
     }
 
     @Override
