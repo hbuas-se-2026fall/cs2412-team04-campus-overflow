@@ -19,6 +19,8 @@
 | 工具链 | GitHub 组织仓库 + Projects 看板 + IntelliJ + JDK 21 + Maven 3.9 + Node 20 + Docker | [`docs/lab1-submission/env-matrix.md`](../lab1-submission/env-matrix.md) |
 | 范围 | T0-01～T0-08：仓库/模板/环境/CI/ADR-009/事件风暴/Backlog/团队约定 | 本节表格 |
 | 本次不做 | 业务功能实现（Q&A、Reputation 等留到 S1/S2） | — |
+| 顺延项（审计魏-4 补记） | **T0-09**（前端课程页）→ S1 内由房国栋随 PR #81 交付；**T0-11**（测试账号/6.2.3 提权说明）→ 陈明哲在 S1 补入 README；**T0-10**（破冰 PR）实际在 S0 窗口内完成（`docs/team.md` 5 人已合并） | 见各 Sprint 记录 |
+| 时点偏差（审计魏-4 补记） | S0 计划窗口至 **2026-11-02**，但 **CI 首次运行 11-04**、**v0.1.0 于 2026-11-16 补打**（`704cd60`）——两项均**晚于 S0 窗口**，属时点偏差而非 S0 内已完成 | `docs/lab1-submission/README.md`、本文件第 6 行 |
 
 **Sprint 0 我们决定不做的事**：不在 S0 写业务代码；只做「让别人能开始写业务」的基础设施与文档，避免基础设施债拖到 S1。
 
