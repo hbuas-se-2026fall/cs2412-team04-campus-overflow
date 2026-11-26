@@ -11,16 +11,23 @@ import type { Bounty } from '../types';
  */
 export function BountyDialog({
   questionId,
+  courseId,
+  accepted,
   canOpen,
   onChanged,
 }: {
   questionId: number;
+  /** 问题所属课程；公开问题（未挂课程）为 undefined，后端会拒 REP-1007 */
+  courseId?: number;
+  /** 问题是否已采纳答案；已采纳后不可再发起悬赏（后端 REP-1001） */
+  accepted: boolean;
   /** 后端 permissions.canManage 为 true 时才允许发起（教师在课程内才能悬赏） */
   canOpen: boolean;
   onChanged?: () => void;
 }) {
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [open, setOpen] = useState(false);
   const [points, setPoints] = useState('50');
   const [days, setDays] = useState('7');
@@ -31,16 +38,22 @@ export function BountyDialog({
 
   const load = () => {
     setLoading(true);
+    setLoadError('');
     api
       .bountyOf(questionId)
       .then(setBounty)
-      .catch(() => setBounty(null))
+      .catch((e: unknown) => {
+        setBounty(null);
+        setLoadError(describe(e));
+      })
       .finally(() => setLoading(false));
   };
 
+  // FE-02：采纳后问题状态变化，悬赏会被结算/关闭；把 accepted 纳入依赖，采纳后重载悬赏状态。
   useEffect(() => {
     load();
-  }, [questionId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionId, accepted]);
 
   // 每秒刷新一次「当前时间」，驱动倒计时重新计算
   useEffect(() => {
@@ -88,9 +101,11 @@ export function BountyDialog({
   return (
     <div className="bounty-box">
       {bounty ? <BountyStatus bounty={bounty} now={now} /> : <p className="muted">该问题还没有悬赏。</p>}
+      {loadError && <p className="error">{loadError}</p>}
 
-      {/* FE-09：已有进行中的悬赏时不再显示「发起悬赏」（后端同一问题只允许一个 OPEN） */}
-      {canOpen && !open && bounty?.status !== 'OPEN' && (
+      {/* FE-02：门控 = 可管理 + 必须是课程问题 + 未采纳 + 无进行中悬赏。
+          公开问题（无 courseId）后端必拒 REP-1007，已采纳必拒 REP-1001，故这里不显示按钮。 */}
+      {canOpen && courseId != null && !accepted && !open && bounty?.status !== 'OPEN' && (
         <button
           onClick={() => {
             setOpen(true);
@@ -187,6 +202,8 @@ function describe(e: unknown): string {
     switch (e.code) {
       case 'REP-1001':
         return '问题已关闭或已采纳，不能发起悬赏';
+      case 'REP-1007':
+        return '公开问题不能发起悬赏，请选择所属课程的问题';
       case 'REP-1002':
         return '可用悬赏积分不足';
       case 'REP-1003':

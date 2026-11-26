@@ -194,12 +194,16 @@ docker compose -f deploy/docker-compose.dev.yml up -d --build
 
 访问：
 
-| 服务 | 地址 |
-| --- | --- |
-| 前端 | <http://localhost/> |
-| 后端 API | <http://localhost:8080/> |
-| Swagger | <http://localhost:8080/swagger-ui.html> |
-| 健康检查 | <http://localhost:8080/actuator/health> |
+| 服务 | 地址（生产 compose） | 地址（本地开发 dev compose） |
+| --- | --- | --- |
+| 前端 | <http://localhost/> | <http://localhost/> |
+| 后端 API | <http://localhost/api/>（经 Nginx 同源代理，8080 不从 host 暴露） | <http://localhost:8080/> |
+| Swagger | 生产默认关闭 | <http://localhost:8080/swagger-ui.html> |
+| 健康检查 | <http://localhost/actuator/health>（Nginx 只开放此 actuator 端点） | <http://localhost:8080/actuator/health> |
+
+> 生产 compose **不映射后端 8080 到 host**：直出会绕过 Nginx 的 `client_max_body_size 2m`
+> 和 actuator 端点白名单（`/actuator/prometheus`、`/actuator/info` 等敏感端点）。
+> 需要在容器内诊断时用 `docker compose -f deploy/docker-compose.yml exec backend wget -qO- http://localhost:8080/actuator/health`。
 
 加上监控（Prometheus + Grafana）：
 
@@ -220,7 +224,7 @@ MYSQL_ROOT_PASSWORD  MySQL root 密码（生产必填，无默认值）
 CO_FIELD_KEY         字段加密 AES 密钥（Base64 32 字节，生产必填）
 CO_FIELD_MAC_KEY     字段摘要 HMAC 密钥（Base64 32 字节，生产必填）
 SPRING_PROFILES      后端 profile，生产默认 prod（禁止 demo）
-COOKIE_SECURE        HTTPS 部署时设为 true（默认 true）
+COOKIE_SECURE        HTTP 部署保持 false（默认 false）；Nginx 启用 TLS、全程 https:// 后必须设为 true，否则 Secure Cookie 不回传、登录后丢会话
 GRAFANA_PASSWORD     Grafana 管理员密码（生产必填）
 ```
 

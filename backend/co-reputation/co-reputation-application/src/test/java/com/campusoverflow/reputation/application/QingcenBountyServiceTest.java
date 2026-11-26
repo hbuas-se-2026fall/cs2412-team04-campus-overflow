@@ -122,6 +122,29 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void openRejectsWhenAcceptedAnswerStillVisible() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "已采纳的问题", 50L, false)));
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
+
+        assertThatThrownBy(() -> service.open(teacher, QUESTION_ID, 50, 7))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("已采纳");
+        verifyNoInteractions(sponsor);
+    }
+
+    @Test
+    void openAllowsStaleAcceptedAnswerId() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "采纳回答已被删除的问题", 50L, false)));
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(false);
+
+        long id = service.open(teacher, QUESTION_ID, 50, 7);
+
+        assertThat(bounties.store.get(id).status()).isEqualTo(BountyStatus.OPEN);
+    }
+
+    @Test
     void openRejectsBountyOnPublicQuestion() {
         // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，
         // 与 docs/final/user-guide.md「必须是该课程的问题」一致。
@@ -195,13 +218,94 @@ class QingcenBountyServiceTest {
         Bounty bounty = seedBounty(50, 7);
         when(identity.findUser(SPONSOR_ID)).thenReturn(Optional.of(
                 new UserSummary(SPONSOR_ID, "王老师", Role.TEACHER, true, "计算机工程学院")));
+        Actor author = new Actor(1L, "提问者", Role.STUDENT);
 
-        Optional<BountyView> view = service.latest(QUESTION_ID);
+        Optional<BountyView> view = service.latest(QUESTION_ID, author);
 
         assertThat(view).isPresent();
         assertThat(view.get().id()).isEqualTo(bounty.id());
         assertThat(view.get().sponsorName()).isEqualTo("王老师");
         assertThat(view.get().status()).isEqualTo("OPEN");
+    }
+
+    @Test
+    void latestRejectsMissingQuestion() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.latest(QUESTION_ID, null))
+                .isInstanceOf(com.campusoverflow.shared.domain.NotFoundException.class);
+    }
+
+    @Test
+    void latestRejectsAnonymousOnCourseQuestion() {
+        seedBounty(50, 7);
+
+        assertThatThrownBy(() -> service.latest(QUESTION_ID, null))
+                .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
+    }
+
+    @Test
+    void latestRejectsOutsiderOnCourseQuestion() {
+        seedBounty(50, 7);
+        Actor outsider = new Actor(2L, "路人", Role.STUDENT);
+        when(identity.isCourseMember(2L, 100L)).thenReturn(false);
+
+        assertThatThrownBy(() -> service.latest(QUESTION_ID, outsider))
+                .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
+    }
+
+    @Test
+    void latestAllowsCourseMember() {
+        Bounty bounty = seedBounty(50, 7);
+        Actor member = new Actor(2L, "课程学生", Role.STUDENT);
+        when(identity.isCourseMember(2L, 100L)).thenReturn(true);
+        when(identity.findUser(SPONSOR_ID)).thenReturn(Optional.of(
+                new UserSummary(SPONSOR_ID, "王老师", Role.TEACHER, true, "计算机工程学院")));
+
+        Optional<BountyView> view = service.latest(QUESTION_ID, member);
+
+        assertThat(view).isPresent();
+        assertThat(view.get().id()).isEqualTo(bounty.id());
+    }
+
+    @Test
+    void latestAllowsAnonymousOnPublicQuestion() {
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, null, "公开问题", null, false)));
+        Bounty bounty = seedBounty(50, 7);
+        when(identity.findUser(SPONSOR_ID)).thenReturn(Optional.of(
+                new UserSummary(SPONSOR_ID, "王老师", Role.TEACHER, true, "计算机工程学院")));
+
+        Optional<BountyView> view = service.latest(QUESTION_ID, null);
+
+        assertThat(view).isPresent();
+        assertThat(view.get().id()).isEqualTo(bounty.id());
+    }
+
+    @Test
+    void settleAfterExpiryRefundsInsteadOfAwarding() {
+        Bounty bounty = seedBounty(50, 1);
+        BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
+
+        later.settleOnAccept(QUESTION_ID, 50L, 3L, "event-late");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
+        verify(sponsor).refundFrozen(50);
+        verify(sponsor, never()).spendFrozen(anyInt());
+        verifyNoInteractions(ledgerService);
+        assertThat(events).singleElement().isInstanceOf(BountyClosedEvent.class);
+    }
+
+    @Test
+    void deleteQuestionClosesOpenBountyOnceAndRefunds() {
+        Bounty bounty = seedBounty(50, 7);
+
+        service.closeForDeletedQuestion(QUESTION_ID);
+        service.closeForDeletedQuestion(QUESTION_ID);
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
+        verify(sponsor).refundFrozen(50);
+        assertThat(events).singleElement().isInstanceOf(BountyClosedEvent.class);
     }
 
     @Test

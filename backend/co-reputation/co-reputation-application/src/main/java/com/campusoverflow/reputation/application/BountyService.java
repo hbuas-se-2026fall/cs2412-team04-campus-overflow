@@ -15,6 +15,7 @@ import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.shared.audit.AuditTrail;
 import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ConflictException;
+import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -23,13 +24,21 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /** 用例：悬赏的发起、结算、到期退款。积分冻结与悬赏状态在同一事务中变更。 */
 @Service
 public class BountyService {
+
+    private static final Logger log = LoggerFactory.getLogger(BountyService.class);
 
     private final BountyRepository bounties;
     private final ReputationAccountRepository accounts;
@@ -39,10 +48,20 @@ public class BountyService {
     private final IntegrationEventPublisher events;
     private final AuditTrail audit;
     private final Clock clock;
+    /** 到期退款逐条使用独立事务；测试直接 new 时该字段为 null，退化为单事务顺序执行。 */
+    private final TransactionTemplate expiryTx;
 
     public BountyService(BountyRepository bounties, ReputationAccountRepository accounts,
                          ReputationLedgerService ledgerService, QaQueryApi qa, IdentityApi identity,
                          IntegrationEventPublisher events, AuditTrail audit, Clock clock) {
+        this(bounties, accounts, ledgerService, qa, identity, events, audit, clock, null);
+    }
+
+    @Autowired
+    public BountyService(BountyRepository bounties, ReputationAccountRepository accounts,
+                         ReputationLedgerService ledgerService, QaQueryApi qa, IdentityApi identity,
+                         IntegrationEventPublisher events, AuditTrail audit, Clock clock,
+                         PlatformTransactionManager txManager) {
         this.bounties = bounties;
         this.accounts = accounts;
         this.ledgerService = ledgerService;
@@ -51,6 +70,10 @@ public class BountyService {
         this.events = events;
         this.audit = audit;
         this.clock = clock;
+        this.expiryTx = txManager == null ? null : new TransactionTemplate(txManager);
+        if (this.expiryTx != null) {
+            this.expiryTx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        }
     }
 
     @Transactional
@@ -66,7 +89,8 @@ public class BountyService {
             throw new BusinessRuleException("REP-1007", "公开问题不能发起悬赏，请选择所属课程的问题");
         }
 
-        boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == null;
+        // 用“可见 accepted”而不是原始 accepted_answer_id：历史脏数据指向已删回答时仍应允许发起悬赏。
+        boolean questionOpen = !question.deleted() && !qa.hasVisibleAcceptedAnswer(questionId);
         boolean managesCourse = identity.canManageCourse(actor.userId(), question.courseId());
 
         // 前置检查只用于友好错误；并发下的单 OPEN 由 rep_bounty.uk_bounty_open_question 兜底。
@@ -102,6 +126,12 @@ public class BountyService {
                 .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
         Instant now = clock.instant();
 
+        // 已到期但定时任务尚未处理：采纳不能再发奖，按到期规则退款。
+        if (bounty.isDue(now)) {
+            closeAndRefund(bounty, sponsor, now);
+            return;
+        }
+
         // 自己的回答获得采纳：悬赏作废，冻结积分退回，不进入声誉流水。
         if (winnerId == bounty.sponsorId()) {
             closeAndRefund(bounty, sponsor, now);
@@ -121,25 +151,75 @@ public class BountyService {
                 "question=" + questionId + ",points=" + bounty.points());
     }
 
-    /** 到期未采纳的悬赏：关闭并退回冻结积分。由定时任务调用。 */
-    @Transactional
+    /**
+     * 到期未采纳的悬赏：关闭并退回冻结积分。由定时任务调用。
+     *
+     * <p>每条悬赏在独立事务中处理：单条脏数据或乐观锁冲突不会回滚整批；
+     * 失败会记录日志并在下一轮重试，其余悬赏继续退款。</p>
+     */
     public int expireDue() {
         Instant now = clock.instant();
         List<Bounty> due = bounties.findDue(now, 100);
+        int closed = 0;
         for (Bounty bounty : due) {
+            try {
+                if (expiryTx == null) {
+                    expireOne(bounty, now);
+                } else {
+                    expiryTx.executeWithoutResult(status -> expireOne(bounty, now));
+                }
+                closed++;
+            } catch (BusinessRuleException | NotFoundException e) {
+                log.warn("悬赏 {} 到期处理跳过：{}", bounty.id(), e.getMessage());
+            } catch (RuntimeException e) {
+                log.error("悬赏 {} 到期处理失败，下一轮重试", bounty.id(), e);
+            }
+        }
+        return closed;
+    }
+
+    private void expireOne(Bounty bounty, Instant now) {
+        ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
+                .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
+        closeAndRefund(bounty, sponsor, now);
+    }
+
+    /** 问题被删除时关闭其进行中的悬赏并退款；幂等，没有 OPEN 悬赏时无操作。 */
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void closeForDeletedQuestion(long questionId) {
+        bounties.findOpenByQuestion(questionId).ifPresent(bounty -> {
             ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
                     .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
-            closeAndRefund(bounty, sponsor, now);
-        }
-        return due.size();
+            closeAndRefund(bounty, sponsor, clock.instant());
+        });
     }
 
     @Transactional(readOnly = true)
-    public Optional<BountyView> latest(long questionId) {
+    public Optional<BountyView> latest(long questionId, Actor viewerOrNull) {
+        // 先存在性守卫：用 isEmpty 而不是丢掉 orElseThrow 的返回值（Sonar java:S2201）。
+        QuestionRef question = qa.findQuestion(questionId)
+                .filter(ref -> !ref.deleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已被删除"));
+        requireCanView(question, viewerOrNull);
         return bounties.findLatestByQuestion(questionId).map(b -> new BountyView(
                 b.id(), b.questionId(), b.sponsorId(),
                 identity.findUser(b.sponsorId()).map(UserSummary::displayName).orElse("未知用户"),
                 b.points(), b.status().name(), b.createdAt(), b.expiresAt(), b.winnerId(), b.answerId()));
+    }
+
+    /** 与 QuestionQueryService.requireCanView 同口径：公开问题不限；课程问题仅作者/成员/管理员。 */
+    private void requireCanView(QuestionRef question, Actor viewerOrNull) {
+        if (question.courseId() == null) {
+            return;
+        }
+        if (viewerOrNull == null) {
+            throw new ForbiddenException("QA-3006", "无权查看此内容");
+        }
+        if (viewerOrNull.isAdmin() || viewerOrNull.is(question.authorId())
+                || identity.isCourseMember(viewerOrNull.userId(), question.courseId())) {
+            return;
+        }
+        throw new ForbiddenException("QA-3006", "无权查看此内容");
     }
 
     private void closeAndRefund(Bounty bounty, ReputationAccount sponsor, Instant now) {

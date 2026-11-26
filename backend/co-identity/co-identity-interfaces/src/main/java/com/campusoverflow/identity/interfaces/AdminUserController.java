@@ -82,9 +82,12 @@ public class AdminUserController {
      * 审计 AUTH-04：email 只校验 {@code @NotBlank}，与注册 DTO / 领域 {@code checkEmail} 的 100 字符上限不一致，
      * 超长邮箱会穿透到领域层才被拒。此处补 {@code @Size(max = 100)} 与之对齐（接口层即返回 400）。
      */
-    public record CreateStaffRequest(@NotBlank String username, @NotBlank String displayName,
-                                     @NotBlank @Size(max = 100) String email, @NotBlank String password,
-                                     @NotNull Role role, String college) {
+    public record CreateStaffRequest(@NotBlank @Size(min = 4, max = 20) String username,
+                                     @NotBlank @Size(min = 2, max = 20) String displayName,
+                                     @NotBlank @Size(max = 100) String email,
+                                     @NotBlank @Size(min = 8, max = 64) String password,
+                                     @NotNull Role role,
+                                     @Size(max = 50) String college) {
     }
 
     public record ChangeRoleRequest(@NotNull Role role) {

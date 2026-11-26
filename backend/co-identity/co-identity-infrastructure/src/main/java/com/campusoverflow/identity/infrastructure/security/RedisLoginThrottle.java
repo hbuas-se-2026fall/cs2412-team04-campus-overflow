@@ -3,6 +3,7 @@ package com.campusoverflow.identity.infrastructure.security;
 import com.campusoverflow.identity.application.LoginThrottle;
 import com.campusoverflow.identity.domain.Usernames;
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,11 +63,17 @@ public class RedisLoginThrottle implements LoginThrottle {
         this.redis = redis;
         this.maxFailures = maxFailures;
         this.window = Duration.ofSeconds(windowSeconds);
+
     }
 
     @Override
     public boolean isBlocked(String username) {
         String key = key(username);
+        Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
+        if (ttl != null && ttl == -1L) {
+            // 兼容旧版本遗留的无 TTL 计数 key：补上过期时间，避免永久锁定
+            redis.expire(key, window);
+        }
         String v = redis.opsForValue().get(key);
         if (v == null) {
             return false;
@@ -83,6 +90,7 @@ public class RedisLoginThrottle implements LoginThrottle {
     @Override
     public void recordFailure(String username) {
         redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(window.toMillis()));
+
     }
 
     @Override

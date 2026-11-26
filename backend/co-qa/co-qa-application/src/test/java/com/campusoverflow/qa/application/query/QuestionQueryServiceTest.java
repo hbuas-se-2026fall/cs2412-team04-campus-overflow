@@ -8,6 +8,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryListCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryReadModel;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubRenderer;
+import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
@@ -15,6 +16,8 @@ import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,10 +76,40 @@ class QuestionQueryServiceTest {
     }
 
     @Test
+    @DisplayName("列表：回填缓存必须使用读取时的代际号，避免旧快照写进新代")
+    void listWritesBackWithGenerationSeenAtRead() {
+        AtomicLong putGeneration = new AtomicLong(-1);
+        QuestionListCache fixedGenerationCache = new QuestionListCache() {
+            @Override
+            public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
+                return new Lookup(7L, Optional.empty());
+            }
+
+            @Override
+            public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                            PageResult<QuestionSummaryView> value) {
+                putGeneration.set(generation);
+            }
+
+            @Override
+            public void invalidateAll() {
+            }
+        };
+        QuestionQueryService serviceWithFixedCache = new QuestionQueryService(readModel, identity,
+                new StubRenderer(), viewCounter, fixedGenerationCache);
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+
+        serviceWithFixedCache.list(null, PAGE, ming);
+
+        assertThat(putGeneration).hasValue(7L);
+    }
+
+    @Test
     @DisplayName("列表：作者信息批量回填，摘要截断到 160 字，有采纳回答时 accepted 为真")
     void listMapsAuthorExcerptAndAcceptedFlag() {
         String longBody = "变色为什么不够？".repeat(60);
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", longBody, 50L));
+        readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
         readModel.questions.add(questionRow(13L, 404L, "作者已经注销的老问题标题", "这条问题的作者在用户表里查不到。",
                 null));
 
@@ -143,6 +176,19 @@ class QuestionQueryServiceTest {
         assertThat(detail.answers()).allSatisfy(answer -> assertThat(answer.accepted()).isFalse());
         // 提问者（ming 是作者）重新获得采纳权限
         assertThat(detail.permissions().canAccept()).isTrue();
+    }
+
+    @Test
+    @DisplayName("列表：历史脏数据——accepted_answer_id 指向已删回答时不显示已采纳")
+    void listToleratesStaleAcceptedAnswerId() {
+        // 采纳 50 但 50 已被删除，只剩普通回答 51：列表摘要不应再显示“已采纳”。
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
+        readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
+
+        PageResult<QuestionSummaryView> page = service.list(COURSE_ID, PAGE, ming);
+
+        assertThat(page.items()).hasSize(1);
+        assertThat(page.items().get(0).accepted()).isFalse();
     }
 
     @Test

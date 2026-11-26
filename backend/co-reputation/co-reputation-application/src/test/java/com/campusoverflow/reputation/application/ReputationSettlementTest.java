@@ -3,6 +3,7 @@ package com.campusoverflow.reputation.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.qa.api.event.VoteCastEvent;
 import com.campusoverflow.reputation.api.event.BountyAwardedEvent;
 import com.campusoverflow.reputation.api.event.BountyClosedEvent;
@@ -21,6 +22,22 @@ import org.junit.jupiter.api.Test;
 class ReputationSettlementTest {
 
     private final ReputationTestFixtures fx = new ReputationTestFixtures();
+
+    @Test
+    @DisplayName("问题删除事件：关闭 OPEN 悬赏并退回冻结积分")
+    void questionDeletedClosesBountyAndRefunds() {
+        Actor teacher = fx.teacher(9);
+        fx.seedAccount(9, 0, 1000, 0);
+        fx.seedQuestion(10, 1, 100L);
+        long bountyId = fx.openBounty(teacher, 10, 50, 7);
+
+        fx.handlers.on(new ContentDeletedEvent("evt-del-1", fx.clock.instant(), "QUESTION", 10, 10));
+
+        assertThat(fx.bounties.get(bountyId).status()).isEqualTo(BountyStatus.EXPIRED);
+        assertThat(fx.accounts.findByUserId(9).orElseThrow().availablePoints()).isEqualTo(1000);
+        assertThat(fx.accounts.findByUserId(9).orElseThrow().frozenPoints()).isZero();
+        assertThat(fx.events.ofType(BountyClosedEvent.class)).hasSize(1);
+    }
 
     @Test
     @DisplayName("每日上限：今天已 +195，再被赞只加 5")

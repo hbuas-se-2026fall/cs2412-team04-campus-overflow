@@ -4,7 +4,7 @@
 
 ## 1.1 一句话架构
 
-CampusOverflow 是 **模块化单体（Modular Monolith）+ 六边形分层**：按 4 个限界上下文物理分 Maven 模块，每个上下文内部再分 `domain / application / infrastructure / interfaces` 四层；跨上下文只通过 `api` 契约或领域事件集成，为后续拆分服务保留边界。
+CampusOverflow 是 **模块化单体（Modular Monolith）+ 六边形分层**：按 4 个限界上下文物理分 Maven 模块，每个上下文分 5 个 Maven 模块：`api`（对外契约）+ `domain / application / infrastructure / interfaces` 四层；跨上下文只通过 `api` 契约或领域事件集成，为后续拆分服务保留边界。
 
 ## 1.2 模块结构
 
@@ -15,13 +15,14 @@ backend/pom.xml（父 POM：依赖版本、JaCoCo、覆盖率门槛 0.70）
 ├── co-identity           Identity：用户、课程、角色、会话（参考实现）
 ├── co-qa                 Q&A：问题、回答、投票、评论、采纳
 ├── co-reputation         Reputation：账户、账本、徽章、悬赏、排行榜
-└── co-discovery          Discovery：搜索投影、相关问题、通知、排行榜读模型
+└── co-discovery          Discovery：搜索投影、相关问题、通知
 ```
 
-每个上下文内部固定四层：
+每个上下文固定 5 个 Maven 模块（api + 四层）：
 
-| 层 | 职责 | 约束 |
+| 模块/层 | 职责 | 约束 |
 | --- | --- | --- |
+| `api` | 对外同步契约（IdentityApi/QaQueryApi/…）与事件 DTO | 其他上下文只能依赖 api，不得依赖 domain/infrastructure |
 | `domain` | 聚合、值对象、领域服务、仓储接口 | 零 Spring 依赖，纯 Java + JUnit |
 | `application` | 用例编排、事务边界、事件发布 | 只依赖 domain + api，测试用 fake 仓储 |
 | `infrastructure` | JPA/JDBC/Redis 适配器、仓储实现、定时任务 | 实现 domain 端口 |
@@ -36,12 +37,12 @@ backend/pom.xml（父 POM：依赖版本、JaCoCo、覆盖率门槛 0.70）
 | Identity | `co-identity` | 用户、课程、成员角色、会话、CSRF | `IdentityApi`（同步）、`UserRegisteredEvent`（异步） |
 | Q&A | `co-qa` | 问题/回答/投票/评论/采纳、软删除 | `QaQueryApi`（同步）、`QuestionPosted`/`AnswerSubmitted`/`VoteCast`/`AnswerAccepted` 等事件 |
 | Reputation | `co-reputation` | 声誉账户与账本、徽章、悬赏、排行榜 | `ReputationApi`；消费 Q&A 事件，发 `ReputationChanged`/`BadgeAwarded`/`Bounty*` |
-| Discovery | `co-discovery` | 搜索索引、相关问题、通知、排行榜读模型 | `SearchQuery`/`SearchPort`；消费 Q&A/Reputation 事件 |
+| Discovery | `co-discovery` | 搜索索引、相关问题、通知 | `SearchQuery`/`SearchPort`；消费 Q&A/Reputation 事件；排行榜由 Reputation 提供 |
 
 上下文映射与事件风暴见：
 
 - [`docs/ddd/context-map.md`](../ddd/context-map.md) / [`context-map.png`](../ddd/context-map.png)
-- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 30 事件）
+- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 14 个实际事件，与 `events.md` 一致）
 - [`docs/ddd/glossary.md`](../ddd/glossary.md)（统一语言）
 
 ## 1.4 关键流程

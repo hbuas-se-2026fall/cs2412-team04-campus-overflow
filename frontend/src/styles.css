@@ -225,6 +225,11 @@ article h1 {
 .votebox button {
   padding: 2px 8px;
 }
+/* FE-04：我的投票选中态（myVote === 1 / -1） */
+.votebox button.active {
+  color: var(--brand);
+  font-weight: 700;
+}
 .check-mark {
   color: var(--accent);
   font-size: 18px;
@@ -263,6 +268,13 @@ article h1 {
   font-size: 13px;
   padding: 4px 0;
   border-bottom: 1px dashed var(--line);
+}
+/* FE-03：二级回复缩进一层 */
+.comment.reply {
+  margin-left: 20px;
+}
+.comment-form.reply {
+  margin-left: 20px;
 }
 .comment-form {
   display: flex;

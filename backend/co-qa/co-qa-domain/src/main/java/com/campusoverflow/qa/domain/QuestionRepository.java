@@ -6,6 +6,12 @@ import java.util.Optional;
 public interface QuestionRepository {
     Optional<Question> findById(long id);
 
+    /**
+     * 以行级悲观锁读取问题，供“采纳 / 删除回答 / 编辑 / 删除问题”等状态变更使用。
+     * 同一问题的这些写操作由此串行化，避免基于旧快照同时通过校验。
+     */
+    Optional<Question> findByIdForUpdate(long id);
+
     Question save(Question question);
 
     /**
@@ -16,6 +22,12 @@ public interface QuestionRepository {
 
     /** 原子地调整回答数（UPDATE ... SET answer_count = answer_count + ?）。 */
     void adjustAnswerCount(long questionId, int delta);
+
+    /**
+     * 仅在问题仍未删除时原子增加回答数。返回 false 表示问题已被并发删除，
+     * 调用方必须回滚，避免出现“问题已删、回答仍插入”的孤儿数据。
+     */
+    boolean adjustAnswerCountIfOpen(long questionId, int delta);
 
     /** 原子地调整得分。 */
     void adjustScore(long questionId, int delta);

@@ -220,12 +220,57 @@ class QuestionCommandServiceTest {
         service.delete(ming, id);
 
         assertThat(questions.findById(id).orElseThrow().isDeleted()).isTrue();
+        assertThat(tags.usage).containsEntry("java", 0);
         ContentDeletedEvent event = events.ofType(ContentDeletedEvent.class).get(0);
         assertThat(event.targetType()).isEqualTo("QUESTION");
         assertThat(event.targetId()).isEqualTo(id);
         assertThat(event.questionId()).isEqualTo(id);
         assertThat(cache.invalidations).isEqualTo(2);
         assertThat(audit.actions).contains("QUESTION_DELETED");
+    }
+
+    @Test
+    @DisplayName("删除：发布→删除后标签计数回落，一进一出不虚高（热门标签口径）")
+    void deleteReclaimsTagUsage() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java", "spring-boot")));
+        assertThat(tags.usage).containsEntry("java", 1).containsEntry("spring-boot", 1);
+
+        service.delete(ming, id);
+
+        assertThat(questions.findById(id).orElseThrow().isDeleted()).isTrue();
+        assertThat(tags.usage).containsEntry("java", 0).containsEntry("spring-boot", 0);
+        assertThat(tags.adjustments).containsExactly("+1:java", "+1:spring-boot", "-1:java", "-1:spring-boot");
+    }
+
+    @Test
+    @DisplayName("删除：删除被拒（已有回答）时不能回收标签用量，避免误减")
+    void rejectedDeleteDoesNotReclaimTagUsage() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+        questions.answerCountDeltas.put(id, 1);
+
+        assertThatThrownBy(() -> service.delete(ming, id))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("已有回答");
+
+        assertThat(questions.findById(id).orElseThrow().isDeleted()).isFalse();
+        assertThat(tags.usage).containsEntry("java", 1);
+        assertThat(tags.adjustments).containsExactly("+1:java");
+    }
+
+    @Test
+    @DisplayName("删除：管理者删除已有回答的问题同样回收标签用量")
+    void managerDeleteAlsoReclaimsTagUsage() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+        questions.answerCountDeltas.put(id, 1);
+
+        service.delete(teacher, id);
+
+        assertThat(questions.findById(id).orElseThrow().isDeleted()).isTrue();
+        assertThat(tags.usage).containsEntry("java", 0);
+        assertThat(tags.adjustments).containsExactly("+1:java", "-1:java");
     }
 
     @Test
@@ -240,6 +285,20 @@ class QuestionCommandServiceTest {
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("已有回答");
         assertThat(questions.findById(id).orElseThrow().isDeleted()).isFalse();
+    }
+
+    @Test
+    @DisplayName("编辑/删除问题前先锁问题行，避免与并发删除互相覆盖")
+    void stateChangesUseLockedRead() {
+        long id = service.post(ming, command("红黑树插入后为什么必须旋转？",
+                "变色为什么不够？希望有直观解释，最好能给出一个反例。", List.of("java")));
+
+        service.edit(ming, id, new EditQuestionCommand("红黑树插入后如何判断旋转方向？",
+                "补充说明：希望在回答里给出一个必须双旋的反例，谢谢。", List.of("java")));
+        assertThat(questions.lockedLoads).isEqualTo(1);
+
+        service.delete(ming, id);
+        assertThat(questions.lockedLoads).isEqualTo(2);
     }
 
     @Test

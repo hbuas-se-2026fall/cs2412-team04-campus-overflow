@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  * 而不是带着仓库里的已知密钥/演示管理员跑在公网上。</p>
  */
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class EnvironmentGuard implements ApplicationRunner {
 
     private static final String DEV_FIELD_KEY = "GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I=";

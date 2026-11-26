@@ -67,17 +67,32 @@ public class QuestionQueryService {
         }
 
         Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
-        Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, viewerId, page);
+        // 缓存 key 必须包含“可见范围指纹”：用户加入课程/被改角色后立刻换 key，
+        // 不能等 75 秒 TTL 或依赖写入方记得 bump 代际。
+        String scope = viewerOrNull == null ? "anon"
+                : allCourses ? "admin"
+                : "member:" + visibleCourseIds.stream().sorted().map(String::valueOf)
+                        .collect(java.util.stream.Collectors.joining(","));
+        QuestionListCache.Lookup lookup = cache.get(courseId, viewerId, page, scope);
+        // 先取出 Optional 再判空，避免对同一表达式重复求值（Sonar java:S3655）。
+        Optional<PageResult<QuestionSummaryView>> cached = lookup.value();
         if (cached.isPresent()) {
             return cached.get();
         }
 
         PageResult<QuestionRow> rows = readModel.listQuestions(courseId, allCourses, visibleCourseIds, page);
+        // 与详情一致的 effective 语义：一次批量确认采纳回答是否仍可见，历史脏数据不显示“已采纳”。
+        List<Long> acceptedAnswerIds = rows.items().stream()
+                .map(QuestionRow::acceptedAnswerId).filter(id -> id != null).distinct().toList();
+        Set<Long> visibleAcceptedIds = acceptedAnswerIds.isEmpty()
+                ? Set.of()
+                : readModel.findVisibleAnswerIds(acceptedAnswerIds);
         List<Long> authorIds = rows.items().stream().map(QuestionRow::authorId).distinct().toList();
         Map<Long, UserSummary> authors = authorIds.isEmpty() ? Map.of() : identity.findUsers(authorIds);
 
-        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId())));
-        cache.put(courseId, viewerId, page, result);
+        PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId()),
+                visibleAcceptedIds));
+        cache.put(courseId, viewerId, page, scope, lookup.generation(), result);
         return result;
     }
 
@@ -155,10 +170,13 @@ public class QuestionQueryService {
         return readModel.popularTags(safeLimit);
     }
 
-    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author) {
+    private QuestionSummaryView toSummary(QuestionRow row, UserSummary author, Set<Long> visibleAcceptedIds) {
+        // 采纳标记同样走 effective 语义：只有采纳回答仍在可见列表里才算已采纳（与 detail 口径一致）。
+        Long acceptedId = row.acceptedAnswerId();
+        boolean accepted = acceptedId != null && visibleAcceptedIds.contains(acceptedId);
         return new QuestionSummaryView(row.id(), row.title(), renderer.toPlainText(row.body(), EXCERPT_LENGTH),
                 row.tags(), row.courseId(), AuthorView.of(row.authorId(), author), row.score(), row.answerCount(),
-                row.viewCount(), row.acceptedAnswerId() != null, row.createdAt());
+                row.viewCount(), accepted, row.createdAt());
     }
 
     private AnswerView toAnswerView(AnswerRow answer, Long effectiveAcceptedId, Map<Long, UserSummary> users,

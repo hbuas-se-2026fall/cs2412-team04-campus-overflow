@@ -15,8 +15,8 @@
 
 ## 二、协作方式
 
-- 所有改动走 `feature/<拼音>-<主题>` 分支 + Pull Request，禁止直接 push main / develop。
-- 每个 PR 至少 1 名有写权限的成员 Approve（评论 LGTM），由 SM 合并，合并后删除分支。
+- 所有改动走 `feature/<issue>-<英文描述>` 分支 + Pull Request，禁止直接 push main / develop（V3 §7.2；历史分支名保留不改）。
+- `develop` 至少 1 名、`main` 至少 2 名有写权限成员 Approve（含 SM/PO），由 SM 合并，合并后删除分支（V3 §7.1.5）。
 - 评审意见 24 小时内响应，作者逐条回复。
 - 领域统一术语以 `docs/ddd/glossary.md` 为准，不自行造词。
 - 评审人按 `.github/CODEOWNERS` 按目录自动分配。
@@ -25,7 +25,7 @@
 
 - 即时沟通：IM 群「CampusOverflow-TeamX」。
 - 工作日群消息 2 小时内回复；阻塞超过 2 小时必须在群内升级。
-- 每日站会 12:30；Sprint Planning / Review / Retro 按课程日历进行。
+- 每日站会 10:00（V3 §7.1.5）；历史 Sprint 记录中的 12:30 为旧约定；Sprint Planning / Review / Retro 按课程日历进行。
 - 重要决策与架构记录：`docs/adr/`。
 
 ## 四、相关文档

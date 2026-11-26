@@ -13,6 +13,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryVotes;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingAudit;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.RecordingEvents;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
+import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.TargetType;
@@ -104,6 +105,39 @@ class AnswerAndVoteServiceTest {
         Question question = questions.findById(questionId).orElseThrow();
         assertThat(question.acceptedAnswerId()).isNull();
         assertThat(question.isAccepted(answerId)).isFalse();
+        // 提交时 +1、删除时 -1，净增量为 0；JPA 适配器还需保证 save 不回写旧 answerCount。
+        assertThat(questions.answerCountDeltas).containsEntry(questionId, 0);
+    }
+
+    @Test
+    @DisplayName("脏数据→accept 成功：采纳 ID 指向已删回答时先清空再采纳，不抛 QA-2002")
+    void acceptToleratesStaleAcceptedAnswerId() {
+        long staleId = answerService.submit(hong, questionId, "这条回答随后被删除，但问题仍记着它的采纳 ID。");
+        answerService.accept(ming, questionId, staleId);
+        Answer stale = answers.findById(staleId).orElseThrow();
+        stale.softDelete(new Actor(9, "王老师", Role.TEACHER), true, true, NOW);
+        answers.save(stale);
+        // 刻意不走 answerService.delete()：它会清空采纳关系；这里模拟修复前遗留的脏数据。
+
+        long freshId = answerService.submit(hong, questionId, "新的回答可以被正常采纳。");
+
+        answerService.accept(ming, questionId, freshId);
+
+        Question question = questions.findById(questionId).orElseThrow();
+        assertThat(question.acceptedAnswerId()).isEqualTo(freshId);
+        assertThat(events.ofType(AnswerAcceptedEvent.class)).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("采纳与删除回答共用问题行锁，避免基于旧快照同时通过校验")
+    void acceptAndDeleteUseTheSameQuestionLock() {
+        long answerId = answerService.submit(hong, questionId, "关键在于黑高这个不变量，仅靠变色无法调整。");
+
+        answerService.accept(ming, questionId, answerId);
+        answerService.delete(new Actor(9, "王老师", Role.TEACHER), answerId);
+
+        assertThat(questions.lockedLoads).isEqualTo(2);
+        assertThat(questions.findById(questionId).orElseThrow().acceptedAnswerId()).isNull();
     }
 
     @Test
@@ -132,6 +166,8 @@ class AnswerAndVoteServiceTest {
         assertThat(voteEvents).hasSize(2);
         assertThat(voteEvents.get(1).oldValue()).isEqualTo(1);
         assertThat(voteEvents.get(1).newValue()).isEqualTo(-1);
+        // 每次投票（含首次）都先锁问题行，首票并发不会同时插入。
+        assertThat(questions.lockedLoads).isEqualTo(3);
     }
 
     @Test

@@ -1,7 +1,7 @@
 # 3. 质量证据
 
-> 答辩口径：先给结论（CI 门禁全绿、覆盖率达标、端到端可跑；Sonar 质量门禁仍 Failed 1 Bug，见 §3.7），再按需展开 CI 与报告。
-> 数据截至：2026-11-24（S4 收口 + 安全加固口径）。
+> 答辩口径：先给结论（CI 门禁全绿、覆盖率达标、端到端可跑、**Sonar 质量门禁 PASSED**），再按需展开 CI 与报告。
+> 数据截至：2026-11-25（最新 CI 全量 + 四域覆盖率重采）。
 
 ## 3.1 CI 门禁（五个后端阶段 + 前端）
 
@@ -23,35 +23,37 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 | 模块 | 测试数 | 行覆盖率 | 门槛 |
 | --- | ---: | ---: | --- |
 | co-shared-kernel | 2 | — | — |
-| co-identity-domain | 9 | 75.74% | ✅ ≥70% |
+| co-identity-domain | 13 | 77.30% | ✅ ≥70% |
 | co-identity-application | 3 | — | — |
-| co-qa-domain | 42 | 83.12% | ✅ |
-| co-qa-application | 32 | — | — |
+| co-qa-domain | 42 | 81.86% | ✅ |
+| co-qa-api | 8 | — | — |
+| co-qa-application | 45 | — | — |
+| co-qa-infrastructure | 3 | — | — |
 | co-reputation-domain | 20 | 81.93% | ✅ |
-| co-reputation-application | 36 | — | — |
-| co-discovery-domain | 6 | 78.26% | ✅ |
-| co-discovery-application | 14 | — | — |
-| co-bootstrap | 4（ArchUnit 1 + FlowIT 3） | — | 分层约束 + 端到端 |
+| co-reputation-application | 38 | — | — |
+| co-discovery-domain | 6 | 78.49% | ✅ |
+| co-discovery-application | 19 | — | — |
+| co-bootstrap | 5（ArchUnit 1 + FlowIT 4） | — | 分层约束 + 端到端 |
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-> 2026-11-18 CI 全量 **168** 个用例（含 `CampusOverflowFlowIT` 3 个）；2026-11-23 Sonar 复扫为 **174** 个单测（含新增用例）。数字差异来自新增测试，不是同一批次。
+> 2026-11-25 CI 全量 **204** 个用例（surefire/failsafe XML 汇总；含 `CampusOverflowFlowIT` 4 个）。此前的 168/174 为 11-18/11-23 的历史批次，已过期。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
 | 模块 | 行覆盖 | 行覆盖率 | 分支覆盖 | 报告截图 | 原始 CSV |
 | --- | ---: | ---: | ---: | --- | --- |
-| `co-identity-domain` | 103 / 136 | **75.74%** | 40 / 66（60.61%） | [`coverage-identity.png`](screenshots/coverage/coverage-identity.png) | [`coverage-identity.csv`](screenshots/coverage/coverage-identity.csv) |
-| `co-qa-domain` | 192 / 231 | **83.12%** | 71 / 90（78.89%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
+| `co-identity-domain` | 109 / 141 | **77.30%** | 54 / 80（67.50%） | [`coverage-identity.png`](screenshots/coverage/coverage-identity.png) | [`coverage-identity.csv`](screenshots/coverage/coverage-identity.csv) |
+| `co-qa-domain` | 194 / 237 | **81.86%** | 71 / 94（75.53%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
 | `co-reputation-domain` | 136 / 166 | **81.93%** | 46 / 56（82.14%） | [`coverage-reputation.png`](screenshots/coverage/coverage-reputation.png) | [`coverage-reputation.csv`](screenshots/coverage/coverage-reputation.csv) |
-| `co-discovery-domain` | 72 / 92 | **78.26%** | 41 / 60（68.33%） | [`coverage-discovery.png`](screenshots/coverage/coverage-discovery.png) | [`coverage-discovery.csv`](screenshots/coverage/coverage-discovery.csv) |
+| `co-discovery-domain` | 73 / 93 | **78.49%** | 42 / 62（67.74%） | [`coverage-discovery.png`](screenshots/coverage/coverage-discovery.png) | [`coverage-discovery.csv`](screenshots/coverage/coverage-discovery.csv) |
 
 | | |
 | :---: | :---: |
-| ![co-identity-domain 75.74%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 83.12%](screenshots/coverage/coverage-qa.png) |
-| ![co-reputation-domain 81.93%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.26%](screenshots/coverage/coverage-discovery.png) |
+| ![co-identity-domain 77.30%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 81.86%](screenshots/coverage/coverage-qa.png) |
+| ![co-reputation-domain 81.93%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.49%](screenshots/coverage/coverage-discovery.png) |
 
-> 采集口径与复现命令见 [`screenshots/coverage/README.md`](screenshots/coverage/README.md)（采集人 陈明哲，2026-11-17，JDK 21 全仓 `mvn verify -DskipITs -Djacoco.skip=false` 后生成）。
+> 采集口径与复现命令见 [`screenshots/coverage/README.md`](screenshots/coverage/README.md)（采集人 陈明哲，2026-11-25，基于最新 CI `jacoco-coverage-reports` 工件重新生成 CSV/截图）。
 
 ## 3.3 端到端与冒烟
 
@@ -103,5 +105,5 @@ mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=f
 | BUG-003（已关闭） | 曾因 develop 无必需状态检查，CI 失败不一定阻断合并 | 2026-11-17 通过规则集 #27436601 启用 `后端构建与验证`/`前端构建`；`enforce_admins=true`，改作业名需同步规则集 |
 | 本地 JDK 25 下 JaCoCo 0.8.12 agent 不兼容 | 本机取证需 `-Djacoco.skip=true` | 统一用 JDK 21 取证；CI 固定 21 |
 | 集成测试已硬门禁 | 失败即阻断，不再漏过端到端问题 | 阶段 5 移除了 `continue-on-error`，Testcontainers 起 MySQL/Redis；见 ADR-009 |
-| Sonar `java:S5998`（`User.EMAIL`） | Quality Gate 仍 Failed（1 Bug），Lab 7 只能证明“已复扫” | 2026-11-24 按方案 A 改为 `^[\\w.+-]+@[\\w.-]+$` 并补域名校验；需在 SonarQube 机器复扫确认归零后才能宣称 PASSED |
-| Sonar 覆盖率 70.3% 卡线 | 接近 70% 阈值，新增低覆盖代码可能让门禁变红 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除 |
+| Sonar Quality Gate（**已关闭**） | 曾因 `java:S5998` 与覆盖率卡线导致 Lab 7 门禁 Failed | 2026-11-25 在最终代码上复扫：**Gate PASSED**（Bugs 0 / Vulnerabilities 0 / 安全热点 100% 复核 / Coverage 73.8% / 219 单测），证据见 [`lab7-sonar-final-rescan.md`](../reports/lab7-sonar-final-rescan.md) |
+| Sonar 覆盖率 73.8% 接近 70% 阈值 | 新增低覆盖代码可能让门禁回红 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除；当前 New Code 覆盖率 88.2% |

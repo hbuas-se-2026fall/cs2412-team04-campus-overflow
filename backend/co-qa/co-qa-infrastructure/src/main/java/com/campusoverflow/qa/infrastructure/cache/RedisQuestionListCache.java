@@ -37,21 +37,32 @@ public class RedisQuestionListCache implements QuestionListCache {
     }
 
     @Override
-    public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+    public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
+        long generation = readGeneration();
+        // 代际不可用时禁用缓存，绝不回退到 0：旧 gen0 缓存可能是失效数据。
+        if (generation < 0) {
+            return new Lookup(generation, Optional.empty());
+        }
         try {
-            String json = redis.opsForValue().get(key(courseId, viewerId, page));
-            return json == null ? Optional.empty() : Optional.of(mapper.readValue(json, TYPE));
+            String json = redis.opsForValue().get(key(courseId, viewerId, page, scope, generation));
+            return new Lookup(generation,
+                    json == null ? Optional.empty() : Optional.of(mapper.readValue(json, TYPE)));
         } catch (Exception e) {
             log.debug("列表缓存读取失败，回源数据库: {}", e.getMessage());
-            return Optional.empty();
+            return new Lookup(generation, Optional.empty());
         }
     }
 
     @Override
-    public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+    public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                    PageResult<QuestionSummaryView> value) {
+        if (generation < 0) {
+            return;
+        }
         try {
             Duration ttl = Duration.ofSeconds(60L + ThreadLocalRandom.current().nextInt(15)); // TTL 抖动防雪崩
-            redis.opsForValue().set(key(courseId, viewerId, page), mapper.writeValueAsString(value), ttl);
+            redis.opsForValue().set(key(courseId, viewerId, page, scope, generation),
+                    mapper.writeValueAsString(value), ttl);
         } catch (Exception e) {
             log.debug("列表缓存写入失败: {}", e.getMessage());
         }
@@ -78,9 +89,25 @@ public class RedisQuestionListCache implements QuestionListCache {
         }
     }
 
-    private String key(Long courseId, Long viewerId, PageRequest page) {
-        String gen = Optional.ofNullable(redis.opsForValue().get(GEN_KEY)).orElse("0");
-        return "qa:list:" + gen + ":" + (courseId == null ? "all" : courseId)
-                + ":" + (viewerId == null ? "anon" : viewerId) + ":" + page.page() + ":" + page.size();
+    private long readGeneration() {
+        try {
+            String raw = redis.opsForValue().get(GEN_KEY);
+            if (raw == null) {
+                // 首次启动/被 allkeys-lru 驱逐：用一个与旧 gen0 不同的代际初始化，
+                // 避免重新读到驱逐前遗留的 gen0 旧缓存；读不到就禁用本轮缓存。
+                redis.opsForValue().setIfAbsent(GEN_KEY, String.valueOf(System.currentTimeMillis()));
+                raw = redis.opsForValue().get(GEN_KEY);
+            }
+            return raw == null ? -1L : Long.parseLong(raw);
+        } catch (Exception e) {
+            log.debug("列表缓存代际读取失败，本轮禁用缓存: {}", e.getMessage());
+            return -1L;
+        }
+    }
+
+    private String key(Long courseId, Long viewerId, PageRequest page, String scope, long generation) {
+        return "qa:list:" + generation + ":" + (courseId == null ? "all" : courseId)
+                + ":" + (viewerId == null ? "anon" : viewerId) + ":" + scope
+                + ":" + page.page() + ":" + page.size();
     }
 }

@@ -1,7 +1,7 @@
 # 安全与质量审计修复记录（2026-11-24）
 
 > 对应组员审计：SEC-01/02、SEC-03、SEC-04、QUAL-01、DOC-01、QA-02、QA-03、DOC-02、CACHE-02、PRIV-01、LEADER-01
-> 分支：`fix/security-hardening-1124`；目标：develop（main 后续同步）
+> 分支：`fix/security-hardening-1124`（PR #209 → #210）；状态：main 已同步安全修复，后续 #216 修复 QA-03。
 
 ## 一、已修复
 
@@ -38,7 +38,7 @@
 - 按方案 A 修改：`^[\\w.+-]+@[\\w.-]+$`，去掉所有重复分组；
 - `User.checkEmail` 补域名校验：不含 `..`、不以 `.` 开头/结尾、必须含 `.`；
 - `UserTest` 增加长 local part 与畸形域名用例。
-- ⚠️ 需要 SonarQube 机器复扫确认 `S5998` 归零；在复扫前 Lab 7 的门禁事实仍是 Failed（1 Bug）。
+- ✅ **已复扫确认归零（2026-11-25）**：最终代码上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
 
 ### DOC-01 / DOC-02
 
@@ -46,7 +46,7 @@
 - `final/README.md`：03-quality 状态改为“已完成（2026-11-24 口径；Sonar Gate 仍 Failed 1 Bug）”；
 - `release/v1.0.0.md`：已知问题补 `QUAL-01`；
 - 文档中的 `@Size(max=254)` 改为真实的 **100**（注册 DTO 与领域 `checkEmail` 均为 100）；
-- `AdminUserController.CreateStaffRequest` 仍需补 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50）：当前只 import 了 `Size`，注解尚未加，领域层兜底校验仍然有效。
+- `AdminUserController.CreateStaffRequest` 已补全 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50），接口层直接 400，不再只靠领域兜底。
 
 ### CACHE-02 浏览量落库失败丢失
 
@@ -59,20 +59,30 @@
 
 ### LEADER-01 排行榜三 ZSET 部分失败重复计分
 
-`RedisLeaderboardStore.increment` 改为 **Lua 脚本一次原子更新** week/month/term 三个 ZSET 与 TTL：
-任一失败则三个都不生效，DB 事务回滚后重试不会只给 week 多加一次。
+`RedisLeaderboardStore.increment` 改为 **Lua 脚本一次提交** week/month/term 三个 ZSET 的 `ZINCRBY` 与 `EXPIRE`。
+
+> 措辞修订（2026-11-25，审计 F-13）：原「任一失败则三个都不生效」不严格。Lua 脚本保证的是**原子执行**
+> （三个命令之间不会被并发请求穿插），但脚本中途的命令错误（如第 2/3 个 key 类型不对、`WRONGTYPE`）
+> **不会回滚已执行的第 1 条 `ZINCRBY`**。此外 `LeaderboardService.on` 先写 `ProcessedEventStore`（DB）再写 Redis，
+> 若 DB 提交失败而 Redis 已累加，重试会再累加一次（at-least-once，存在重复计分窗口），该限制仍待后续收敛。
 
 ## 二、需要 PO / 产品决策（未改代码）
 
-### QA-02 课程问题可见性冲突
+### QA-02 课程问题可见性冲突（已被 2026-11-25 最终裁决取代）
 
-- 2026-11-24 已定为**课程内问题仅课程成员可见，公开问题保持公开**；
-- 修复分支覆盖 list/detail/search/related/post/answer/comment/vote，并把 viewer 加入列表缓存 key；回归测试覆盖未登录、非成员、成员三种身份。
-- `SecurityConfig` 仍允许匿名 GET，是为了让公开问题可被访客浏览；课程问题由应用层成员校验拦截。
+> **更新（2026-11-25 晚）**：本文下方“保持公开可见”的初版结论已作废。
+> PO 最终裁决为 **课程成员可见**：公开问题对所有访问者可见；课程问题仅管理员、作者、课程成员可见，
+> 未加入者返回 `QA-3006`。代码 `QuestionQueryService.requireCanView()`、`QuestionController`、
+> 前端 `QuestionDetailPage` 已按此实现。
 
-### PRIV-01 课程成员名单匿名可读
+- 初版（已作废）：PO 决策曾为“保持公开可见”，因此当时没有新增成员校验；
+- 最终口径：以 [`v1-scope-decisions-2026-11-25.md`](v1-scope-decisions-2026-11-25.md) 决策 1 为准；
+- 这是产品取舍，不是代码缺陷；当前代码已按最终裁决补齐 list/detail/search/related/bounty 校验与 viewer 缓存键。
 
-`GET /api/v1/courses/*/members` 当前允许匿名，返回 `displayName/role/userId`。需 PO 确认名单是否公开；若不公开，要求登录 + 课程成员，并同步 Nginx 限制。
+### PRIV-01 课程成员名单匿名可读（已关闭）
+
+`GET /api/v1/courses/*/members` 已从 `SecurityConfig` 的 `permitAll` 列表移除，落到 `anyRequest().authenticated()`：
+匿名访问返回 401，登录用户可读。最终口径见 `v1-scope-decisions-2026-11-25.md` 决策 4。
 
 ### QA-03 删除问题与回答并发窗口
 
@@ -91,5 +101,5 @@
 
 1. CI 全量 + Testcontainers；若通过，合并 develop 并同步 main；
 2. 在 SonarQube 机器复扫，确认 `S5998` 归零、Gate PASSED，补 `lab7-sonar-rescan` 截图；
-3. PO 对 PRIV-01 拍板；QA-02 已按成员可见落地，QA-03 已修复；后续 PR 需同步更新本报告状态；
+3. PO 对 PRIV-01（成员名单是否公开）拍板；QA-02 已按公开决策关闭、QA-03 已由 #216 修复；
 4. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。

@@ -7,7 +7,7 @@
 | Sprint | 周期 | Sprint Goal | 记录 | 版本 |
 | --- | --- | --- | --- | --- |
 | S0 启动 | 2026-10-22 ～ 11-02 | 仓库、环境、CI、Backlog 与团队文档就绪 | [`sprint-0.md`](../scrum/sprint-0.md) | `v0.1.0`（补打） |
-| S1 问答核心 | 2026-11-03 ～ 11-13 | 提问 → 回答 → 投票 → 评论 → 采纳闭环 | [`sprint-1.md`](../scrum/sprint-1.md)、[`sprint-1-demo.md`](../scrum/sprint-1-demo.md) | `v0.2.0`（补打） |
+| S1 问答核心 | 2026-11-03 ～ 11-13 | 主链路完成（提问→回答→投票→评论）；PB-10「采纳」Must/5 SP 顺延至 S2；Review/回顾未执行 | [`sprint-1.md`](../scrum/sprint-1.md)、[`sprint-1-demo.md`](../scrum/sprint-1-demo.md) | `v0.2.0`（补打） |
 | S2 声誉激励 | 2026-11-09 ～ 11-20 | 声誉/徽章/悬赏/排行榜，幂等与对账 | [`sprint-2.md`](../scrum/sprint-2.md) | `v0.3.0` |
 | S3 内容发现 | 2026-11-16 ～ 11-17（实际，原计划 11-23～12-04） | 搜索、相关问题、通知；移除骨架，`mvn verify` 全绿 | [`sprint-3.md`](../scrum/sprint-3.md)、[`sprint-3-search.md`](../scrum/sprint-3-search.md) | `v0.9.0`（RC tag，内容随 v1.0.0 进 main） |
 | S4 发布 | 2026-11-17 ～ 11-19（实际，原计划 12-07～12-11） | 稳定化、可观测、v1.0.0 与答辩 | [`sprint-4.md`](../scrum/sprint-4.md) | `v1.0.0`（GitHub Release） |
@@ -31,13 +31,13 @@
 | 工作约定 / DoR / DoD | [`docs/team-agreement.md`](../team-agreement.md)、[`dor-dod.md`](../team/dor-dod.md) | 含 CI 红灯 30 分钟认领、事件重放命令 |
 | Product Backlog | [`docs/backlog/product-backlog.md`](../backlog/product-backlog.md) | PB-01～48，含 PBI/Issue 映射 |
 | Sprint 计划与记录 | [`docs/scrum/`](../scrum/) | S0～S4（S4 记录已入库，仅两次彩排待执行） |
-| 燃尽图 | `sprint-1-burndown.png`、`sprint-2-burndown.png`、`sprint-3-burndown.png` | S1/S2/S3 已归档（S3 见 [`sprint-3.md`](../scrum/sprint-3.md) §五之二） |
-| 评审与回顾 | 各 `sprint-N.md` 的 Review / 回顾章节 | 含未达标项与行动项 |
+| 燃尽图 | `sprint-1-burndown.png`、`sprint-2-burndown.png`、`sprint-3-burndown.png` | S1/S2/S3 已归档；S0 为启动周、S4 为发布周，未单独生成燃尽图（以发布检查/任务表替代） |
+| 评审与回顾 | S2 有评审彩排与回顾，但未召开独立正式 Review；S1/S4 未执行正式 Review/回顾；S3 见其记录 | 原因：S1 时间压缩、采纳顺延到 S2；S2 用彩排替代 Review；S4 以发布+彩排收口，回顾合并到答辩准备 |
 | CI 运行记录 | GitHub Actions | 每次 PR 的后端/前端检查；v0.3.0 三阶段绿 |
 
 ## 4.3 协作与贡献
 
-- 分支策略：`feature/*` / `docs/*` / `test/*` → PR → 1～2 Approve → squash/merge，合并后删分支；
+- 分支与审批（V3 §7.1.5/7.2）：`feature/<issue>-<英文描述>` / `docs/*` / `test/*` → PR；`main` ≥2 Approve（含 SM/PO），`develop` ≥1；站会 10:00；历史 sprint 记录里的 `feature/<拼音>-<主题>`、12:30 为旧约定。
 - PR 模板包含「关联 Issue / 变更内容 / 自测 / 影响范围」；Issue 模板区分 story/task/bug/tech-debt；
 - 代码评审：PR #100、#102、#103、#104、#118、#121 等均有非作者 Approve；
 - 个人贡献以合并 PR、评审、Issue 关闭记录为准，不以代码行数论。

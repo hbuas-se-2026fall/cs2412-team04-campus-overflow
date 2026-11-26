@@ -3,7 +3,9 @@ package com.campusoverflow.qa.application;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.campusoverflow.qa.api.QuestionRef;
+import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryAnswers;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryQuestions;
+import com.campusoverflow.qa.domain.Answer;
 import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.Tags;
@@ -28,12 +30,20 @@ class QaQueryApiImplTest {
     private static final Actor TEACHER = new Actor(9L, "王老师", Role.TEACHER);
 
     private final InMemoryQuestions questions = new InMemoryQuestions();
+    private final InMemoryAnswers answers = new InMemoryAnswers();
 
     private QaQueryApiImpl api;
 
     @BeforeEach
     void setUp() {
-        api = new QaQueryApiImpl(questions);
+        api = new QaQueryApiImpl(questions, answers);
+    }
+
+    private Answer seedAnswer(long id, long questionId, boolean deleted) {
+        Answer answer = Answer.reconstitute(id, questionId, 2L, MarkdownBody.ofAnswer("这是一条长度足够的回答正文。"),
+                0, null, NOW, NOW, deleted ? NOW.plusSeconds(1) : null, 0L);
+        answers.save(answer);
+        return answer;
     }
 
     private Question seed(long id, Long courseId, Long acceptedAnswerId) {
@@ -79,6 +89,32 @@ class QaQueryApiImplTest {
         Optional<QuestionRef> ref = api.findQuestion(404L);
 
         assertThat(ref).isEmpty();
+    }
+
+    @Test
+    @DisplayName("可见采纳：accepted 指向未删除且属于该问题的回答")
+    void visibleAcceptedAnswerTrue() {
+        seed(12L, 100L, 50L);
+        seedAnswer(50L, 12L, false);
+
+        assertThat(api.hasVisibleAcceptedAnswer(12L)).isTrue();
+    }
+
+    @Test
+    @DisplayName("stale accepted：accepted 指向已删除回答时按未采纳处理")
+    void staleAcceptedAnswerFalse() {
+        seed(12L, 100L, 50L);
+        seedAnswer(50L, 12L, true);
+
+        assertThat(api.hasVisibleAcceptedAnswer(12L)).isFalse();
+    }
+
+    @Test
+    @DisplayName("accepted 指向的问题不存在时按未采纳处理")
+    void missingAcceptedAnswerFalse() {
+        seed(12L, 100L, 50L);
+
+        assertThat(api.hasVisibleAcceptedAnswer(12L)).isFalse();
     }
 
     @Test

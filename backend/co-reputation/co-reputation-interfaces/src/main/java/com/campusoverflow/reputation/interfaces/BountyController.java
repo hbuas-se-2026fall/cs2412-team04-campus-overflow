@@ -11,6 +11,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,10 +32,13 @@ public class BountyController {
         this.bounties = bounties;
     }
 
-    @Operation(summary = "问题的最近一次悬赏（无悬赏返回 204）")
+    @Operation(summary = "问题的最近一次悬赏（无悬赏返回 204；课程问题按成员可见性校验）")
     @GetMapping
-    public ResponseEntity<BountyView> latest(@PathVariable long questionId) {
-        return bounties.latest(questionId).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    public ResponseEntity<BountyView> latest(@PathVariable long questionId,
+                                             @Parameter(hidden = true) Optional<Actor> actor) {
+        return bounties.latest(questionId, actor.orElse(null))
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
     @Operation(summary = "发起悬赏（课程教师/助教/管理员，冻结积分）")

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { api } from './api';
+import { api, ApiError } from './api';
 import type { Me } from './types';
 
 interface AuthState {
@@ -19,8 +19,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async () => {
     try {
       setMe(await api.me());
-    } catch {
-      setMe(null); // 401 表示未登录，属于正常状态
+    } catch (e) {
+      // FE-08：只有 401 才表示「未登录/会话失效」；网络抖动、5xx 等临时故障
+      // 不应把用户当成登出（否则已登录用户会看起来被突然踢下线）。
+      if (e instanceof ApiError && e.status === 401) {
+        setMe(null);
+      }
+      // 其他错误保留当前 me，不覆盖；下次进入页面或手动刷新时再重试。
     } finally {
       setLoading(false);
     }

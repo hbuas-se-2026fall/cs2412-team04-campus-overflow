@@ -13,8 +13,8 @@ backend/pom.xml（父 POM）
 ├── co-bootstrap：启动入口、装配、安全链、Flyway
 ├── co-identity：用户、课程、角色、会话（完整参考实现）
 ├── co-qa：问题、回答、投票、评论、采纳
-├── co-reputation：声誉账本、徽章、悬赏
-└── co-discovery：搜索投影、通知、排行榜
+├── co-reputation：声誉账本、徽章、悬赏、排行榜
+└── co-discovery：搜索投影、通知
 
 每个上下文内部：
 
@@ -50,7 +50,7 @@ backend/pom.xml（父 POM）
 - **软删除**：ContentDeletedEvent；读模型过滤 `deleted_at`。
 - **原子计数**：score / answerCount / viewCount 由仓储原子 SQL 更新，不整行回写（ADR-008）。
 - **Flyway**：每个上下文独立迁移目录；`ddl-auto: none`。
-- **读模型**：Discovery 的 SearchDocument / Notification / Leaderboard 由事件投影维护。
+- **读模型**：Discovery 的 SearchDocument / Notification 由事件投影维护；Leaderboard 归 Reputation，由 `LeaderboardService` 维护 Redis ZSET。
 
 ## 6. 为什么这样分
 
@@ -77,7 +77,7 @@ backend/pom.xml（父 POM）
 | 魏志国 | ADR-002 事务性发件箱 + application 层 | 业务数据与 `outbox_event` 同事务写入；中继异步投递；消费端按 `(event_id, user_id, reason)` / `processed_event` 幂等；`AnswerCommandService` 为典型编排：save → 原子计数 → 发事件 → 失效缓存 | ✅ 已署名（2026-11-17 讲评：`AnswerCommandService.submit` 的四步编排与发件箱同事务写入口） |
 | 刘俊琒 | ADR-008 领域与持久化分离 + co-qa-domain | 聚合只引用 ID、不直接持有其他聚合对象；score/answerCount 用原子 SQL 而非整行回写；`Question` 五方法的不变式即领域测试 | ✅ 已署名（2026-11-19 本人复核：逐条核对 ADR-008 与 `Question`/`QuestionRepositoryAdapter`/`QuestionJpaRepository`，复核结论与两处口径偏差见 §10.4） |
 | 房国栋 | ADR-003 服务端会话 + interfaces 层 | Spring Session + Redis；HttpOnly / SameSite=Lax / CSRF 双提交；控制器不写业务规则，前端按 `permissions` 渲染按钮 | ✅ 已署名（§9 ADR-003 主讲笔记） |
-| 陈明哲 | ArchUnit 架构适应度函数 + ADR-009 渐进门禁 | `ArchitectureTest` 分层断言；`SPRINT_MODULES` 随 Sprint 扩容；覆盖率门槛 0.70 起；CI 只跑 Sprint 范围、集成测试容错、红灯 30 分钟内认领 | 已署名（2026-11-16） |
+| 陈明哲 | ArchUnit 架构适应度函数 + ADR-009 渐进门禁 | `ArchitectureTest` 分层断言；渐进期 `SPRINT_MODULES` 扩容，2026-11-18 已删除并恢复全量 `mvn test`/`mvn verify`，集成测试硬门禁；覆盖率门槛 0.70；红灯 30 分钟内认领 | 已署名（2026-11-16） |
 
 > 讲评排期：Sprint 3 计划会上每人约 5 分钟讲完各自认领项，讲完即更新本表状态。
 

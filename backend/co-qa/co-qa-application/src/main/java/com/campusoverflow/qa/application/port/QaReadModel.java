@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * 读模型端口（CQRS-lite）：查询直接返回投影行，绕过聚合装配，避免 N+1。
@@ -26,6 +27,12 @@ public interface QaReadModel {
     Optional<QuestionRow> findQuestion(long questionId);
 
     List<AnswerRow> findAnswers(long questionId);
+
+    /**
+     * 批量返回仍可见（未软删除）的回答 ID，用于列表/详情判定 accepted_answer_id 是否已失效。
+     * 一次查询搞定，避免为每个问题单独查库。
+     */
+    Set<Long> findVisibleAnswerIds(Collection<Long> answerIds);
 
     List<CommentRow> findComments(long questionId);
 

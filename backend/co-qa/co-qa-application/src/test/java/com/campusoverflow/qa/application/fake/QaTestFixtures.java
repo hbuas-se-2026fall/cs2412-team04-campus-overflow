@@ -55,9 +55,16 @@ public final class QaTestFixtures {
         public final Map<Long, Integer> answerCountDeltas = new HashMap<>();
         public final Map<Long, Integer> scoreDeltas = new HashMap<>();
         public int saves;
+        public int lockedLoads;
 
         @Override
         public Optional<Question> findById(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public Optional<Question> findByIdForUpdate(long id) {
+            lockedLoads++;
             return Optional.ofNullable(store.get(id));
         }
 
@@ -87,6 +94,16 @@ public final class QaTestFixtures {
         @Override
         public void adjustAnswerCount(long questionId, int delta) {
             answerCountDeltas.merge(questionId, delta, Integer::sum);
+        }
+
+        @Override
+        public boolean adjustAnswerCountIfOpen(long questionId, int delta) {
+            Question question = store.get(questionId);
+            if (question == null || question.isDeleted()) {
+                return false;
+            }
+            answerCountDeltas.merge(questionId, delta, Integer::sum);
+            return true;
         }
 
         @Override
@@ -235,12 +252,13 @@ public final class QaTestFixtures {
         public int invalidations;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
-            return Optional.empty();
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
+            return new Lookup(0L, Optional.empty());
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                        PageResult<QuestionSummaryView> value) {
         }
 
         @Override
@@ -323,6 +341,12 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public Set<Long> findVisibleAnswerIds(Collection<Long> answerIds) {
+            Set<Long> wanted = Set.copyOf(answerIds);
+            return answers.stream().map(AnswerRow::id).filter(wanted::contains).collect(Collectors.toSet());
+        }
+
+        @Override
         public List<CommentRow> findComments(long questionId) {
             return comments;
         }
@@ -355,33 +379,37 @@ public final class QaTestFixtures {
         public int hits;
         public int misses;
         public int invalidations;
+        private long generation;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
             Optional<PageResult<QuestionSummaryView>> value =
-                    Optional.ofNullable(store.get(key(courseId, viewerId, page)));
+                    Optional.ofNullable(store.get(key(courseId, viewerId, page, scope, generation)));
             if (value.isPresent()) {
                 hits++;
             } else {
                 misses++;
             }
-            return value;
+            return new Lookup(generation, value);
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
-            store.put(key(courseId, viewerId, page), value);
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                        PageResult<QuestionSummaryView> value) {
+            store.put(key(courseId, viewerId, page, scope, generation), value);
         }
 
         @Override
         public void invalidateAll() {
             invalidations++;
+            generation++;
             store.clear();
         }
 
-        private static String key(Long courseId, Long viewerId, PageRequest page) {
-            return (courseId == null ? "all" : courseId) + ":" + (viewerId == null ? "anon" : viewerId)
-                    + ":" + page.page() + ":" + page.size();
+        private static String key(Long courseId, Long viewerId, PageRequest page, String scope, long generation) {
+            return generation + ":" + (courseId == null ? "all" : courseId) + ":"
+                    + (viewerId == null ? "anon" : viewerId) + ":" + scope + ":"
+                    + page.page() + ":" + page.size();
         }
     }
 }

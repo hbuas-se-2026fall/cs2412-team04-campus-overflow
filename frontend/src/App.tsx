@@ -68,6 +68,14 @@ function RequireAuth({ children }: { children: JSX.Element }) {
   return me ? children : <Navigate to="/login" replace />;
 }
 
+/** FE-02：徽章通知链接为 /me/reputation，这里重定向到当前用户的声誉主页。 */
+function MyReputationRedirect() {
+  const { me, loading } = useAuth();
+  if (loading) return <p className="muted">加载中…</p>;
+  if (!me) return <Navigate to="/login" replace />;
+  return <Navigate to={`/users/${me.id}/reputation`} replace />;
+}
+
 /** 管理页只给 ADMIN；非管理员即使手输 URL 也只看到无权限页。 */
 function RequireAdmin({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth();
@@ -115,6 +123,7 @@ export function App() {
             <Route path="/search" element={<SearchPage />} />
             <Route path="/leaderboard" element={<LeaderboardPage />} />
             <Route path="/users/:id/reputation" element={<ReputationPage />} />
+            <Route path="/me/reputation" element={<MyReputationRedirect />} />
             <Route
               path="/notifications"
               element={

@@ -12,6 +12,7 @@ import com.campusoverflow.qa.domain.MarkdownBody;
 import com.campusoverflow.qa.domain.Question;
 import com.campusoverflow.qa.domain.QuestionRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
+import com.campusoverflow.shared.domain.BusinessRuleException;
 import com.campusoverflow.shared.domain.ForbiddenException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.EventIds;
@@ -53,7 +54,9 @@ public class AnswerCommandService {
 
         Answer answer = Answer.submit(question, actor.userId(), MarkdownBody.ofAnswer(body), clock.instant());
         answers.save(answer);
-        questions.adjustAnswerCount(questionId, 1);
+        if (!questions.adjustAnswerCountIfOpen(questionId, 1)) {
+            throw new BusinessRuleException("QA-1020", "问题已删除");
+        }
 
         events.publish(new AnswerSubmittedEvent(
                 EventIds.next(), clock.instant(),
@@ -67,7 +70,9 @@ public class AnswerCommandService {
     @Transactional
     public void edit(Actor actor, long answerId, String body) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        // 拿到问题锁后重读回答：若并发删除已先提交，这里会按 404 失败，而不是用旧快照把它写回复活。
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         // 修正 3：参数类型改为 MarkdownBody 和 Instant
@@ -78,7 +83,9 @@ public class AnswerCommandService {
     @Transactional
     public void delete(Actor actor, long answerId) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        // 锁住问题后重读回答：与采纳串行化，确保 accepted 判断基于最新状态。
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         boolean accepted = question.isAccepted(answer.id());
@@ -105,9 +112,18 @@ public class AnswerCommandService {
 
     @Transactional
     public void accept(Actor actor, long questionId, long answerId) {
-        Question question = loadQuestion(questionId);
+        // 先锁问题再读回答：与“删除回答”使用同一把锁，二者不再能同时基于旧快照通过校验。
+        Question question = loadQuestionForUpdate(questionId);
         Answer answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
+
+        // 历史脏数据容错：写入侧修复前可能留下 accepted_answer_id 指向已删除回答。
+        // 若原采纳回答已不可见，先清空失效 ID 再采纳新回答；清空与采纳落在同一次 save，
+        // 由 @Version 乐观锁保证原子，避免提问者被 QA-2002 永久卡住。
+        Long staleAcceptedId = question.acceptedAnswerId();
+        if (staleAcceptedId != null && !acceptedAnswerStillVisible(questionId, staleAcceptedId)) {
+            question.clearAcceptedAnswer(staleAcceptedId, clock.instant());
+        }
 
         question.accept(answer, actor, manages);
         questions.save(question);
@@ -124,7 +140,8 @@ public class AnswerCommandService {
     @Transactional
     public void endorse(Actor actor, long answerId) {
         Answer answer = loadAnswer(answerId);
-        Question question = loadQuestion(answer.questionId());
+        Question question = loadQuestionForUpdate(answer.questionId());
+        answer = loadAnswer(answerId);
         boolean manages = identity.canManageCourse(actor.userId(), question.courseId());
 
         answer.endorse(actor, manages); // 如果这里报错，说明 endorse 要的参数不一样
@@ -142,10 +159,24 @@ public class AnswerCommandService {
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已删除"));
     }
 
+    /** 状态变更（采纳 / 删除 / 编辑 / 认证回答）统一先锁问题行。 */
+    private Question loadQuestionForUpdate(long id) {
+        return questions.findByIdForUpdate(id)
+                .filter(q -> !q.isDeleted())
+                .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在或已删除"));
+    }
+
     private Answer loadAnswer(long id) {
         return answers.findById(id)
                 .filter(a -> !a.isDeleted())
                 .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在或已删除"));
+    }
+
+    /** 采纳目标是否仍可见：存在、未软删、且确实属于该问题。 */
+    private boolean acceptedAnswerStillVisible(long questionId, long answerId) {
+        return answers.findById(answerId)
+                .filter(a -> !a.isDeleted() && a.questionId() == questionId)
+                .isPresent();
     }
 
     /** 课程问题只有课程成员可以回答；公开问题对所有登录用户开放。 */
