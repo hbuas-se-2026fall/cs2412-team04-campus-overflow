@@ -41,7 +41,7 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 255 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 259 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |
@@ -54,5 +54,10 @@
 | Q-30 | 中 | 对账只比较 reputation/ledger，不检查 frozen 与 OPEN 悬赏 | 新增 `reconcilePoints()`、`co_reputation_points_mismatches` 指标和 `/admin/reputation/reconciliation/points` | 已修复 |
 | Q-31 | 中 | 回答锁后二次 `findById` 命中一级缓存，竞态退化为 409 | 新增加 `AnswerRepository.findQuestionId` 标量投影，锁后首次加载回答 | 已修复 |
 | Q-32 | 低 | `qa_view_batch` 只增不删 | 每次刷新后清理 7 天前的已应用批次 | 已修复 |
+| Q-33 | 高 | Q-28 捕获悬赏异常后，内层 MANDATORY 事务仍会把共享事务标记 rollback-only，+15 仍整体回滚 | `settleOnAccept` / `closeForDeletedQuestion` 改 `REQUIRES_NEW`，失败只回滚悬赏子事务 | 已修复（待 Spring+MySQL 脏账户 IT） |
+| Q-34 | 中 | 每日投票上限在 REPEATABLE READ 下锁后仍读旧快照，可被并发突破 | 投票处理器 `READ_COMMITTED`；`recordVoteCapped` 先锁账户再做幂等 exists 与日累计 | 已修复（待 MySQL 并发 IT） |
+| Q-35 | 中 | VoteService 预加载回答后锁问题，锁后重读命中一级缓存，可给已删回答投票 | 先用 `findQuestionId` 标量投影，锁问题后再首次加载回答 | 已修复（待 MySQL 交错 IT） |
+| Q-36 | 中 | 自问自答可领他人悬赏；管理者可采纳/认证自己的回答 | 悬赏结算对 `winner==提问者` 或 `acceptedById==winner` 退款；管理者不能采纳/认证自己的回答（`QA-1021`） | 已修复（自采纳是否彻底禁止待产品确认） |
+| Q-37 | 中 | 发起悬赏与采纳/删除问题存在 TOCTOU，可产生已采纳/已删问题上的 OPEN 悬赏 | `QaQueryApi.findQuestionForUpdate` 锁问题行；`BountyService.open` 改用它 | 已修复（待 MySQL 并发 IT） |
 
-> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31 的真实 MySQL/多实例集成验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。
+> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37 的真实 MySQL/多实例集成验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。

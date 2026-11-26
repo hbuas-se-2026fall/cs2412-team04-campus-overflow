@@ -28,7 +28,7 @@
 
 ### SEC-04 默认 demo/密码/端口暴露
 
-- `deploy/docker-compose.yml` 改为**生产**：默认 `prod`（不含 demo）、不映射 3306/6379、`DB_PASSWORD`/`MYSQL_ROOT_PASSWORD`/`CO_FIELD_KEY`/`CO_FIELD_MAC_KEY`/`GRAFANA_PASSWORD` 均为必填（`:?`）；
+- `deploy/docker-compose.yml` 改为**生产**：默认 `prod`（不含 demo）、不映射 3306/6379；`DB_PASSWORD`/`MYSQL_ROOT_PASSWORD`/`CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 用 `:?` 必填；`GRAFANA_PASSWORD` 用 `${GRAFANA_PASSWORD:-}` 加 entrypoint 非空自检（避免未启用 observability 时整份 compose 插入失败）；
 - 新增 `deploy/docker-compose.dev.yml`：本地开发专用，保留默认密码、端口映射和 demo；
 - 新增 `deploy/.env.example`；README §5 改为「生产 `.env` + dev compose」两套命令；
 - `EnvironmentGuard` 兜底拒绝 prod+demo/默认密钥/默认密码启动。
@@ -38,12 +38,12 @@
 - 按方案 A 修改：`^[\\w.+-]+@[\\w.-]+$`，去掉所有重复分组；
 - `User.checkEmail` 补域名校验：不含 `..`、不以 `.` 开头/结尾、必须含 `.`；
 - `UserTest` 增加长 local part 与畸形域名用例。
-- ✅ **已复扫确认归零（2026-11-25）**：最终代码上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
+- ✅ **已复扫确认归零（2026-11-25）**：在 `3750111` 基线上 Quality Gate **PASSED**，Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测。该基线不是当前 HEAD；当前 HEAD 为 259 单测，需在最终提交上重扫。证据：[`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)。
 
 ### DOC-01 / DOC-02
 
 - `03-quality.md`：数据截止 2026-11-24；明确“CI 门禁绿 ≠ Sonar 门禁绿”，补 `S5998` 风险行；
-- `final/README.md`：03-quality 状态改为“已完成（2026-11-24 口径；Sonar Gate 仍 Failed 1 Bug）”；
+- `final/README.md`：03-quality 状态在 2026-11-24 时点为“已完成（Sonar Gate 仍 Failed 1 Bug）”；2026-11-25 复扫已 PASSED，以上文 QUAL-01 为准；
 - `release/v1.0.0.md`：已知问题补 `QUAL-01`；
 - 文档中的 `@Size(max=254)` 改为真实的 **100**（注册 DTO 与领域 `checkEmail` 均为 100）；
 - `AdminUserController.CreateStaffRequest` 已补全 `@Size`（username 4–20、displayName 2–20、email ≤100、password 8–64、college ≤50），接口层直接 400，不再只靠领域兜底。
@@ -102,14 +102,13 @@
 
 | 范围 | 命令 | 结果 |
 | --- | --- | --- |
-| identity 三模块 | `mvn -o -pl co-identity/co-identity-domain,co-identity/co-identity-application,co-identity/co-identity-interfaces -am test -Djacoco.skip=true` | BUILD SUCCESS（domain 10、application 3） |
+| identity 三模块 | `mvn -o -pl co-identity/co-identity-domain,co-identity/co-identity-application,co-identity/co-identity-interfaces -am test -Djacoco.skip=true` | 当时基线 BUILD SUCCESS（domain 10、application 3）；当前 HEAD 为 domain 13、application 8 |
 | qa + reputation 基础设施 | `mvn -o -pl co-qa/co-qa-infrastructure,co-reputation/co-reputation-infrastructure -am test -Djacoco.skip=true` | BUILD SUCCESS |
 | bootstrap 主代码 | `mvn -o -pl co-bootstrap -am compile` | BUILD SUCCESS |
 | 集成测试（含新增大小写/禁用用例） | CI `后端构建与验证` | 待 CI |
 
 ## 四、剩余动作
 
-1. CI 全量 + Testcontainers；若通过，合并 develop 并同步 main；
-2. 在 SonarQube 机器复扫，确认 `S5998` 归零、Gate PASSED，补 `lab7-sonar-rescan` 截图；
-3. QA-02 已按 2026-11-25 最终决策“课程成员可见”关闭；PRIV-01 已按“名单仅登录可读”关闭；QA-03 已由 #216 修复；
-4. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。
+1. 在**当前 HEAD**上重跑 CI 全量 + Testcontainers，并在 SonarQube 机器复扫（`3750111` 的 PASSED 不能直接代表当前 259 单测）；
+2. QA-02 已按 2026-11-25 最终决策“课程成员可见”关闭；PRIV-01 已按“名单仅登录可读”关闭；QA-03 已由 #216 修复；
+3. 生产切换前轮换 `CO_FIELD_KEY`/`CO_FIELD_MAC_KEY` 并迁移已有 email 摘要。
