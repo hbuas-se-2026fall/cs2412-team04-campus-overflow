@@ -1,5 +1,6 @@
 package com.campusoverflow;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -11,6 +12,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -109,6 +116,75 @@ class CampusOverflowFlowIT {
                 mvc.perform(get("/api/v1/notifications").session(hong))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.items[?(@.type=='ANSWER_ACCEPTED')]").exists()));
+    }
+
+    @Test
+    void P5迁移在真实MySQL生效且并发投票串行化() throws Exception {
+        // H09：确认 P5 新增的 VoteAward 表与通知 link 索引随 Flyway 真正落到 MySQL。
+        assertThat(jdbc.queryForObject("""
+                SELECT COUNT(*) FROM information_schema.tables
+                WHERE table_schema = DATABASE() AND table_name = 'rep_vote_award'
+                """, Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("""
+                SELECT COUNT(*) FROM information_schema.statistics
+                WHERE table_schema = DATABASE() AND table_name = 'dis_notification'
+                  AND index_name = 'idx_notification_link'
+                """, Integer.class)).isEqualTo(1);
+
+        register("2026010", "并发作者", "it-author@campus.edu.cn");
+        register("2026011", "并发回答者", "it-answerer@campus.edu.cn");
+        register("2026012", "并发投票甲", "it-voter-a@campus.edu.cn");
+        register("2026013", "并发投票乙", "it-voter-b@campus.edu.cn");
+        MockHttpSession author = login("2026010");
+        MockHttpSession answerer = login("2026011");
+        MockHttpSession voterA = login("2026012");
+        MockHttpSession voterB = login("2026013");
+
+        long questionId = idOf(mvc.perform(post("/api/v1/questions").session(author).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"title":"并发投票是否只会落一条记录？",
+                                 "body":"两个用户同时给同一条回答投票时，问题行锁应该让两个请求串行化，而不是一个 409。",
+                                 "tags":["并发","投票","测试"]}
+                                """))
+                .andExpect(status().isCreated()).andReturn());
+
+        long answerId = idOf(mvc.perform(post("/api/v1/questions/" + questionId + "/answers").session(answerer).with(csrf())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"body\":\"用真实 MySQL + 两个独立会话并发投赞成票，最后应看到 2 条投票、score=2。\"}"))
+                .andExpect(status().isCreated()).andReturn());
+
+        ExecutorService pool = Executors.newFixedThreadPool(2);
+        CountDownLatch ready = new CountDownLatch(2);
+        CountDownLatch go = new CountDownLatch(1);
+        try {
+            Future<Integer> first = pool.submit(castVote(voterA, answerId, ready, go));
+            Future<Integer> second = pool.submit(castVote(voterB, answerId, ready, go));
+            assertThat(ready.await(5, TimeUnit.SECONDS)).isTrue();
+            go.countDown();
+            assertThat(first.get(10, TimeUnit.SECONDS)).isEqualTo(200);
+            assertThat(second.get(10, TimeUnit.SECONDS)).isEqualTo(200);
+        } finally {
+            pool.shutdownNow();
+        }
+
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM qa_vote WHERE target_type = 'ANSWER' AND target_id = ?",
+                Integer.class, answerId)).isEqualTo(2);
+        assertThat(jdbc.queryForObject("SELECT score FROM qa_answer WHERE id = ?", Integer.class, answerId))
+                .isEqualTo(2);
+    }
+
+    private Callable<Integer> castVote(MockHttpSession session, long answerId, CountDownLatch ready, CountDownLatch go) {
+        return () -> {
+            ready.countDown();
+            if (!go.await(5, TimeUnit.SECONDS)) {
+                throw new IllegalStateException("并发投票未同时开始");
+            }
+            return mvc.perform(put("/api/v1/votes").session(session).with(csrf())
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("{\"targetType\":\"ANSWER\",\"targetId\":" + answerId + ",\"value\":1}"))
+                    .andReturn().getResponse().getStatus();
+        };
     }
 
     @Test

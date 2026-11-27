@@ -111,6 +111,6 @@ public class AdminUserService {
 
     static UserView toView(User u) {
         return new UserView(u.id(), Masking.account(u.username()), u.displayName(), u.role(), u.verified(),
-                u.college(), u.className(), u.createdAt());
+                u.status(), u.college(), u.className(), u.createdAt());
     }
 }

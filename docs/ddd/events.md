@@ -1,6 +1,6 @@
 # 领域事件目录 v1.0
 
-> 负责人：青岑（Dev-1）
+> 负责人：青岑（Developer C）
 > 口径：与当前代码 `backend/**/api/event/*.java` 对齐；V3 3.5 的 `BountyOpened / BountyAwarded / BountyClosed` 合并行在代码中拆为 3 个事件。
 > 说明：早期 30 事件清单包含未实现/未来事件，已作废；本文件只列实际发布并消费的事件。
 

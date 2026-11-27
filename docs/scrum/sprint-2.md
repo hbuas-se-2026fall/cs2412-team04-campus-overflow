@@ -65,12 +65,12 @@
 | Bounty 边界测试 | points 9/10/500/501、days 0/1/14/15 已覆盖 |
 | 到期与结算顺序 | 新增 `settledBountyIsNotReturnedByExpireDue`、`expiredBountyCannotBeSettledAgain` |
 | 悬赏脚本 | 新增 `http/bounty.http`（学生发问题 → 教师 50 分 / 7 天 → 查 950/50） |
-| 悬赏执行证据 | `scripts/bounty-smoke.ps1` 实测：教师 1000/0 → 950/50，悬赏 OPEN / 50 分，日志见 `docs/scrum/sprint-2-bounty.log` |
+| 悬赏执行证据 | `scripts/bounty-smoke.ps1` 实测：教师 1000/0 → 950/50，悬赏 OPEN / 50 分，日志见 `docs/scrum/sprint-2-bounty.log`；2026-11-27 用重置脚本重跑，日志 [`docs/qa/logs/bounty-smoke-2026-11-27.log`](../qa/logs/bounty-smoke-2026-11-27.log)，信誉页截图 [`s2-bounty-950-50.png`](s2-bounty-950-50.png)（可用 950 / 冻结 50） |
 | 测试结果 | `co-reputation-domain` 20 条、`co-reputation-application` 23 条，全部通过 |
 
 ### 2026-11-16（悬赏 950/50 演示）
 
-demo profile 启动后，把 T2001 账户重置为 1000/0，再执行 `scripts/bounty-smoke.ps1`：
+demo profile 启动后，先执行 [`scripts/demo/reset-demo-account.sql`](../../scripts/demo/reset-demo-account.sql) 把 T2001 重置为 1000/0（关闭遗留 OPEN 悬赏），再执行 `scripts/bounty-smoke.ps1`：
 
 ```text
 POST /api/v1/questions                    -> 201  {"id":5}
@@ -82,6 +82,8 @@ Teacher after : available=950, frozen=50
 ```
 
 完整日志：[`sprint-2-bounty.log`](sprint-2-bounty.log)。
+
+2026-11-27 复跑（当前 `DemoDataSeeder` 8 账号 / 4 问题）同样得到 1000/0 → 950/50，日志 [`docs/qa/logs/bounty-smoke-2026-11-27.log`](../qa/logs/bounty-smoke-2026-11-27.log)，教师声誉页截图 [`s2-bounty-950-50.png`](s2-bounty-950-50.png)。复跑后已再次执行重置脚本，当前 demo 库为 1000/0。
 
 ### 2026-11-16（悬赏结算与到期退款）
 
@@ -116,7 +118,7 @@ bounty        : status=AWARDED, points=50
 | 2026-11-12 | D2 | 34 | 32 | Reputation 核心与 E3 环境证据合入；未逐日记录，按持平处理 |
 | 2026-11-14 | D3 | 30 | 29 | PR #98 合并，CI #50 全绿 |
 | 2026-11-15 | D4 | 26 | 24 | 悬赏边界/顺序测试、`http/bounty.http`、S2 收尾补测 |
-| 2026-11-16 | D5 | 22 | 0（收口） | `v0.3.0` 发布，S2 收口；D5 未逐日记录 |
+| 2026-11-16 | D5 | 22 | 0（收口） | `v0.3.0` 发布，S2 收口；D5 未逐日记录；燃尽图仅为收口示意，不是实测曲线 |
 
 燃尽图：
 
@@ -184,7 +186,7 @@ bounty        : status=AWARDED, points=50
 
 ### 做得好的
 
-- Bounty 从聚合、服务到 HTTP 脚本、950/50、结算、到期退款形成了可重复的端到端证据；
+- Bounty 从聚合、服务到 HTTP 脚本、950/50、结算、到期退款形成了可重复的端到端证据（前置重置脚本 `scripts/demo/reset-demo-account.sql`，2026-11-27 已复跑）；
 - 并发/重复提交和事件幂等被测试锁住，而不是只靠口头约定；
 - 仓库改为 Public 后 CI 恢复，外部依赖（ReputationAccount、事件处理器）合入后 Bounty 链路顺利联调；
 - 前端 #100 补齐悬赏对话框、个人声誉页，后端接口字段一次对齐。
@@ -228,6 +230,8 @@ bounty        : status=AWARDED, points=50
 **结论：S2 未召开独立的正式 Sprint Review。** §九是面向演示的“评审彩排”，不是 Sprint Review：
 没有 PO/干系人参加的正式验收会议记录，也没有 Review 决议与待办。S2 的验收由 §九彩排 + 各测试用例覆盖，
 PO 最终验收合并到 2026-11-25 的 v1.0 范围复核。
+
+**S2 结论：功能通过、流程未完成。** 正式 Review/Retro 未执行，PO 验收为补记；下列缺口不因功能通过而消失。
 
 **缺口与改进**：S2 与 S1 时间重叠（S2 11-09 开始，S1 11-13 才结束），导致 S2 启动时 S1 的“采纳”仍未收口；
 后续 Sprint 应在计划会明确依赖的前置 Sprint 收口条件，并把 Review 排进时间盒，而不是用彩排替代。

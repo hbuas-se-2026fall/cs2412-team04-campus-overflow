@@ -32,6 +32,7 @@ function errorMessage(error: unknown): string {
  *   POST /api/v1/admin/users/{id}/verify
  *   POST /api/v1/admin/users
  *   PUT  /api/v1/admin/users/{id}/role
+ *   PUT  /api/v1/admin/users/{id}/disable
  */
 export function AdminUsersPage() {
   const { me } = useAuth();
@@ -100,12 +101,12 @@ export function AdminUsersPage() {
 
   // 审计 P-56：后端 T4-02 有 disable 接口（禁用并撤销会话），管理页此前没有入口
   const disableUser = async (user: AdminUser) => {
-    if (!confirm(`禁用后 ${user.displayName} 会立即掉线且无法登录，确定禁用吗？`)) return;
+    if (!window.confirm(`确认禁用 ${user.displayName}？该账号现有会话会立即失效。`)) return;
     setNotice('');
     setError('');
     try {
       await api.disableUser(user.id);
-      setNotice(`已禁用 ${user.displayName}`);
+      setNotice(`已禁用 ${user.displayName}，其现有会话已失效`);
       reload();
     } catch (e: unknown) {
       setError(errorMessage(e));
@@ -223,6 +224,7 @@ function AdminUserRow({
   }, [user.role]);
 
   const isSelf = currentUserId === user.id;
+  const isDisabled = user.status === 'DISABLED';
 
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -245,17 +247,22 @@ function AdminUserRow({
       </td>
       <td>{user.maskedUsername}</td>
       <td>{[user.college, user.className].filter(Boolean).join(' / ') || '—'}</td>
-      <td>{roleLabel(user.role)}</td>
+      <td>
+        {roleLabel(user.role)}
+        {isDisabled && <span className="muted">（已禁用）</span>}
+      </td>
       <td>{new Date(user.createdAt).toLocaleString('zh-CN')}</td>
       <td>
         <div className="admin-actions">
-          {!user.verified && (
+          {!user.verified && !isDisabled && (
             <button disabled={busy} onClick={() => void run(() => onVerify(user))}>
               认证
             </button>
           )}
           {isSelf ? (
             <span className="muted">当前账号</span>
+          ) : isDisabled ? (
+            <span className="muted">已禁用</span>
           ) : (
             <>
               <select

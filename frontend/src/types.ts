@@ -45,6 +45,7 @@ export interface AdminUser {
   displayName: string;
   role: Role;
   verified: boolean;
+  status: 'ACTIVE' | 'DISABLED';
   college?: string | null;
   className?: string | null;
   createdAt: string;

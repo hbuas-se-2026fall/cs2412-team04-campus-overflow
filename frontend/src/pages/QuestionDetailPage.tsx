@@ -378,6 +378,7 @@ function AnswerBlock({
         <button
           disabled={!canVote}
           className={answer.myVote === 1 ? 'active' : ''}
+          title={canVote ? '赞成' : '登录后可投票'}
           onClick={() => onAct(() => api.vote('ANSWER', answer.id, answer.myVote === 1 ? 0 : 1))}
         >
           ▲
@@ -386,6 +387,7 @@ function AnswerBlock({
         <button
           disabled={!canVote}
           className={answer.myVote === -1 ? 'active' : ''}
+          title={canVote ? '反对' : '登录后可投票'}
           onClick={() => onAct(() => api.vote('ANSWER', answer.id, answer.myVote === -1 ? 0 : -1))}
         >
           ▼

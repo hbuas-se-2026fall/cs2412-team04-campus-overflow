@@ -1,6 +1,6 @@
 # 5. 演示脚本（≤15 分钟彩排 / ≤5 分钟视频）
 
-> 录制文件：**5 分钟版** [`demo-v1.0.0-5min.mp4`](demo-v1.0.0-5min.mp4)（5:00，1280×870，十段字幕分镜，见 §5.3）；早期 55 秒版 [`demo-v1.0.0.webm`](demo-v1.0.0.webm)（无旁白）
+> 录制文件：**5 分钟版** [`demo-v1.0.0-5min.mp4`](demo-v1.0.0-5min.mp4)（记录口径 5:00、1280×870、十段字幕分镜，见 §5.3；文件存在，但本机无 ffprobe，元数据未重新核验）；早期 55 秒版 [`demo-v1.0.0.webm`](demo-v1.0.0.webm)（无旁白）
 > 目标：15 分钟内讲完六段，每人 ≥2 分钟；留 1 分钟给提问与异常分支。
 > 前置：`docker compose -f deploy/docker-compose.dev.yml up -d --build`（本地开发，demo 数据已加载）；生产环境请用 `deploy/docker-compose.yml` + `.env`；用两个浏览器窗口（学生 A / 学生 B）。
 
@@ -27,8 +27,10 @@
 
 **B. 悬赏（魏志国 / 青岑）**
 
+> 演示前先重置 T2001：seeder 的 q2 自带一个 OPEN 悬赏，T2001 初始会是 950/50；不重置则再开 50 会变成 900/100。执行 `scripts/demo/reset-demo-account.sql`（仅 demo 库）恢复为 1000/0。
+
 1. 教师 `T2001` 登录 → 问题详情 → 「发起悬赏」→ 50 分 / 7 天；
-2. 数据库或页面确认：发起人可用 950、冻结 50；
+2. 数据库或页面确认：发起人可用 950、冻结 50（2026-11-27 实测截图：[`reputation-t2001-950-50.png`](screenshots/reputation-t2001-950-50.png)）；
 3. 提问者采纳回答 → 悬赏结算：获奖者 +50、发起人冻结归零；
 4. 备用：另发一个悬赏后等 7 天不现实，展示 `sprint-2-bounty-expiry.log` 的到期退款记录。
 
@@ -48,18 +50,19 @@
 
 5. `admin01 / Campus2026` 登录 → 导航「管理」→ `/admin`；
 6. 「待认证学生」列表 → 对 `SeedUser` 点「认证」→ 列表人数减少
-   （`TestStudent` 已在 2026-11-17 截图时认证，现场改用仍在待认证列表的 `SeedUser`）；
+   （当前 seeder 会创建 `SeedUser`、`TestStudent` 两个待认证账号；旧截图里的 3 人是历史手工数据，现场以当前列表为准）；
 7. 学生 `2023002` 直接访问 `/admin` → 「无权限访问」；
-8. 时间够再演示「建教职工」/「改角色」，不够则口述并展示
+8. 时间够再演示「建教职工」/「改角色」/「禁用」，不够则口述并展示
    [`screenshots/admin/admin-users-pending.png`](screenshots/admin/admin-users-pending.png)
    与 [`screenshots/admin/admin-forbidden.png`](screenshots/admin/admin-forbidden.png)。
+9. 禁用演示：已认证用户行点「禁用」→ 确认；该账号现有会话立即失效，重新登录返回 401。禁用截图待用当前构建重拍。
 
 > 青岑的完整计时讲稿见 [`rehearsal-qingcen.md`](rehearsal-qingcen.md)，刘俊琒（问答主流程 4:00）见 [`rehearsal-liujunfeng.md`](rehearsal-liujunfeng.md)。
 
 **D. CI 与可观测性（陈明哲）**
 
 1. Actions 最近一次 `develop`：五个后端阶段 + 前端；
-2. Coverage：四个 domain 模块 70%+（qa 83.12 / identity 75.74 / reputation 81.93 / discovery 78.26）；
+2. Coverage：四个 domain 模块 70%+（qa 82.57 / identity 77.30 / reputation 79.53 / discovery 78.49）；
 3. Grafana `CampusOverflow · 质量与可观测性`：
    - 发件箱积压 `co_outbox_backlog`
    - 死信 `co_outbox_dead_letters`
@@ -79,7 +82,7 @@
 
 ## 5.4 彩排检查清单
 
-- [ ] demo profile 数据完整（6 账号 / 1 课程 / 3 问题）
+- [ ] demo profile 数据完整（8 账号，含 2 个待认证 / 1 课程 / 4 问题）
 - [ ] 两个浏览器窗口已分别登录 A/B，不共享 Cookie
 - [ ] Actions / Grafana / Swagger 标签页提前打开
 - [ ] 每人至少讲 2 分钟；总时长 ≤15 分钟（计时见 [`rehearsal-log.md`](rehearsal-log.md)）

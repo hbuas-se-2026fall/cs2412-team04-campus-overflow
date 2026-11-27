@@ -12,7 +12,7 @@
 | 中文搜索 | ✅ `q=红黑树` → `total=2`，命中 id=7/id=8 | §3、[`sprint-3-search-hit.png`](sprint-3-search-hit.png)、[`sprint-3-search-hit.log`](sprint-3-search-hit.log) |
 | 相关问题 | ✅ `Related count=1`，`similarity=1.0`，按共享标签排序 | §3、[`sprint-3-search-related.png`](sprint-3-search-related.png) |
 | 通知幂等 / 仅本人可标已读 / 未读数 | ✅ `NotificationProjectorTest` 7 条 + `NotificationServiceTest` 3 条全部通过 | [`sprint-3.md`](sprint-3.md) §五 |
-| 前端三处 | ✅ 搜索页、相关问题侧栏、通知未读/已读均可用 | [`s3-front-search.png`](s3-front-search.png)、[`s3-front-search-422.png`](s3-front-search-422.png)、[`s3-front-mention.png`](s3-front-mention.png)、[`s3-front-notifications.png`](s3-front-notifications.png)、[`s3-front-notifications-read.png`](s3-front-notifications-read.png) |
+| 前端三处 | ✅ 搜索页、相关问题侧栏、通知未读/已读均可用 | [`s3-front-search.png`](s3-front-search.png)、[`s3-front-search-422.png`](s3-front-search-422.png)、[`s3-front-mention.png`](s3-front-mention.png)、[`s3-front-related.png`](s3-front-related.png)（2026-11-27 重拍，含 q4 相关问题）、[`s3-front-notifications.png`](s3-front-notifications.png)、[`s3-front-notifications-read.png`](s3-front-notifications-read.png) |
 
 **结论：S3 搜索与通知验收项全部通过，无阻塞项。**
 

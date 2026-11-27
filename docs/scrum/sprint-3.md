@@ -28,6 +28,8 @@
 
 ## 二、当前基础（S2 期间已提前完成）
 
+> 测试数为 S3 当时快照（2026-11-16/17）；最终测试数见 [`final-test-report.md`](../qa/final-test-report.md)（当前 281 单测 + 5 IT）。
+
 | 项 | 状态 | 证据 |
 | --- | --- | --- |
 | `SearchQuery.terms` / `RelatedQuestionPolicy`（青岑 T3-01/02） | ✅ 已合入 develop | PR #117（`5f3caaa`） |
@@ -77,10 +79,9 @@
     - 搜索页两栏布局（左结果 / 右相关标签 + 相关问题 + 热门标签）：[`s3-front-search.png`](s3-front-search.png)
     - 单字关键词 422 中文提示（`DIS-1001` → 「每个关键词至少 2 个字符」）：[`s3-front-search-422.png`](s3-front-search-422.png)
     - 详情页 `@昵称` 高亮（评论里 `@小红` 蓝底标记）：[`s3-front-mention.png`](s3-front-mention.png)
-    - 详情页相关问题侧栏：**该截图为 `s3-front-mention.png` 的重复副本（字节相同，且右侧显示「暂无相关问题」），不构成 related 证据，已删除（审计 P-19）**；相关问题以接口实测为准，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-related.png`](sprint-3-search-related.png)
+    - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)（2026-11-27 用当前 seeder 重拍：q1 右侧显示“红黑树删除节点时为什么要做双黑修复？”，不再是“暂无相关问题”）。
     - 通知页未读数角标（`通知 6`）与 6 条未读列表：[`s3-front-notifications.png`](s3-front-notifications.png)
-    - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)
-      ⚠️ **该图拍于修复前（审计 P-21）**：顶栏角标仍是 6，与页面「5 条未读」不一致——正是后来修掉的缺陷（角标改为服务端 `unread-count` + 已读后立即刷新，见 `App.tsx` 的 `co:notifications-changed` 监听）。图保留作对照，不作为当前行为的证据。
+    - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)（2026-11-27 用当前代码重拍：顶栏角标 5、页面“5 条未读”，已一致）
 - [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频（[`docs/qa/defects.md`](../qa/defects.md)）
 - [x] 缺陷台账：S3 收口时 BUG-001/002/003/005/006 已关闭；**BUG-004 当时仍为「部分修复」**，其最终关闭发生在 S4（2026-11-25 重写 `events.md` 与 `event-storming.png` 为 14 事件；审计 2-19 更正）
 - [x] T3-12 功能冻结：S3 范围 31 SP 全部合入 `develop`，v1.0.0 于 2026-11-17 发布

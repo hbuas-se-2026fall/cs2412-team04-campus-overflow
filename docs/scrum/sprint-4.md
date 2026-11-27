@@ -30,7 +30,7 @@
 
 - [x] `develop` CI：后端构建与验证 / 前端构建绿；容器镜像由 `main`/PR→main 的 `images` job 覆盖
 - [x] 全仓 27 模块 `mvn verify -DskipITs -Djacoco.skip=false` 通过（2026-11-17，JDK 21）
-- [x] 覆盖率：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥0.70（口径：`docs/final/screenshots/coverage/*.csv` 的 LINE COVERED / TOTAL）
+- [x] 覆盖率（v1.0.0 时点）：qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%，均 ≥0.70；2026-11-27 当前重采为 82.57 / 77.30 / 79.53 / 78.49，见 `docs/final/03-quality.md`
 - [x] T1-15 冒烟 `SMOKE PASS`；demo profile 数据可加载
 - [x] `develop → main` 发布 PR #135（魏志国、青岑 Approve，三检查绿）
 - [x] `v1.0.0` tag 指向 main 合并提交 `10925c7`
@@ -60,7 +60,7 @@
 
 | # | 9.1 维度 | 结论 | 证据 |
 | --- | --- | --- | --- |
-| 1 | 可运行软件 | ✅ 通过（本地/容器） | compose 全栈四容器 + health=UP（`s4-compose-fullstack-verify.md`）；冒烟 9/9、悬赏 17/17、S4 禁用账号 5/5 |
+| 1 | 可运行软件 | ✅ 通过（本地/容器） | compose 全栈四容器 + health=UP（`s4-compose-fullstack-verify.md`）；冒烟 9/9、悬赏 17/17、S4 禁用账号 5/5（当时 4 单测 + 1 FlowIT；2026-11-27 单测扩至 8 条） |
 | 2 | 提交历史 | ✅ 通过 | S4 相关 PR：#127–#130（T4-02/04/05/07）、#135（T4-01 发布）、#162（CI 收紧）、#222（审计修复） |
 | 3 | 贡献者分布 | ✅ 通过 | 5 人个人总结 5/5（#154）；E4 身份核查 5/5 |
 | 4 | PR 与评审 | ✅ 通过 | 所有 S4 PR 经非作者 Approve；release PR 满足 main 的 2 Approve |
