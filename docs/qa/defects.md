@@ -41,7 +41,7 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 264 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 270 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |
@@ -57,17 +57,22 @@
 | Q-33 | 高 | Q-28 捕获悬赏异常后，内层 MANDATORY 事务仍会把共享事务标记 rollback-only，+15 仍整体回滚 | `settleOnAccept` / `closeForDeletedQuestion` 改 `REQUIRES_NEW`，失败只回滚悬赏子事务 | 已修复（待 Spring+MySQL 脏账户 IT） |
 | Q-34 | 中 | 每日投票上限在 REPEATABLE READ 下锁后仍读旧快照，可被并发突破 | 投票处理器 `READ_COMMITTED`；`recordVoteCapped` 先锁账户再做幂等 exists 与日累计 | 已修复（待 MySQL 并发 IT） |
 | Q-35 | 中 | VoteService 预加载回答后锁问题，锁后重读命中一级缓存，可给已删回答投票 | 先用 `findQuestionId` 标量投影，锁问题后再首次加载回答 | 已修复（待 MySQL 交错 IT） |
-| Q-36 | 中 | 自问自答可领他人悬赏；管理者可采纳/认证自己的回答 | 悬赏结算对 `winner==提问者` 或 `acceptedById==winner` 退款；管理者不能采纳/认证自己的回答（`QA-1021`） | 已修复（自采纳是否彻底禁止待产品确认） |
+| Q-36 | 中 | 自问自答可领他人悬赏；管理者可采纳/认证自己的回答 | 悬赏结算对 `winner==提问者` 或 `acceptedById==winner` 退款；管理者不能采纳/认证自己的回答（`QA-1021`）；提问者自采纳允许且声誉 +0（PO 口径） | 已修复 |
 | Q-37 | 中 | 发起悬赏与采纳/删除问题存在 TOCTOU，可产生已采纳/已删问题上的 OPEN 悬赏 | `QaQueryApi.findQuestionForUpdate` 锁问题行；`BountyService.open` 改用它 | 已修复（待 MySQL 并发 IT） |
 | Q-38 | 中 | 悬赏结算用处理时间判到期，采纳在到期前但事件积压到到期后会被退款 | `settleOnAccept` 增加 `acceptedAt`，用事件发生时间判断 `isDue` | 已修复 |
 | Q-39 | 中 | 评论/回复与目标删除、父评论删除无锁，可能产生孤儿评论 | 评论 post/delete 先锁问题行，再锁父评论/目标评论（`CommentRepository.findByIdForUpdate`） | 已修复（待 MySQL 交错 IT） |
 | Q-40 | 中 | 投票被日上限截断为 0 时不写幂等标记，跨日重投可补分 | `VoteCastEvent` 用 `ProcessedEventStore` 标记（consumer=`reputation-vote`） | 已修复 |
-| Q-41 | 中 | 教师/助教账户先被懒创建为 0，后到注册事件不再补 1000 分 | 注册事件按 eventId 幂等；仅对 0/0/0 的懒创建空账户补 `grantAvailablePoints(1000)` | 已修复 |
+| Q-41 | 中 | 教师/助教账户先被懒创建为 0（或已有声誉），后到注册事件不再补 1000 分；且重放依赖 eventId，换事件 ID 可重复补分 | 注册事件用 eventId + 持久化 marker `initial-points:<userId>` 双重幂等；存量账户由迁移补 marker；补非零懒创建账户用例 | 已修复 |
 | Q-42 | 低 | 浏览量失败批次 HINCRBY+HDEL 非原子；刷新锁 TTL 过短 | 合并改为单次 Lua 原子执行；锁 TTL 由 2 分钟提高到 10 分钟 | 已修复（待故障注入 IT） |
 | Q-43 | 低 | 缓存代际 key 被驱逐后 `INCR` 可能重新产生小编号 | `invalidateAll` 用 Lua：代际缺失或过小时先重置为时间戳再 INCR | 已修复 |
 | Q-44 | 低 | 声誉对账漏“有流水但账户行缺失”的用户 | `reconcile()` 遍历账户与流水用户并集，缺失账户按 0 声誉上报 | 已修复 |
 | Q-45 | 低 | 标签计数按输入顺序批量 UPSERT，并发可死锁 500 | `adjustDeltas` 按标签名 `TreeMap` 排序一次批量执行；编辑合并 added/removed 净增量 | 已修复（待 MySQL 并发 IT） |
 | Q-46 | 低 | 并发首票测试仍固化旧 409 路径，未验证生产串行化 | 测试重命名为“唯一键兜底”并注明生产由问题行锁串行化；真实并发需 MySQL IT | 部分修复（验证缺口） |
 | Q-47 | 低 | 问题删除后已入队事件仍发通知 | 通知处理器统一过滤 `QuestionRef.deleted()`；补删除问题用例 | 已修复 |
+| Q-48 | 低 | Q-47 只拦截新投影；删除事件之前已落库的通知仍残留，点开指向已删问题 | `NotificationProjector` 订阅 `ContentDeletedEvent`，按 `/questions/{id}` 删除该问题相关通知；补删除通知用例 | 已修复 |
+| Q-49 | 中 | `expireDue` 到期退款不检查是否已有可见采纳回答，采纳事件积压时会先退款再发奖 | 退款前调用 `QaQueryApi.hasVisibleAcceptedAnswer`，已采纳则跳过并由结算处理器发奖 | 已修复 |
+| Q-50 | 中 | 迟到的旧 `AnswerAccepted` 事件可结算新悬赏（采纳发生在悬赏创建前/当前采纳已是别的回答/回答已被删除） | `settleOnAccept` 校验 `acceptedAt >= createdAt`，并重读当前 `acceptedAnswerId` 一致且 `hasVisibleAcceptedAnswer` 为真后才结算；补“删除释放采纳”用例 | 已修复 |
+| Q-51 | 低 | 浏览量失败批次合并后 `__batch_id` 留在 FLUSHING；测试未断言合并脚本 | Lua 脚本补 `HDEL KEYS[2] '__batch_id'`；测试改为区分合并/解锁两次 `execute` | 已修复 |
+| Q-52 | 低 | W-06 已让 `canManageCourse(userId, null)` 对非管理员返回 false，但 `IdentityApi` 接口注释与 `BountyService.open` 注释仍写“全局教师可管理公开问题” | 两处注释改为当前口径：公开问题仅作者与 ADMIN；悬赏仍按 REP-1007 拒绝公开问题 | 已修复 |
 
 > 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37/Q-38/Q-39/Q-42/Q-45/Q-46 的真实 MySQL/多实例/故障注入验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。

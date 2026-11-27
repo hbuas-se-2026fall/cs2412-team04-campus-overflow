@@ -34,7 +34,7 @@
 | 发布回答 | 登录用户（课程问题需成员） | AnswerSubmitted | Answer | 问题必须存在且未删除 |
 | 编辑回答 | 回答作者/管理者 | 无集成事件 | Answer | 仅作者或管理者；不改变搜索投影文本 |
 | 删除回答 | 回答作者/管理者 | ContentDeleted | Answer | 被采纳的回答作者不可删；管理者删除时问题释放采纳关系 |
-| 采纳回答 | 提问者/课程管理者（TEACHER/TA/ADMIN） | AnswerAccepted | Question | 只能采纳一个；不能采纳自己的回答；历史脏数据允许重新采纳 |
+| 采纳回答 | 提问者/课程管理者（TEACHER/TA/ADMIN） | AnswerAccepted | Question | 只能采纳一个；课程管理者不能采纳自己的回答（提问者自采纳允许，声誉 +0）；历史脏数据允许重新采纳 |
 | 认证回答 | 课程管理者（TEACHER/TA/ADMIN） | AnswerEndorsed | Answer | 只能认证一次；不能认证自己的回答 |
 | 投出/修改/撤销投票 | 登录用户（课程问题需成员） | VoteCast | Vote | 不能给自己投票，值 ±1 |
 | 发表评论 | 登录用户（课程问题需成员） | CommentPosted | Comment | 同一目标下一层回复 |

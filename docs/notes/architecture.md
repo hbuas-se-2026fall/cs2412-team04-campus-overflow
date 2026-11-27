@@ -37,7 +37,8 @@ backend/pom.xml（父 POM）
 
 ## 4. 上下文边界
 
-- Identity → Q&A / Reputation / Discovery：OHS/PL，同步 IdentityApi + UserRegisteredEvent；下游只拿 UserSummary。
+- Identity → Q&A / Discovery：OHS/PL，同步 `IdentityApi`（`UserSummary`/`CourseSummary`）；
+- Identity → Reputation：同步 `IdentityApi` + 异步 `UserRegisteredEvent`（仅 Reputation 消费）。
 - Q&A → Reputation：客户/供应商，Answer* / VoteCast / ContentDeleted(QUESTION) 事件 + QaQueryApi.findQuestion。
 - Q&A → Discovery：遵奉者，Question* / Answer* / Vote / Comment / ContentDeleted 事件。
 - Reputation → Discovery：遵奉者，Bounty* / BadgeAwarded 事件。
@@ -100,31 +101,55 @@ ADR-003 的选择是：**不做无状态令牌，改用 Redis 服务端会话**�
 | 登录后轮换会话 ID | `AuthController` → `request.changeSessionId()` | 防**会话固定攻击**：攻击者先埋一个已知 SID，等受害者登录后复用 |
 | 登录失败限流 | `LoginThrottle` 接口 + `RedisLoginThrottle` | Redis 固定窗口计数，同一用户名 1 分钟内失败 5 次即锁定到窗口结束，返回 `AUTH-429` |
 ### 9.3 `RedisLoginThrottle` 逐行理解（我讲的那一层代码）
+
+> 说明：以下按 **2026-11-26 当前实现**更新；旧版“GET 后 parse + 固定 1 分钟窗口 + 连字符配置键”已作废。
+
 ```java
-private static final Duration WINDOW = Duration.ofMinutes(1);
-private final StringRedisTemplate redis;
-private final int maxFailures;      // 来自配置 co.security.login-max-failures，默认 5
+private final int maxFailures;   // co.security.login.max-failures，默认 5
+private final Duration window;   // co.security.login.window-seconds，默认 60 秒
+
+// recordFailure：INCR 与首次 PEXPIRE 在单条 Lua 脚本内原子完成
+private static final RedisScript<Long> INCR_WITH_TTL = new DefaultRedisScript<>(
+        "local c = redis.call('INCR', KEYS[1]) "
+                + "if c == 1 then redis.call('PEXPIRE', KEYS[1], ARGV[1]) end "
+                + "return c",
+        Long.class);
+
 public boolean isBlocked(String username) {
-    String v = redis.opsForValue().get(key(username));
-    return v != null && Integer.parseInt(v) >= maxFailures;   // 达到阈值即锁
-}
-public void recordFailure(String username) {
-    Long count = redis.opsForValue().increment(key(username));
-    if (count != null && count == 1L) {
-        redis.expire(key(username), WINDOW);                  // 只在第一次失败时设过期
+    String key = key(username);
+    Long ttl = redis.getExpire(key, TimeUnit.SECONDS);
+    if (ttl != null && ttl == -1L) {
+        redis.expire(key, window);            // 兼容旧版遗留的无 TTL key：补过期时间，避免永久锁定
+    }
+    String v = redis.opsForValue().get(key);
+    if (v == null) {
+        return false;
+    }
+    try {
+        return Integer.parseInt(v) >= maxFailures;
+    } catch (NumberFormatException e) {
+        redis.delete(key);                    // 计数损坏：按未锁定处理并删除脏 key 自愈
+        return false;
     }
 }
-public void reset(String username) {
-    redis.delete(key(username));                              // 登录成功后清零
+
+public void recordFailure(String username) {
+    redis.execute(INCR_WITH_TTL, List.of(key(username)), String.valueOf(window.toMillis()));
 }
+
+public void reset(String username) {
+    redis.delete(key(username));              // 登录成功后清零
+}
+
 private static String key(String username) {
-    return "id:login-fail:" + username;                       // 按用户名计数
+    return "id:login-fail:" + Usernames.normalize(username);   // 按归一化后的用户名计数
 }
 ```
-三个值得注意的设计点：
-1. **`expire` 只设在计数为 1 时**。如果每次失败都刷新过期时间，攻击者持续尝试就会让窗口永远不过期，等于把"1 分钟内 5 次"变成"永久锁定"——锁死账号反而成了新的攻击面；
-2. **登录成功后 `reset` 清零**。否则用户白天输错几次、成功登录后计数还留着，晚上再错一次就被锁；
-3. **按用户名计数而不是按 IP**。按 IP 会误伤同一出口 IP 的整个机房/校园网用户；按用户名则精确落在被攻击的账号上（代价是可被用来恶意锁定他人账号，这是本方案已知的取舍）。
+四个值得注意的设计点：
+1. **INCR 与 PEXPIRE 必须原子**。早期实现是「先 INCR、计数为 1 时再 EXPIRE」两步，进程在两步之间中断就留下无 TTL 的 key，该账号会被永久锁定；现在两条命令在同一个 Lua 脚本里执行，不存在中间态，`isBlocked` 还会给历史遗留的无 TTL key 补过期时间；
+2. **`PEXPIRE` 只设在计数为 1 时**。如果每次失败都刷新过期时间，攻击者持续尝试就会让窗口永远不过期，等于把"1 分钟内 5 次"变成"永久锁定"——锁死账号反而成了新的攻击面；
+3. **登录成功后 `reset` 清零**。否则用户白天输错几次、成功登录后计数还留着，晚上再错一次就被锁；
+4. **按用户名计数而不是按 IP**。按 IP 会误伤同一出口 IP 的整个机房/校园网用户；按用户名则精确落在被攻击的账号上（代价是可被用来恶意锁定他人账号，这是本方案已知的取舍）。
 ### 9.4 与 JWT 方案的对比（为什么否掉）
 | 维度 | 服务端会话（本方案） | JWT（localStorage） |
 | --- | --- | --- |
