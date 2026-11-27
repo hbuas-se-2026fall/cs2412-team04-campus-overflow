@@ -24,24 +24,30 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 
 | 模块 | 测试数 | 行覆盖率 | 门槛 |
 | --- | ---: | ---: | --- |
-| co-shared-kernel | 3 | — | — |
-| co-identity-domain | 13 | 77.30% | ✅ ≥70% |
-| co-identity-application | 8 | — | — |
-| co-identity-infrastructure | 1 | — | — |
-| co-qa-domain | 44 | 82.57% | ✅ |
-| co-qa-api | 8 | — | — |
-| co-qa-application | 56 | — | — |
-| co-qa-infrastructure | 6 | — | — |
-| co-reputation-domain | 20 | 80.00% | ✅ |
-| co-reputation-application | 62 | — | — |
-| co-reputation-infrastructure | 3 | — | — |
-| co-discovery-domain | 6 | 78.49% | ✅ |
-| co-discovery-application | 26 | — | — |
-| co-bootstrap | 12（ArchUnit 1 + FlowIT 4 + 其他 7） | — | 分层约束 + 端到端 |
+| co-shared-kernel | 3 | 17.46% | — |
+| co-identity-domain | 13 | **77.30%** | ✅ ≥70% |
+| co-identity-application | 8 | 20.12% | — |
+| co-identity-infrastructure | 1 | 11.01% | — |
+| co-qa-domain | 44 | **82.57%** | ✅ |
+| co-qa-api | 8 | 0.00%（仅事件契约） | — |
+| co-qa-application | 56 | 93.92% | — |
+| co-qa-infrastructure | 6 | 20.39% | — |
+| co-reputation-domain | 20 | **79.53%** | ✅ |
+| co-reputation-application | 72 | 87.56% | — |
+| co-reputation-infrastructure | 3 | 10.30% | — |
+| co-discovery-domain | 6 | **78.49%** | ✅ |
+| co-discovery-application | 29 | 94.68% | — |
+| co-bootstrap | 8（ArchUnit 1 + EnvironmentGuard 7） | 6.38% | 分层约束 |
+| **合计（surefire，`-DskipITs`）** | **277** | — | — |
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-> 2026-11-27 CI 全量 **268** 个用例（surefire/failsafe XML 汇总；其中 FlowIT 4 个）。此前的 168/174/204 为历史批次，已过期。
+> **实测口径（2026-11-27，合并 develop 后重采）**：上表由 `mvn -B clean verify -DskipITs -Djacoco.skip=false`
+> 实跑后，从 `**/target/surefire-reports/TEST-*.xml` 与 `**/target/site/jacoco/jacoco.csv` 直接汇总：
+> 单元测试 **277**（surefire）+ 集成测试 **4**（`CampusOverflowFlowIT`，failsafe）= **281**；前端组件测试 **6**（Vitest）。
+> **口径说明（审计 P-02/04/10）**：上表与「268 用例」由 surefire/failsafe 的 XML 汇总得出；
+> 历史文档里出现过的 165 / 168 / 174 / 204 / 252 是不同日期、不同参数（是否 `-DskipITs`、是否含 failsafe、
+> 合并前后）的批次，引用时必须注明日期与命令，不要混用。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 

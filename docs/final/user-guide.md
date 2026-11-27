@@ -167,7 +167,29 @@
    - 导航没有「管理」；
    - 直接访问 `/admin` 会显示「无权限访问」。
 
-![管理员：待认证学生列表](screenshots/admin/admin-users-pending.png)
+> **截图口径（2026-11-27 重拍，审计 P-27~P-34/P-56）**：下列步骤图均在当前 `develop` 代码上，
+> 用 `demo` profile + 真实浏览器重拍（1500×1000，非拼图），覆盖登录、列表、详情、提问、搜索、
+> 通知、排行榜、声誉与管理员页。
+
+![登录页](screenshots/user-guide/00-login.png)
+
+![问题列表（登录后可见课程问题，「已采纳」有文字标签）](screenshots/user-guide/01-question-list.png)
+
+![问题详情（回答、评论、投票、悬赏、相关问题侧栏）](screenshots/user-guide/02-question-detail.png)
+
+![提问页（编辑 / 预览 / 分屏）](screenshots/user-guide/03-ask.png)
+
+![搜索页](screenshots/user-guide/04-search.png)
+
+![通知页（未读数来自服务端）](screenshots/user-guide/05-notifications.png)
+
+![排行榜（周 / 月 / 学期 / 总榜）](screenshots/user-guide/06-leaderboard.png)
+
+![声誉主页（徽章墙 + 积分流水）](screenshots/user-guide/07-reputation.png)
+
+![管理员：待认证学生列表 + 创建教职工表单](screenshots/admin/admin-users-pending.png)
+
+![管理员：已认证用户，操作列含「禁用」（T4-02）](screenshots/admin/admin-users-verified.png)
 
 ![认证成功](screenshots/admin/admin-verify.png)
 

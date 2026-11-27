@@ -33,6 +33,10 @@ const BY_CODE: Record<string, string> = {
   'REP-1003': '悬赏积分需在 10–500 之间',
   'REP-1004': '悬赏期限需在 1–14 天之间',
   'REP-1007': '公开问题不能发起悬赏，请选择所属课程的问题',
+  'REP-1005': '不能把悬赏发给自己',
+  'REP-2001': '该悬赏已结束，无需再操作',
+  'REP-2002': '该问题已有进行中的悬赏',
+  'REP-3001': '只有课程管理者（教师/助教/管理员）可以发起悬赏',
   'REP-3002': '只能查看自己的声誉流水',
 
   // Discovery
@@ -70,11 +74,12 @@ export function errorMessage(e: unknown): string {
   if (e instanceof ApiError) {
     const byCode = BY_CODE[e.code];
     if (byCode) return byCode;
+    // 业务码没收录、但后端给了中文说明时，优先用后端那句（比「请求参数有误」更具体）；
+    // 英文/为空才退回按状态码兜底，避免把英文原文透到界面上。
+    if (hasCjk(e.message)) return e.message;
     const byStatus = BY_STATUS[e.status];
     if (byStatus) return byStatus;
-    // 审计 2-8：没有码也没有状态映射时，只在后端文案本身是中文时透出，
-    // 否则回退到一句中文，避免界面出现英文原文。
-    return hasCjk(e.message) ? e.message : '请求失败，请稍后重试';
+    return '请求失败，请稍后重试';
   }
   if (e instanceof Error) {
     const msg = e.message || '';
