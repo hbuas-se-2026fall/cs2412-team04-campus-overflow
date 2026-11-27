@@ -15,13 +15,13 @@
 ## 3. 沟通约定
 - IM 群：CampusOverflow-TeamX；
 - 工作日 2 小时内回复群消息；
-- 每日站会时间：12:30；
+- 每日站会时间：10:00（V3 §7.1.5；早期约定 12:30 已废止，见 `docs/team.md`）；
 - 阻塞超过 2 小时必须在群内升级；
 - 重要决策写入 docs/decisions/。
 
 ## 4. 开发规约
 - main 禁止直推；
-- 分支命名：feature/<姓名拼音>-<功能>；
+- 分支命名：feature/<issue>-<英文描述>（V3 §7.2；历史 feature/<拼音>-<功能> 分支保留不改）；
 - Commit 规范：feat/fix/docs/test/refactor: 描述；
 - 每个 PR 至少 1 人 review，LGTM 后由 SM 合并；
 - 新代码必须有单元测试；

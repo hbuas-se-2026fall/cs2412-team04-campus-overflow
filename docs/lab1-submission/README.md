@@ -112,6 +112,9 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 - 原始证据目录：[`env/`](env/)（目录说明见 [`env/README.md`](env/README.md)）
   - 已归档（5/5 齐）：`env/env-fangguodong`、`env/env-qingcen`、`env/env-chenmingzhe`、`env/env-weizhiguo`、`env/env-liujunfeng`，每人 `.png` + `.txt` 成对
   - **5/5 齐（2026-11-18 复核）**：房国栋 `screenshots/mvn-test-fangguodong.png`（27 模块 165 用例全绿，日志 `logs/mvn-test-fangguodong-20261118.log`）；其余 4 人 `screenshots/mvn-test-<拼音>.png` 亦齐
+- 用例数口径（审计 W-66）：**165 是 Lab 1 阶段（2026-11-18）的历史值**，不是最终值；随 S2～S4 用例增加，
+  全量口径已演进到 268 → 277 单测（+4/5 集成 = 281/286），最终以 [`../final/03-quality.md`](../final/03-quality.md)
+  与 CI 全量报告为准。本节保留 165 仅说明 Lab 1 当时的取证快照，勿当交付最终数字。
 - 采集脚本：[`scripts/dev-env/collect-env.ps1`](../../scripts/dev-env/collect-env.ps1) / [`collect-env.sh`](../../scripts/dev-env/collect-env.sh)
 - 达标线：Git 2.40+、JDK 21、Node.js 20+、Docker 可运行
 - 已知情况：Lab 1 时期 `backend` 整体 `mvn clean test` 为红（`co-qa-domain` 的 `TODO(S2)` 桩未实现），
