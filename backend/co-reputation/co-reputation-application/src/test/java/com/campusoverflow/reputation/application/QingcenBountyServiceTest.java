@@ -170,6 +170,7 @@ class QingcenBountyServiceTest {
     @Test
     void settleAwardsWinnerAndRecordsLedger() {
         Bounty bounty = seedBounty(50, 7);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
 
         service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
@@ -189,6 +190,7 @@ class QingcenBountyServiceTest {
     @Test
     void settleRefundsWhenQuestionAuthorWinsOwnAnswer() {
         Bounty bounty = seedBounty(50, 7);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
 
         service.settleOnAccept(QUESTION_ID, 50L, 1L, 1L, 1L, NOW, "event-self-answer");
 
@@ -201,6 +203,7 @@ class QingcenBountyServiceTest {
     @Test
     void settleRefundsWhenAcceptorIsTheWinningAnswerAuthor() {
         Bounty bounty = seedBounty(50, 7);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
 
         service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 3L, NOW, "event-self-accept");
 
@@ -213,6 +216,7 @@ class QingcenBountyServiceTest {
     @Test
     void selfWinClosesAndRefundsWithoutLedger() {
         Bounty bounty = seedBounty(50, 7);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
 
         service.settleOnAccept(QUESTION_ID, 50L, SPONSOR_ID, 1L, 1L, NOW, "event-1");
 
@@ -317,8 +321,44 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void settleIgnoresStaleAcceptanceForDifferentCurrentAnswer() {
+        Bounty bounty = seedBounty(50, 7);
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "问题", 99L, false)));
+
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-stale");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.OPEN);
+        verifyNoInteractions(ledgerService);
+    }
+
+    @Test
+    void settleIgnoresAcceptanceBeforeBountyCreation() {
+        Bounty bounty = seedBounty(50, 7);
+
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW.minus(Duration.ofDays(1)), "event-before-bounty");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.OPEN);
+        verifyNoInteractions(ledgerService);
+    }
+
+    @Test
+    void settleIgnoresAcceptanceReleasedByAnswerDeletion() {
+        Bounty bounty = seedBounty(50, 7);
+        when(qa.findQuestion(QUESTION_ID)).thenReturn(Optional.of(
+                new QuestionRef(QUESTION_ID, 1L, 100L, "问题", null, false)));
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(false);
+
+        service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-deleted-answer");
+
+        assertThat(bounty.status()).isEqualTo(BountyStatus.OPEN);
+        verifyNoInteractions(ledgerService);
+    }
+
+    @Test
     void settleAfterExpiryRefundsInsteadOfAwarding() {
         Bounty bounty = seedBounty(50, 1);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
         BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
 
         later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW.plus(Duration.ofDays(2)), "event-late");
@@ -363,6 +403,7 @@ class QingcenBountyServiceTest {
     @Test
     void settleAcceptedBeforeExpiryAwardsEvenIfProcessedLater() {
         Bounty bounty = seedBounty(50, 1);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
         BountyService later = serviceAt(NOW.plus(Duration.ofDays(2)));
 
         later.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-before-expiry");
@@ -376,6 +417,7 @@ class QingcenBountyServiceTest {
     @Test
     void settledBountyIsNotReturnedByExpireDue() {
         Bounty bounty = seedBounty(50, 1);
+        when(qa.hasVisibleAcceptedAnswer(QUESTION_ID)).thenReturn(true);
         service.settleOnAccept(QUESTION_ID, 50L, 3L, 1L, 1L, NOW, "event-1");
 
         int expired = serviceAt(NOW.plus(Duration.ofDays(3))).expireDue();

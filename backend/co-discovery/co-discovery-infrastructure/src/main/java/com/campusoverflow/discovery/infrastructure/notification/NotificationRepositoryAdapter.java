@@ -60,6 +60,11 @@ public class NotificationRepositoryAdapter implements NotificationRepository {
         return jpa.markAllRead(recipientId);
     }
 
+    @Override
+    public int deleteByQuestionId(long questionId) {
+        return jpa.deleteByLink("/questions/" + questionId);
+    }
+
     private static Notification toDomain(NotificationJpaEntity e) {
         return Notification.reconstitute(e.getId(), e.getRecipientId(), NotificationType.valueOf(e.getType()),
                 e.getTitle(), e.getLink(), e.getSourceEventId(), e.isRead(), e.getCreatedAt());

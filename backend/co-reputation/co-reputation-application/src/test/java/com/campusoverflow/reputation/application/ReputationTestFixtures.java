@@ -155,6 +155,13 @@ public class ReputationTestFixtures {
         return bountyService.open(sponsor, questionId, points, days);
     }
 
+    /** 把问题引用标记为已采纳某回答，供“到期任务 vs 采纳事件”竞态用例使用。 */
+    public void acceptQuestion(long questionId, long answerId) {
+        QuestionRef old = qa.questions.get(questionId);
+        qa.questions.put(questionId, new QuestionRef(old.id(), old.authorId(), old.courseId(), old.title(),
+                answerId, old.deleted()));
+    }
+
     // ---------- 替身实现 ----------
 
     /** 内存账户仓储。 */
