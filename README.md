@@ -45,28 +45,20 @@ net stop MySQL80
 docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 ```
 
-方式二，把容器端口映射到 3307，不动本机 MySQL。建一个本地覆盖文件
-`deploy/docker-compose.local.yml`（该文件已在 `.gitignore` 中，不会入库）：
-
-```yaml
-services:
-  mysql:
-    ports: !override
-      - "3307:3306"
-```
-
-> 注意必须写 `!override`。compose 合并多个 `-f` 时，`ports` 默认是**追加**而不是替换，
-> 不写 `!override` 会变成 3306 和 3307 同时暴露，3306 仍然冲突。
-
-然后带上覆盖文件启动，并让后端连 3307：
+方式二，把容器端口映射到 3307，不动本机 MySQL。dev compose 的端口已支持环境变量覆盖，不需要额外的覆盖文件：
 
 ```bash
-docker compose -f deploy/docker-compose.dev.yml -f deploy/docker-compose.local.yml up -d mysql redis
+# 只改 MySQL 对外端口；Redis 同理用 REDIS_PORT
+MYSQL_PORT=3307 docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 
-# 从仓库根进入后端目录，再指定端口启动（默认 3306 见 application.yml 的 ${DB_PORT:3306}）
+# 后端连 3307（默认 3306，见 application.yml 的 ${DB_PORT:3306}）
 cd backend
 DB_PORT=3307 mvn -pl co-bootstrap -am spring-boot:run
 ```
+
+> 早期文档让你手写 `deploy/docker-compose.local.yml` 再用 `-f` 合并，并提醒 `ports` 必须写 `!override`
+> 才能覆盖。该文件在 `.gitignore` 里、仓库中并不存在，容易照抄失败（审计 P-23/P-24）；
+> 现已改为 `MYSQL_PORT` / `REDIS_PORT` 环境变量，无需任何本地文件。
 
 PowerShell 写法：
 
@@ -81,8 +73,16 @@ mvn -pl co-bootstrap -am spring-boot:run
 ```bash
 cd backend
 mvn -pl co-bootstrap -am -DskipTests package
-java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=demo
+
+# demo profile 不在 application-dev.yml 里，DB 密码与字段密钥必须显式注入，否则启动会失败：
+#   缺 DB_PASSWORD      -> Flyway: Access denied for user 'campus' (using password: NO)
+#   缺 CO_FIELD_KEY     -> FieldEncryptor 构造失败
+# 下面用的是 compose 里的开发默认值，仅本机使用。
+DB_PASSWORD=campus_dev_pwd CO_FIELD_KEY=GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I= CO_FIELD_MAC_KEY=ZGV2LW1hYy1rZXktMzItYnl0ZXMtZm9yLWRldi1vayE= java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=demo
 ```
+
+> 若 MySQL 容器映射到 3307（见 §2.2 方式二），再加 `DB_PORT=3307`。
+> 审计 P-25 记录：旧版这里只写 `--spring.profiles.active=demo`，照抄会启动失败。
 
 也可以在 IntelliJ 里直接运行 `CampusOverflowApplication`，或用
 `mvn -pl co-bootstrap spring-boot:run -Dspring-boot.run.profiles=demo`

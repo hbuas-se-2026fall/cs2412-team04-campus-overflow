@@ -55,3 +55,39 @@ Node   : v24.18.1（复采一致）
 说明：首采截图 env-fangguodong.png 拍于 10-29，当时未装 Docker，
       其中的 java -version / mvn -v 仍有效；Docker 一栏以本文件与
       env-fangguodong-docker.png 为准。
+
+三采（2026-11-27，审计 P-01 复核：解释「截图显示 1.8」与「汇总写 21」的矛盾）
+==========================================================================
+本机存在两套 JDK，取决于 PATH / JAVA_HOME：
+
+A) 默认 PATH（不做任何设置）——与实际截图 env-fangguodong.png 一致：
+   java  -version  -> java version "1.8.0_481"（Oracle JRE，位于
+                      C:\Program Files (x86)\Common Files\Oracle\Java\java8path）
+   javac -version  -> 'javac' 不是内部或外部命令 / not installed
+   脚本判定        -> [FAIL] JDK 21
+
+B) 明确把 JAVA_HOME 指向 IntelliJ 自带 JBR 21（本项目构建与测试的实际用法）：
+   export JAVA_HOME="/e/IntelliJ IDEA 2025.3.3/jbr"; export PATH="$JAVA_HOME/bin:$PATH"
+   java  -version  -> openjdk version "21.0.10" 2026-01-20
+                      OpenJDK Runtime Environment JBR-21.0.10+1-1163.110-jcef
+   javac -version  -> javac 21.0.10
+   mvn   -v        -> Apache Maven 3.9.11
+                      Java version: 21.0.10, vendor: JetBrains s.r.o.,
+                      runtime: E:\IntelliJ IDEA 2025.3.3\jbr
+   脚本判定        -> [PASS] JDK 21
+
+结论（以此为准）
+----------------
+- 「JDK 21 达标」成立的前提是 **命令在同一窗口里先设 JAVA_HOME 指向 JBR 21**；
+  默认 PATH 下的 java 是 1.8，且没有 javac，直接跑 collect-env.ps1 会得到 [FAIL]。
+- 本文早期把 [PASS] JDK 21 与本机实测截图并列，看起来矛盾，原因是两段采集用了不同的 PATH。
+  2026-11-27 起按上面 A/B 两段分别记录，不再把两种状态混写成一行。
+- 建议：把 JBR 21 的 bin 加入系统 PATH（或安装独立 JDK 21）后重采，可让 A 段也变成 [PASS]。
+
+同窗口的 mvn 结果（2026-11-27，JDK 21 / JBR-21.0.10+1-1163.110）
+---------------------------------------------------------------
+命令：cd backend && mvn -B clean test -Djacoco.skip=true
+结果：BUILD SUCCESS
+      surefire 汇总：Tests run: 252, Failures: 0, Errors: 0, Skipped: 0
+      （含新增 EnvironmentGuardTest 7 条；不含 CampusOverflowFlowIT 4 条，那 4 条需 Testcontainers）
+
