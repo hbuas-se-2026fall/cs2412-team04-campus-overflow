@@ -99,7 +99,8 @@ export function AdminUsersPage() {
     }
   };
 
-  const disable = async (user: AdminUser) => {
+  // 审计 P-56：后端 T4-02 有 disable 接口（禁用并撤销会话），管理页此前没有入口
+  const disableUser = async (user: AdminUser) => {
     if (!window.confirm(`确认禁用 ${user.displayName}？该账号现有会话会立即失效。`)) return;
     setNotice('');
     setError('');
@@ -169,7 +170,7 @@ export function AdminUsersPage() {
                     currentUserId={me?.id}
                     onVerify={verify}
                     onChangeRole={changeRole}
-                    onDisable={disable}
+                    onDisable={disableUser}
                   />
                 ))}
               </tbody>

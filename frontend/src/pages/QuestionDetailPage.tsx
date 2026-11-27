@@ -17,6 +17,9 @@ export function QuestionDetailPage() {
   const [q, setQ] = useState<QuestionDetail | null>(null);
   const [state, setState] = useState<PageState>('loading');
   const [related, setRelated] = useState<{ id: number; title: string }[]>([]);
+  // 审计 P-51：原实现 .catch(() => undefined) 把失败吞成「暂无相关问题」，用户看不出是加载失败
+  const [relatedError, setRelatedError] = useState('');
+  const [relatedReloadKey, setRelatedReloadKey] = useState(0);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
@@ -42,11 +45,15 @@ export function QuestionDetailPage() {
 
   useEffect(() => {
     load(true);
+    setRelatedError('');
     api
       .related(questionId)
-      .then(setRelated)
-      .catch(() => undefined);
-  }, [load, questionId]);
+      .then((items) => {
+        setRelated(items);
+        setRelatedError('');
+      })
+      .catch((e: unknown) => setRelatedError(errorMessage(e)));
+  }, [load, questionId, relatedReloadKey]);
 
   /** 所有写操作统一走这里：失败时把业务码翻成中文，成功后重新拉一次详情（不计浏览）。 */
   const act = async (fn: () => Promise<unknown>) => {
@@ -252,14 +259,21 @@ export function QuestionDetailPage() {
 
       <aside>
         <h3>相关问题</h3>
-        <ul className="plain">
-          {related.map((r) => (
-            <li key={r.id}>
-              <Link to={`/questions/${r.id}`}>{r.title}</Link>
-            </li>
-          ))}
-          {related.length === 0 && <li className="muted">暂无相关问题</li>}
-        </ul>
+        {relatedError ? (
+          <div>
+            <p className="error">相关问题加载失败：{relatedError}</p>
+            <button onClick={() => setRelatedReloadKey((k) => k + 1)}>重试</button>
+          </div>
+        ) : (
+          <ul className="plain">
+            {related.map((r) => (
+              <li key={r.id}>
+                <Link to={`/questions/${r.id}`}>{r.title}</Link>
+              </li>
+            ))}
+            {related.length === 0 && <li className="muted">暂无相关问题</li>}
+          </ul>
+        )}
       </aside>
     </div>
   );

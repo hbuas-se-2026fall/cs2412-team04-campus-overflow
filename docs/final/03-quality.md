@@ -24,24 +24,27 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 
 | 模块 | 测试数 | 行覆盖率 | 门槛 |
 | --- | ---: | ---: | --- |
-| co-shared-kernel | 3 | — | — |
-| co-identity-domain | 13 | 77.30% | ✅ ≥70% |
-| co-identity-application | 12 | — | — |
-| co-identity-infrastructure | 1 | — | — |
-| co-qa-domain | 44 | 82.57% | ✅ |
-| co-qa-api | 8 | — | — |
-| co-qa-application | 56 | — | — |
-| co-qa-infrastructure | 6 | — | — |
-| co-reputation-domain | 20 | 79.53% | ✅ |
-| co-reputation-application | 72 | — | — |
-| co-reputation-infrastructure | 3 | — | — |
-| co-discovery-domain | 6 | 78.49% | ✅ |
-| co-discovery-application | 29 | — | — |
-| co-bootstrap | 13（ArchUnit 1 + FlowIT 5 + 其他 7） | — | 分层约束 + 端到端 |
+| co-shared-kernel | 3 | 17.46% | — |
+| co-identity-domain | 13 | **77.30%** | ✅ ≥70% |
+| co-identity-application | 12 | 20.12% | — |
+| co-identity-infrastructure | 1 | 11.01% | — |
+| co-qa-domain | 44 | **82.57%** | ✅ |
+| co-qa-api | 8 | 0.00%（仅事件契约） | — |
+| co-qa-application | 56 | 93.92% | — |
+| co-qa-infrastructure | 6 | 20.39% | — |
+| co-reputation-domain | 20 | **79.53%** | ✅ |
+| co-reputation-application | 72 | 87.56% | — |
+| co-reputation-infrastructure | 3 | 10.30% | — |
+| co-discovery-domain | 6 | **78.49%** | ✅ |
+| co-discovery-application | 29 | 94.68% | — |
+| co-bootstrap | 8（ArchUnit 1 + EnvironmentGuard 7） | 6.38% | 分层约束 |
+| **合计（surefire，`-DskipITs`）** | **281** | — | — |
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；CI（Linux）上四个 domain 模块均通过 `check-domain-coverage`。本地 Windows 路径含中文时 JaCoCo 默认写不进 `target/jacoco.exec`，本次用 `-Djacoco.destFile` 指定 ASCII 路径才生成报告，`check-domain-coverage` 本地被跳过，详见 coverage README。
 
-> 2026-11-27 本地 `mvn verify`（含 Testcontainers）：**281 单测**（surefire XML 汇总）+ **FlowIT 5** = **286** 总口径。该轮 FlowIT 已在 Docker Desktop 29.9.3 + Testcontainers 上全部通过（含新增 P5 迁移与并发投票用例）；此前的 168/174/204/268 为历史批次，已过期。最终 GitHub Actions 仍待补。
+> **实测口径（2026-11-27，合并 develop 后）**：上表单元测试数来自 surefire XML；本地另跑
+> `mvn -o verify`（含 Testcontainers）得 **FlowIT 5** 条全绿，总口径 **281 单测 + 5 集成 = 286**；前端组件测试 **16** 条（Vitest：errors 8 + BountyDialog 6 + AdminUsersPage 2）。
+> **口径说明（审计 P-02/04/10）**：测试数由 surefire/failsafe 的 XML 汇总得出；历史文档里出现过的 165 / 168 / 174 / 204 / 252 / 268 是不同日期、不同参数（是否 `-DskipITs`、是否含 failsafe、合并前后）的批次，引用时必须注明日期与命令，不要混用。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 

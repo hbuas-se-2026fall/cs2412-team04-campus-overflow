@@ -4,31 +4,31 @@
 [INFO] 
 [INFO] CampusOverflow :: Parent                                           [pom]
 [INFO] CampusOverflow :: Shared Kernel                                    [jar]
-[INFO] CampusOverflow :: Identity Éí·İÓëÈÏÖ¤                                   [pom]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: api£¨·¢²¼ÓïÑÔ£©                                        [jar]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: domain£¨´¿ Java£©                                   [jar]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: application£¨ÓÃÀı±àÅÅ£©                                [jar]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£©                          [jar]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: interfaces£¨REST ½Ó¿Ú²ã£©                             [jar]
-[INFO] CampusOverflow :: Q&A ÎÊ´ğºËĞÄ                                         [pom]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: api£¨·¢²¼ÓïÑÔ£©                                              [jar]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: domain£¨´¿ Java£©                                         [jar]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: application£¨ÓÃÀı±àÅÅ£©                                      [jar]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£©                                [jar]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: interfaces£¨REST ½Ó¿Ú²ã£©                                   [jar]
-[INFO] CampusOverflow :: Reputation ÉùÓşÓë¼¤Àø                                 [pom]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: api£¨·¢²¼ÓïÑÔ£©                                      [jar]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: domain£¨´¿ Java£©                                 [jar]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: application£¨ÓÃÀı±àÅÅ£©                              [jar]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£©                        [jar]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: interfaces£¨REST ½Ó¿Ú²ã£©                           [jar]
-[INFO] CampusOverflow :: Discovery ÄÚÈİ·¢ÏÖ                                   [pom]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: api£¨·¢²¼ÓïÑÔ£©                                        [jar]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: domain£¨´¿ Java£©                                   [jar]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: application£¨ÓÃÀı±àÅÅ£©                                [jar]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£©                          [jar]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: interfaces£¨REST ½Ó¿Ú²ã£©                             [jar]
-[INFO] CampusOverflow :: Bootstrap£¨Æô¶¯×°Åä£©                                  [jar]
+[INFO] CampusOverflow :: Identity èº«ä»½ä¸è®¤è¯                                   [pom]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰                                        [jar]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: domainï¼ˆçº¯ Javaï¼‰                                   [jar]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰                                [jar]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰                          [jar]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰                             [jar]
+[INFO] CampusOverflow :: Q&A é—®ç­”æ ¸å¿ƒ                                         [pom]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰                                              [jar]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: domainï¼ˆçº¯ Javaï¼‰                                         [jar]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰                                      [jar]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰                                [jar]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰                                   [jar]
+[INFO] CampusOverflow :: Reputation å£°èª‰ä¸æ¿€åŠ±                                 [pom]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰                                      [jar]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: domainï¼ˆçº¯ Javaï¼‰                                 [jar]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰                              [jar]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰                        [jar]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰                           [jar]
+[INFO] CampusOverflow :: Discovery å†…å®¹å‘ç°                                   [pom]
+[INFO] Discovery å†…å®¹å‘ç° :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰                                        [jar]
+[INFO] Discovery å†…å®¹å‘ç° :: domainï¼ˆçº¯ Javaï¼‰                                   [jar]
+[INFO] Discovery å†…å®¹å‘ç° :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰                                [jar]
+[INFO] Discovery å†…å®¹å‘ç° :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰                          [jar]
+[INFO] Discovery å†…å®¹å‘ç° :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰                             [jar]
+[INFO] CampusOverflow :: Bootstrapï¼ˆå¯åŠ¨è£…é…ï¼‰                                  [jar]
 [INFO] 
 [INFO] -----------------< com.campusoverflow:campus-overflow >-----------------
 [INFO] Building CampusOverflow :: Parent 0.1.0-SNAPSHOT                  [1/27]
@@ -81,7 +81,7 @@
 [INFO] 
 [INFO] 
 [INFO] -------------------< com.campusoverflow:co-identity >-------------------
-[INFO] Building CampusOverflow :: Identity Éí·İÓëÈÏÖ¤ 0.1.0-SNAPSHOT          [3/27]
+[INFO] Building CampusOverflow :: Identity èº«ä»½ä¸è®¤è¯ 0.1.0-SNAPSHOT          [3/27]
 [INFO]   from co-identity\pom.xml
 [INFO] --------------------------------[ pom ]---------------------------------
 [INFO] 
@@ -91,7 +91,7 @@
 [INFO] argLine set to -javaagent:C:\\Users\\PC\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\Users\\PC\\Desktop\\CampusOverflow\\backend\\co-identity\\target\\jacoco.exec
 [INFO] 
 [INFO] -----------------< com.campusoverflow:co-identity-api >-----------------
-[INFO] Building Identity Éí·İÓëÈÏÖ¤ :: api£¨·¢²¼ÓïÑÔ£© 0.1.0-SNAPSHOT               [4/27]
+[INFO] Building Identity èº«ä»½ä¸è®¤è¯ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ 0.1.0-SNAPSHOT               [4/27]
 [INFO]   from co-identity\co-identity-api\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -119,7 +119,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] ---------------< com.campusoverflow:co-identity-domain >----------------
-[INFO] Building Identity Éí·İÓëÈÏÖ¤ :: domain£¨´¿ Java£© 0.1.0-SNAPSHOT          [5/27]
+[INFO] Building Identity èº«ä»½ä¸è®¤è¯ :: domainï¼ˆçº¯ Javaï¼‰ 0.1.0-SNAPSHOT          [5/27]
 [INFO]   from co-identity\co-identity-domain\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -161,7 +161,7 @@
 [INFO] 
 [INFO] 
 [INFO] -------------< com.campusoverflow:co-identity-application >-------------
-[INFO] Building Identity Éí·İÓëÈÏÖ¤ :: application£¨ÓÃÀı±àÅÅ£© 0.1.0-SNAPSHOT       [6/27]
+[INFO] Building Identity èº«ä»½ä¸è®¤è¯ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ 0.1.0-SNAPSHOT       [6/27]
 [INFO]   from co-identity\co-identity-application\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -201,7 +201,7 @@
 [INFO] 
 [INFO] 
 [INFO] -----------< com.campusoverflow:co-identity-infrastructure >------------
-[INFO] Building Identity Éí·İÓëÈÏÖ¤ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© 0.1.0-SNAPSHOT [7/27]
+[INFO] Building Identity èº«ä»½ä¸è®¤è¯ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ 0.1.0-SNAPSHOT [7/27]
 [INFO]   from co-identity\co-identity-infrastructure\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -229,7 +229,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] -------------< com.campusoverflow:co-identity-interfaces >--------------
-[INFO] Building Identity Éí·İÓëÈÏÖ¤ :: interfaces£¨REST ½Ó¿Ú²ã£© 0.1.0-SNAPSHOT    [8/27]
+[INFO] Building Identity èº«ä»½ä¸è®¤è¯ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ 0.1.0-SNAPSHOT    [8/27]
 [INFO]   from co-identity\co-identity-interfaces\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -257,7 +257,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] ----------------------< com.campusoverflow:co-qa >----------------------
-[INFO] Building CampusOverflow :: Q&A ÎÊ´ğºËĞÄ 0.1.0-SNAPSHOT                [9/27]
+[INFO] Building CampusOverflow :: Q&A é—®ç­”æ ¸å¿ƒ 0.1.0-SNAPSHOT                [9/27]
 [INFO]   from co-qa\pom.xml
 [INFO] --------------------------------[ pom ]---------------------------------
 [INFO] 
@@ -267,7 +267,7 @@
 [INFO] argLine set to -javaagent:C:\\Users\\PC\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\Users\\PC\\Desktop\\CampusOverflow\\backend\\co-qa\\target\\jacoco.exec
 [INFO] 
 [INFO] --------------------< com.campusoverflow:co-qa-api >--------------------
-[INFO] Building Q&A ÎÊ´ğºËĞÄ :: api£¨·¢²¼ÓïÑÔ£© 0.1.0-SNAPSHOT                    [10/27]
+[INFO] Building Q&A é—®ç­”æ ¸å¿ƒ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ 0.1.0-SNAPSHOT                    [10/27]
 [INFO]   from co-qa\co-qa-api\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -295,7 +295,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] ------------------< com.campusoverflow:co-qa-domain >-------------------
-[INFO] Building Q&A ÎÊ´ğºËĞÄ :: domain£¨´¿ Java£© 0.1.0-SNAPSHOT               [11/27]
+[INFO] Building Q&A é—®ç­”æ ¸å¿ƒ :: domainï¼ˆçº¯ Javaï¼‰ 0.1.0-SNAPSHOT               [11/27]
 [INFO]   from co-qa\co-qa-domain\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -351,7 +351,7 @@
 [INFO] 
 [INFO] 
 [INFO] ----------------< com.campusoverflow:co-qa-application >----------------
-[INFO] Building Q&A ÎÊ´ğºËĞÄ :: application£¨ÓÃÀı±àÅÅ£© 0.1.0-SNAPSHOT            [12/27]
+[INFO] Building Q&A é—®ç­”æ ¸å¿ƒ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ 0.1.0-SNAPSHOT            [12/27]
 [INFO]   from co-qa\co-qa-application\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -399,7 +399,7 @@
 [INFO] 
 [INFO] 
 [INFO] --------------< com.campusoverflow:co-qa-infrastructure >---------------
-[INFO] Building Q&A ÎÊ´ğºËĞÄ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© 0.1.0-SNAPSHOT      [13/27]
+[INFO] Building Q&A é—®ç­”æ ¸å¿ƒ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ 0.1.0-SNAPSHOT      [13/27]
 [INFO]   from co-qa\co-qa-infrastructure\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -427,7 +427,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] ----------------< com.campusoverflow:co-qa-interfaces >-----------------
-[INFO] Building Q&A ÎÊ´ğºËĞÄ :: interfaces£¨REST ½Ó¿Ú²ã£© 0.1.0-SNAPSHOT         [14/27]
+[INFO] Building Q&A é—®ç­”æ ¸å¿ƒ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ 0.1.0-SNAPSHOT         [14/27]
 [INFO]   from co-qa\co-qa-interfaces\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -455,7 +455,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] ------------------< com.campusoverflow:co-reputation >------------------
-[INFO] Building CampusOverflow :: Reputation ÉùÓşÓë¼¤Àø 0.1.0-SNAPSHOT       [15/27]
+[INFO] Building CampusOverflow :: Reputation å£°èª‰ä¸æ¿€åŠ± 0.1.0-SNAPSHOT       [15/27]
 [INFO]   from co-reputation\pom.xml
 [INFO] --------------------------------[ pom ]---------------------------------
 [INFO] 
@@ -465,7 +465,7 @@
 [INFO] argLine set to -javaagent:C:\\Users\\PC\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\Users\\PC\\Desktop\\CampusOverflow\\backend\\co-reputation\\target\\jacoco.exec
 [INFO] 
 [INFO] ----------------< com.campusoverflow:co-reputation-api >----------------
-[INFO] Building Reputation ÉùÓşÓë¼¤Àø :: api£¨·¢²¼ÓïÑÔ£© 0.1.0-SNAPSHOT            [16/27]
+[INFO] Building Reputation å£°èª‰ä¸æ¿€åŠ± :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ 0.1.0-SNAPSHOT            [16/27]
 [INFO]   from co-reputation\co-reputation-api\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -493,7 +493,7 @@
 [INFO] No tests to run.
 [INFO] 
 [INFO] --------------< com.campusoverflow:co-reputation-domain >---------------
-[INFO] Building Reputation ÉùÓşÓë¼¤Àø :: domain£¨´¿ Java£© 0.1.0-SNAPSHOT       [17/27]
+[INFO] Building Reputation å£°èª‰ä¸æ¿€åŠ± :: domainï¼ˆçº¯ Javaï¼‰ 0.1.0-SNAPSHOT       [17/27]
 [INFO]   from co-reputation\co-reputation-domain\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -537,7 +537,7 @@
 [INFO] 
 [INFO] 
 [INFO] ------------< com.campusoverflow:co-reputation-application >------------
-[INFO] Building Reputation ÉùÓşÓë¼¤Àø :: application£¨ÓÃÀı±àÅÅ£© 0.1.0-SNAPSHOT    [18/27]
+[INFO] Building Reputation å£°èª‰ä¸æ¿€åŠ± :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ 0.1.0-SNAPSHOT    [18/27]
 [INFO]   from co-reputation\co-reputation-application\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -593,7 +593,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] 
 [INFO] 
 [INFO] ----------< com.campusoverflow:co-reputation-infrastructure >-----------
-[INFO] Building Reputation ÉùÓşÓë¼¤Àø :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© 0.1.0-SNAPSHOT [19/27]
+[INFO] Building Reputation å£°èª‰ä¸æ¿€åŠ± :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ 0.1.0-SNAPSHOT [19/27]
 [INFO]   from co-reputation\co-reputation-infrastructure\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -621,7 +621,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] No tests to run.
 [INFO] 
 [INFO] ------------< com.campusoverflow:co-reputation-interfaces >-------------
-[INFO] Building Reputation ÉùÓşÓë¼¤Àø :: interfaces£¨REST ½Ó¿Ú²ã£© 0.1.0-SNAPSHOT [20/27]
+[INFO] Building Reputation å£°èª‰ä¸æ¿€åŠ± :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ 0.1.0-SNAPSHOT [20/27]
 [INFO]   from co-reputation\co-reputation-interfaces\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -649,7 +649,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] No tests to run.
 [INFO] 
 [INFO] ------------------< com.campusoverflow:co-discovery >-------------------
-[INFO] Building CampusOverflow :: Discovery ÄÚÈİ·¢ÏÖ 0.1.0-SNAPSHOT         [21/27]
+[INFO] Building CampusOverflow :: Discovery å†…å®¹å‘ç° 0.1.0-SNAPSHOT         [21/27]
 [INFO]   from co-discovery\pom.xml
 [INFO] --------------------------------[ pom ]---------------------------------
 [INFO] 
@@ -659,7 +659,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] argLine set to -javaagent:C:\\Users\\PC\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\Users\\PC\\Desktop\\CampusOverflow\\backend\\co-discovery\\target\\jacoco.exec
 [INFO] 
 [INFO] ----------------< com.campusoverflow:co-discovery-api >-----------------
-[INFO] Building Discovery ÄÚÈİ·¢ÏÖ :: api£¨·¢²¼ÓïÑÔ£© 0.1.0-SNAPSHOT              [22/27]
+[INFO] Building Discovery å†…å®¹å‘ç° :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ 0.1.0-SNAPSHOT              [22/27]
 [INFO]   from co-discovery\co-discovery-api\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -687,7 +687,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] No tests to run.
 [INFO] 
 [INFO] ---------------< com.campusoverflow:co-discovery-domain >---------------
-[INFO] Building Discovery ÄÚÈİ·¢ÏÖ :: domain£¨´¿ Java£© 0.1.0-SNAPSHOT         [23/27]
+[INFO] Building Discovery å†…å®¹å‘ç° :: domainï¼ˆçº¯ Javaï¼‰ 0.1.0-SNAPSHOT         [23/27]
 [INFO]   from co-discovery\co-discovery-domain\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -727,7 +727,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] 
 [INFO] 
 [INFO] ------------< com.campusoverflow:co-discovery-application >-------------
-[INFO] Building Discovery ÄÚÈİ·¢ÏÖ :: application£¨ÓÃÀı±àÅÅ£© 0.1.0-SNAPSHOT      [24/27]
+[INFO] Building Discovery å†…å®¹å‘ç° :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ 0.1.0-SNAPSHOT      [24/27]
 [INFO]   from co-discovery\co-discovery-application\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -773,7 +773,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] 
 [INFO] 
 [INFO] -----------< com.campusoverflow:co-discovery-infrastructure >-----------
-[INFO] Building Discovery ÄÚÈİ·¢ÏÖ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© 0.1.0-SNAPSHOT [25/27]
+[INFO] Building Discovery å†…å®¹å‘ç° :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ 0.1.0-SNAPSHOT [25/27]
 [INFO]   from co-discovery\co-discovery-infrastructure\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -801,7 +801,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] No tests to run.
 [INFO] 
 [INFO] -------------< com.campusoverflow:co-discovery-interfaces >-------------
-[INFO] Building Discovery ÄÚÈİ·¢ÏÖ :: interfaces£¨REST ½Ó¿Ú²ã£© 0.1.0-SNAPSHOT   [26/27]
+[INFO] Building Discovery å†…å®¹å‘ç° :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ 0.1.0-SNAPSHOT   [26/27]
 [INFO]   from co-discovery\co-discovery-interfaces\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -829,7 +829,7 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] No tests to run.
 [INFO] 
 [INFO] ------------------< com.campusoverflow:co-bootstrap >-------------------
-[INFO] Building CampusOverflow :: Bootstrap£¨Æô¶¯×°Åä£© 0.1.0-SNAPSHOT        [27/27]
+[INFO] Building CampusOverflow :: Bootstrapï¼ˆå¯åŠ¨è£…é…ï¼‰ 0.1.0-SNAPSHOT        [27/27]
 [INFO]   from co-bootstrap\pom.xml
 [INFO] --------------------------------[ jar ]---------------------------------
 [INFO] 
@@ -874,31 +874,31 @@ OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader clas
 [INFO] 
 [INFO] CampusOverflow :: Parent ........................... SUCCESS [  0.543 s]
 [INFO] CampusOverflow :: Shared Kernel .................... SUCCESS [  5.387 s]
-[INFO] CampusOverflow :: Identity Éí·İÓëÈÏÖ¤ ................... SUCCESS [  0.007 s]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: api£¨·¢²¼ÓïÑÔ£© ........................ SUCCESS [  0.355 s]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: domain£¨´¿ Java£© ................... SUCCESS [  2.949 s]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: application£¨ÓÃÀı±àÅÅ£© ................ SUCCESS [  4.137 s]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© .......... SUCCESS [  2.062 s]
-[INFO] Identity Éí·İÓëÈÏÖ¤ :: interfaces£¨REST ½Ó¿Ú²ã£© ............. SUCCESS [  1.864 s]
-[INFO] CampusOverflow :: Q&A ÎÊ´ğºËĞÄ ......................... SUCCESS [  0.003 s]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: api£¨·¢²¼ÓïÑÔ£© .............................. SUCCESS [  0.308 s]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: domain£¨´¿ Java£© ......................... SUCCESS [  3.103 s]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: application£¨ÓÃÀı±àÅÅ£© ...................... SUCCESS [  5.169 s]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© ................ SUCCESS [  1.589 s]
-[INFO] Q&A ÎÊ´ğºËĞÄ :: interfaces£¨REST ½Ó¿Ú²ã£© ................... SUCCESS [  1.070 s]
-[INFO] CampusOverflow :: Reputation ÉùÓşÓë¼¤Àø ................. SUCCESS [  0.005 s]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: api£¨·¢²¼ÓïÑÔ£© ...................... SUCCESS [  0.336 s]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: domain£¨´¿ Java£© ................. SUCCESS [  2.850 s]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: application£¨ÓÃÀı±àÅÅ£© .............. SUCCESS [  7.659 s]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© ........ SUCCESS [  1.396 s]
-[INFO] Reputation ÉùÓşÓë¼¤Àø :: interfaces£¨REST ½Ó¿Ú²ã£© ........... SUCCESS [  1.093 s]
-[INFO] CampusOverflow :: Discovery ÄÚÈİ·¢ÏÖ ................... SUCCESS [  0.003 s]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: api£¨·¢²¼ÓïÑÔ£© ........................ SUCCESS [  0.124 s]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: domain£¨´¿ Java£© ................... SUCCESS [  2.305 s]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: application£¨ÓÃÀı±àÅÅ£© ................ SUCCESS [  3.744 s]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: infrastructure£¨³Ö¾Ã»¯ÓëÊÊÅäÆ÷£© .......... SUCCESS [  0.879 s]
-[INFO] Discovery ÄÚÈİ·¢ÏÖ :: interfaces£¨REST ½Ó¿Ú²ã£© ............. SUCCESS [  0.941 s]
-[INFO] CampusOverflow :: Bootstrap£¨Æô¶¯×°Åä£© .................. SUCCESS [ 18.394 s]
+[INFO] CampusOverflow :: Identity èº«ä»½ä¸è®¤è¯ ................... SUCCESS [  0.007 s]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ ........................ SUCCESS [  0.355 s]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: domainï¼ˆçº¯ Javaï¼‰ ................... SUCCESS [  2.949 s]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ ................ SUCCESS [  4.137 s]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ .......... SUCCESS [  2.062 s]
+[INFO] Identity èº«ä»½ä¸è®¤è¯ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ ............. SUCCESS [  1.864 s]
+[INFO] CampusOverflow :: Q&A é—®ç­”æ ¸å¿ƒ ......................... SUCCESS [  0.003 s]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ .............................. SUCCESS [  0.308 s]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: domainï¼ˆçº¯ Javaï¼‰ ......................... SUCCESS [  3.103 s]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ ...................... SUCCESS [  5.169 s]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ ................ SUCCESS [  1.589 s]
+[INFO] Q&A é—®ç­”æ ¸å¿ƒ :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ ................... SUCCESS [  1.070 s]
+[INFO] CampusOverflow :: Reputation å£°èª‰ä¸æ¿€åŠ± ................. SUCCESS [  0.005 s]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ ...................... SUCCESS [  0.336 s]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: domainï¼ˆçº¯ Javaï¼‰ ................. SUCCESS [  2.850 s]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ .............. SUCCESS [  7.659 s]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ ........ SUCCESS [  1.396 s]
+[INFO] Reputation å£°èª‰ä¸æ¿€åŠ± :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ ........... SUCCESS [  1.093 s]
+[INFO] CampusOverflow :: Discovery å†…å®¹å‘ç° ................... SUCCESS [  0.003 s]
+[INFO] Discovery å†…å®¹å‘ç° :: apiï¼ˆå‘å¸ƒè¯­è¨€ï¼‰ ........................ SUCCESS [  0.124 s]
+[INFO] Discovery å†…å®¹å‘ç° :: domainï¼ˆçº¯ Javaï¼‰ ................... SUCCESS [  2.305 s]
+[INFO] Discovery å†…å®¹å‘ç° :: applicationï¼ˆç”¨ä¾‹ç¼–æ’ï¼‰ ................ SUCCESS [  3.744 s]
+[INFO] Discovery å†…å®¹å‘ç° :: infrastructureï¼ˆæŒä¹…åŒ–ä¸é€‚é…å™¨ï¼‰ .......... SUCCESS [  0.879 s]
+[INFO] Discovery å†…å®¹å‘ç° :: interfacesï¼ˆREST æ¥å£å±‚ï¼‰ ............. SUCCESS [  0.941 s]
+[INFO] CampusOverflow :: Bootstrapï¼ˆå¯åŠ¨è£…é…ï¼‰ .................. SUCCESS [ 18.394 s]
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------

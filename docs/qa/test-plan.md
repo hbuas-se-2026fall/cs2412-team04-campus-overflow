@@ -60,7 +60,7 @@
 | --- | --- |
 | T-01～T-05 认证 | `final-test-report.md` 的 281 单测 + `scripts/smoke/`；FlowIT 5 条已在本地 Testcontainers 跑通，CI 最终 HEAD 待补 |
 | T-06～T-08 课程 | `co-identity-application` 11 条 + 前端课程页 |
-| T-09～T-11 前端 | `frontend` Vitest 8 条 + 手工走查截图 |
+| T-09～T-11 前端 | `frontend` Vitest 16 条 + 手工走查截图 |
 | T-12 发布问题 | 已实现；`co-qa-domain` 44 条、`co-qa-application` 56 条 |
 | T-13 CI 检查 | BUG-002 已关闭（PR 触发 CI） |
 | T-14 分支保护 | BUG-003 已关闭（规则集 #27436601） |

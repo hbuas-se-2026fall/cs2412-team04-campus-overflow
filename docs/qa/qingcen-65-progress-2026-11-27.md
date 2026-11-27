@@ -1,6 +1,6 @@
 # 青岑 65 项审计问题 · 修复进度（2026-11-27）
 
-> 基线：`develop` `5a74fb0`；本文件记录本轮修改，push/PR 由青岑手动执行。
+> 起始基线：`develop` `5a74fb0`；合并 `develop` `71ee629`（PR #253）解决 PR #254 冲突。本文件记录本轮修改，push/PR 由青岑手动执行。
 > 口径：已闭环=代码/文档已改并有本地验证；部分完成=已改但仍缺运行截图/CI/最终数据；阻塞=需 Docker、其他机器、其他 owner 或 PO 决策。
 
 ## 一、已闭环（可本地验证）
@@ -47,7 +47,7 @@
 演示重置：docs/qa/logs/reset-demo-account-2026-11-27.log（T2001 1000/0，OPEN 悬赏 EXPIRED）
 悬赏复跑：docs/qa/logs/bounty-smoke-2026-11-27.log（1000/0 → 950/50），截图 docs/scrum/s2-bounty-950-50.png；复跑后已重置回 1000/0
 Q-63 核对：docs/qa/logs/q63-initial-points-check-2026-11-27.log（非零账户缺 marker 0 条）
-前端：npm run typecheck ✅ / npm run test:run ✅ 8 条 / npm run build ✅
+前端：npm run typecheck ✅ / npm run test:run ✅ 16 条（合并 develop 后：errors 8 + BountyDialog 6 + AdminUsersPage 2）/ npm run build ✅
 覆盖率：identity 77.30% / qa 82.57% / reputation 79.53% / discovery 78.49%
 限制：本机路径含中文，JaCoCo 需 -Djacoco.destFile=E:/tmp/...；check-domain-coverage 本地被跳过，CI 仍待跑
 ```

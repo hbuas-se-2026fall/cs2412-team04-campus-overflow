@@ -181,5 +181,6 @@ export const api = {
   }) => request<{ id: number }>('POST', '/v1/admin/users', body),
   changeRole: (userId: number, role: Role) =>
     request<void>('PUT', `/v1/admin/users/${userId}/role`, { role }),
+  /** 禁用违规账号（T4-02）：后端会同时撤销该账号的会话 */
   disableUser: (userId: number) => request<void>('PUT', `/v1/admin/users/${userId}/disable`, {}),
 };

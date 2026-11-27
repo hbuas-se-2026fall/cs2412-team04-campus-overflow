@@ -92,6 +92,13 @@ export function QuestionListPage() {
           )}
         </div>
 
+        {/* 审计 P-52：从课程卡片跳转带进来的 ?courseId= 原先在界面上不可见、也无法清除 */}
+        {courseId !== undefined && (
+          <p className="muted">
+            课程筛选：<b>课程 #{courseId}</b> <Link to="/">清除（回到全部问题）</Link>
+          </p>
+        )}
+
         {activeTag && (
           <p className="muted">
             标签筛选：<b>{activeTag}</b> <button onClick={() => setActiveTag(undefined)}>清除</button>
@@ -127,6 +134,8 @@ export function QuestionListPage() {
                   </span>
                   <span className={q.accepted ? 'accepted' : ''}>
                     <b>{q.answerCount}</b> 回答
+                    {/* 审计 P-54：手册承诺的「已采纳」此前只有样式没有文字，看不见 */}
+                    {q.accepted && <em className="accepted-tag">已采纳</em>}
                   </span>
                   {typeof q.viewCount === 'number' && <span>{q.viewCount} 浏览</span>}
                 </div>
