@@ -98,6 +98,20 @@ export function AdminUsersPage() {
     }
   };
 
+  // 审计 P-56：后端 T4-02 有 disable 接口（禁用并撤销会话），管理页此前没有入口
+  const disableUser = async (user: AdminUser) => {
+    if (!confirm(`禁用后 ${user.displayName} 会立即掉线且无法登录，确定禁用吗？`)) return;
+    setNotice('');
+    setError('');
+    try {
+      await api.disableUser(user.id);
+      setNotice(`已禁用 ${user.displayName}`);
+      reload();
+    } catch (e: unknown) {
+      setError(errorMessage(e));
+    }
+  };
+
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.size)) : 1;
 
   return (
@@ -155,6 +169,7 @@ export function AdminUsersPage() {
                     currentUserId={me?.id}
                     onVerify={verify}
                     onChangeRole={changeRole}
+                    onDisable={disableUser}
                   />
                 ))}
               </tbody>
@@ -192,11 +207,13 @@ function AdminUserRow({
   currentUserId,
   onVerify,
   onChangeRole,
+  onDisable,
 }: {
   user: AdminUser;
   currentUserId?: number;
   onVerify: (user: AdminUser) => Promise<void>;
   onChangeRole: (user: AdminUser, role: Role) => Promise<void>;
+  onDisable: (user: AdminUser) => Promise<void>;
 }) {
   const [role, setRole] = useState<Role>(user.role);
   const [busy, setBusy] = useState(false);
@@ -258,6 +275,9 @@ function AdminUserRow({
                 onClick={() => void run(() => onChangeRole(user, role))}
               >
                 改角色
+              </button>
+              <button className="danger" disabled={busy} onClick={() => void run(() => onDisable(user))}>
+                禁用
               </button>
             </>
           )}

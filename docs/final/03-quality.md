@@ -24,22 +24,31 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 
 | 模块 | 测试数 | 行覆盖率 | 门槛 |
 | --- | ---: | ---: | --- |
-| co-shared-kernel | 2 | — | — |
-| co-identity-domain | 13 | 77.30% | ✅ ≥70% |
-| co-identity-application | 3 | — | — |
-| co-qa-domain | 42 | 81.86% | ✅ |
-| co-qa-api | 8 | — | — |
-| co-qa-application | 45 | — | — |
-| co-qa-infrastructure | 3 | — | — |
-| co-reputation-domain | 20 | 81.93% | ✅ |
-| co-reputation-application | 38 | — | — |
-| co-discovery-domain | 6 | 78.49% | ✅ |
-| co-discovery-application | 19 | — | — |
-| co-bootstrap | 5（ArchUnit 1 + FlowIT 4） | — | 分层约束 + 端到端 |
+| co-shared-kernel | 3 | 17.46% | — |
+| co-identity-domain | 13 | **77.30%** | ✅ ≥70% |
+| co-identity-application | 8 | 20.12% | — |
+| co-identity-infrastructure | 1 | 10.65% | — |
+| co-qa-domain | 39 | **81.86%** | ✅ |
+| co-qa-api | 8 | 0.00%（仅事件契约） | — |
+| co-qa-application | 56 | 94.12% | — |
+| co-qa-infrastructure | 6 | 19.38% | — |
+| co-reputation-domain | 20 | **81.93%** | ✅ |
+| co-reputation-application | 53 | 85.43% | — |
+| co-reputation-infrastructure | 3 | 12.77% | — |
+| co-discovery-domain | 6 | **78.49%** | ✅ |
+| co-discovery-application | 25 | 94.15% | — |
+| co-bootstrap | 8（ArchUnit 1 + EnvironmentGuard 7） | 6.60% | 分层约束 |
+| **合计（surefire，`-DskipITs`）** | **252** | — | — |
+
+> 口径（2026-11-26 重采，审计 P-02/04/10）：上表由 `mvn -B clean verify -DskipITs -Djacoco.skip=false` 实跑后，
+> 从 `**/target/surefire-reports/TEST-*.xml` 与 `**/target/site/jacoco/jacoco.csv` 直接汇总，
+> 脚本化可复现。`CampusOverflowFlowIT` 的 4 个用例由 CI 的「集成测试」阶段单独执行，不在 252 内。
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-> 2026-11-25 CI 全量 **204** 个用例（surefire/failsafe XML 汇总；含 `CampusOverflowFlowIT` 4 个）。此前的 168/174 为 11-18/11-23 的历史批次，已过期。
+> **权威口径（2026-11-26）**：单元测试 **252**（surefire，`-DskipITs`）+ 集成测试 **4**（`CampusOverflowFlowIT`，failsafe）
+> = 全量 **256**；前端组件测试 **6**（Vitest）。此前文档里出现的 165 / 168 / 174 / 204 / 268 / 277 / 281
+> 都是不同日期、不同参数（是否 `-DskipITs`、是否含 failsafe）的历史批次，**不再作为验收口径引用**（审计 P-02/04/10）。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
