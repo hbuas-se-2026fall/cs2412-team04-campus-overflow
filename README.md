@@ -68,31 +68,30 @@ $env:DB_PORT = "3307"
 mvn -pl co-bootstrap -am spring-boot:run
 ```
 
-### 2.3 启动后端（demo profile）
+### 2.3 启动后端（dev + demo profile）
 
 ```bash
 cd backend
 mvn -pl co-bootstrap -am -DskipTests package
-
-# demo profile 不在 application-dev.yml 里，DB 密码与字段密钥必须显式注入，否则启动会失败：
-#   缺 DB_PASSWORD      -> Flyway: Access denied for user 'campus' (using password: NO)
-#   缺 CO_FIELD_KEY     -> FieldEncryptor 构造失败
-# 下面用的是 compose 里的开发默认值，仅本机使用。
-DB_PASSWORD=campus_dev_pwd CO_FIELD_KEY=GB7LwwDgcWpslCMsYtIkTbDrzER+IbjJwhtSu7LPz1I= CO_FIELD_MAC_KEY=ZGV2LW1hYy1rZXktMzItYnl0ZXMtZm9yLWRldi1vayE= java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=demo
+# demo 需要 dev 的默认值（DB 密码、字段密钥），所以两个 profile 一起启用；
+# 只写 --spring.profiles.active=demo 会启动失败：
+#   缺 DB_PASSWORD  -> Flyway: Access denied for user 'campus' (using password: NO)
+#   缺 CO_FIELD_KEY -> FieldEncryptor 构造失败（审计 P-25 记录）
+java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=dev,demo
 ```
 
 > 若 MySQL 容器映射到 3307（见 §2.2 方式二），再加 `DB_PORT=3307`。
 > 审计 P-25 记录：旧版这里只写 `--spring.profiles.active=demo`，照抄会启动失败。
 
 也可以在 IntelliJ 里直接运行 `CampusOverflowApplication`，或用
-`mvn -pl co-bootstrap spring-boot:run -Dspring-boot.run.profiles=demo`
+`mvn -pl co-bootstrap spring-boot:run -Dspring-boot.run.profiles=dev,demo`
 （后者要求依赖已经在本地 Maven 仓库中）。
 
 - 后端：<http://localhost:8080>
 - Swagger：<http://localhost:8080/swagger-ui.html>
 - 健康检查：<http://localhost:8080/actuator/health>
 
-`demo` profile 会由 `DemoDataSeeder` 写入演示账号、课程、问题和悬赏；重复启动会跳过已存在的数据。
+`demo` profile 会由 `DemoDataSeeder` 写入演示账号、课程、问题和悬赏；重复启动会跳过已存在的数据。必须同时启用 `dev` 以加载本地数据库密码与字段密钥默认值，或显式注入 `DB_PASSWORD`/`CO_FIELD_KEY`/`CO_FIELD_MAC_KEY`。
 如果只想启动空库，把 profile 换成 `dev`。
 
 ### 2.4 启动前端

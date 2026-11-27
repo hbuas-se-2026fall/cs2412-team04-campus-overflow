@@ -8,6 +8,7 @@ import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerEndorsedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.CommentPostedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.reputation.api.event.BadgeAwardedEvent;
 import com.campusoverflow.reputation.api.event.BountyAwardedEvent;
 import java.time.Instant;
@@ -47,6 +48,31 @@ class NotificationProjectorTest {
         assertThat(list.get(0).type()).isEqualTo(NotificationType.ANSWER_RECEIVED);
         assertThat(list.get(0).title()).contains("小红", "回答了你的问题");
         assertThat(list.get(0).link()).isEqualTo("/questions/7");
+    }
+
+    @Test
+    void deletingQuestionRemovesExistingNotifications() {
+        AnswerSubmittedEvent event = new AnswerSubmittedEvent("e-before-delete", NOW, 50, 7, 2, 1,
+                "红黑树插入后为什么必须旋转？");
+        projector.on(event);
+        assertThat(notifications.all()).isNotEmpty();
+
+        projector.on(new ContentDeletedEvent("e-delete", NOW.plusSeconds(1), "QUESTION", 7, 7));
+
+        assertThat(notifications.all()).isEmpty();
+    }
+
+    @Test
+    void deletedQuestionDoesNotNotify() {
+        NotificationTestFixtures.StubQa deleted = new NotificationTestFixtures.StubQa()
+                .withDeletedQuestion(7, 1, "已删除的问题标题");
+        NotificationProjector p = new NotificationProjector(notifications, identity, deleted);
+        AnswerSubmittedEvent event = new AnswerSubmittedEvent("e-deleted", NOW, 50, 7, 2, 1,
+                "已删除的问题标题");
+
+        p.on(event);
+
+        assertThat(notifications.all()).isEmpty();
     }
 
     @Test

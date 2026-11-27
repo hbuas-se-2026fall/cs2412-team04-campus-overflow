@@ -48,7 +48,7 @@
 | --- | --- | --- |
 | S0/S1 发布没有打 tag | S4 前补齐 v0.1.0～v0.3.0，并固化「发布 PR + tag + Release Notes」 | [`docs/reports/release-v0.2.0-v0.3.0.md`](../reports/release-v0.2.0-v0.3.0.md) |
 | 环境证据只有 2/5 | 采集脚本 + 统一归档，**5/5 已齐**（刘俊琒 #159 补拍后收口） | [`docs/lab1-submission/env-matrix.md`](../lab1-submission/env-matrix.md) |
-| CI 被重复 workflow 与额度拖累 | 删除重复 `ci.yaml`、仓库转 Public、固定 `SPRINT_MODULES` | `sprint-2.md` §五 |
+| CI 被重复 workflow 与额度拖累 | 删除重复 `ci.yaml`、仓库转 Public；渐进期临时固定 `SPRINT_MODULES`，**2026-11-18 已删除并恢复全量 `mvn test`/`mvn verify`** | `sprint-2.md` §五、`docs/notes/architecture.md` |
 | 缺陷台账状态过期 | 每次评审前复核并关闭已修复项 | [`docs/qa/defects.md`](../qa/defects.md) |
 | S3 与 S2/S4 交叠，未逐日站会、无计划会纪要 | 压缩执行时改为「开工同步 + 收口同步」两次固定节点，站会记录按当日合并 PR 回填（只记可查证事实，不补写发言） | [`sprint-3.md`](../scrum/sprint-3.md) §四 |
 | 48 条 Issue 的验收清单是模板文本、从未逐条勾选，Issue 状态与交付脱节 | 交付以 PR 合并为准；v1.0.0 发布后统一同步 Issue（刘俊琒执行，T4-06 决策见 [`s4-deferred-items-decision.md`](../reports/s4-deferred-items-decision.md)）。**状态只由 Issue 的 open/closed + `state_reason` 表达**：`status:done` / `status:backlog` 整族标签已停用（2026-11-17 从所有 Issue 上摘除；标签定义仍留在仓库 Labels 里未删，见 board-sync §二），看板列由 Projects 内置工作流按关闭事件流转，从机制上消除"已关闭却挂 backlog"的错位。**新增规约（v1.1 起执行）：关闭 Issue 的前提是有一条带 PR 编号的证据评论**——本次复核发现 48 条中有 28 条（#27–#32、#35–#56）没有任何评论，只能靠 PR 列表回溯 | [`product-backlog.md`](../backlog/product-backlog.md) S4 未交付项、[`board-sync-2026-11-17.md`](../backlog/board-sync-2026-11-17.md) §二 |

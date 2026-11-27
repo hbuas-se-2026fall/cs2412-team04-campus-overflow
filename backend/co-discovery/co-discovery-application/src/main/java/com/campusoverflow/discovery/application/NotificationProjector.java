@@ -12,6 +12,7 @@ import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerEndorsedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.CommentPostedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.reputation.api.event.BadgeAwardedEvent;
 import com.campusoverflow.reputation.api.event.BountyAwardedEvent;
 import com.campusoverflow.shared.security.Role;
@@ -38,7 +39,7 @@ public class NotificationProjector {
     @EventListener
     @Transactional
     public void on(AnswerSubmittedEvent e) {
-        if (e.answerAuthorId() == e.questionAuthorId()) {
+        if (!questionVisible(e.questionId()) || e.answerAuthorId() == e.questionAuthorId()) {
             return;
         }
         notify(e.questionAuthorId(), NotificationType.ANSWER_RECEIVED,
@@ -49,7 +50,7 @@ public class NotificationProjector {
     @EventListener
     @Transactional
     public void on(AnswerAcceptedEvent e) {
-        if (e.acceptedById() == e.answerAuthorId()) {
+        if (!questionVisible(e.questionId()) || e.acceptedById() == e.answerAuthorId()) {
             return;
         }
         notify(e.answerAuthorId(), NotificationType.ANSWER_ACCEPTED,
@@ -60,7 +61,7 @@ public class NotificationProjector {
     @EventListener
     @Transactional
     public void on(AnswerEndorsedEvent e) {
-        if (e.endorserId() == e.answerAuthorId()) {
+        if (!questionVisible(e.questionId()) || e.endorserId() == e.answerAuthorId()) {
             return;
         }
         notify(e.answerAuthorId(), NotificationType.ANSWER_ENDORSED,
@@ -77,6 +78,10 @@ public class NotificationProjector {
         }
         String who = name(e.authorId());
         QuestionRef question = qa.findQuestion(e.questionId()).orElse(null);
+        if (question != null && question.deleted()) {
+            // 问题已删除：不再把标题和 404 链接发给被提及者。
+            return;
+        }
         Long courseId = question == null ? null : question.courseId();
         String title = question == null ? "一个问题" : question.title();
         for (String displayName : mentioned) {
@@ -99,6 +104,9 @@ public class NotificationProjector {
     @EventListener
     @Transactional
     public void on(BountyAwardedEvent e) {
+        if (!questionVisible(e.questionId())) {
+            return;
+        }
         notify(e.winnerId(), NotificationType.BOUNTY_AWARDED,
                 "恭喜！你获得《" + questionTitle(e.questionId()) + "》的悬赏 " + e.points() + " 分",
                 "/questions/" + e.questionId(), e.eventId(), e.occurredAt());
@@ -131,6 +139,20 @@ public class NotificationProjector {
 
     /** 评论事件与悬赏事件不带标题，回查问答上下文的发布语言。 */
     private String questionTitle(long questionId) {
-        return qa.findQuestion(questionId).map(QuestionRef::title).orElse("一个问题");
+        return qa.findQuestion(questionId).filter(question -> !question.deleted())
+                .map(QuestionRef::title).orElse("一个问题");
+    }
+
+    private boolean questionVisible(long questionId) {
+        return qa.findQuestion(questionId).filter(question -> !question.deleted()).isPresent();
+    }
+
+    /** 问题删除后清理已存在的通知；顺序消费下 AnswerSubmitted 通知可能已先落库。 */
+    @EventListener
+    @Transactional
+    public void on(ContentDeletedEvent e) {
+        if ("QUESTION".equalsIgnoreCase(e.targetType())) {
+            notifications.deleteByQuestionId(e.targetId());
+        }
     }
 }

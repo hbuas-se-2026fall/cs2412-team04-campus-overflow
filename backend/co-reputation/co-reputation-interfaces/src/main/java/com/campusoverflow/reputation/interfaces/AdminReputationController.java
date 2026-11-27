@@ -24,4 +24,10 @@ public class AdminReputationController {
     public List<ReconciliationService.Mismatch> reconcile() {
         return reconciliation.reconcile();
     }
+
+    @Operation(summary = "立即执行积分对账（frozen_points vs OPEN 悬赏）")
+    @GetMapping("/reconciliation/points")
+    public List<ReconciliationService.PointsMismatch> reconcilePoints() {
+        return reconciliation.reconcilePoints();
+    }
 }

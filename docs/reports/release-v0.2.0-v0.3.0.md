@@ -12,6 +12,8 @@
 | v0.2.0 | `v0.2.0`（annotated） | `a381bb8`（S1 收尾，2026-11-12） | develop 历史（S1 发布 PR 当时跳过，本 tag 补打） | 后端 ✅、前端 ✅、镜像 ⏭ skipped | 通过 |
 | v0.3.0 | `v0.3.0`（annotated） | `a4114dc`（PR #115 合入 main，2026-11-16） | **main** | 后端 ✅、前端 ✅、容器镜像 ✅ | 通过 |
 
+三个 tag 均为 **2026-11-16 统一补打**；v0.1.0/v0.2.0 是追溯基线（v0.2.0 不在 main），不是当时正常发布的版本。
+
 CI 检查页：
 
 - v0.2.0：<https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/commit/a381bb8/checks>

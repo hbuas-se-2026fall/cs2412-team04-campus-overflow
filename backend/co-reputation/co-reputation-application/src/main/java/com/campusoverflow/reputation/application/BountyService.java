@@ -9,6 +9,7 @@ import com.campusoverflow.reputation.api.event.BountyClosedEvent;
 import com.campusoverflow.reputation.api.event.BountyOpenedEvent;
 import com.campusoverflow.reputation.domain.Bounty;
 import com.campusoverflow.reputation.domain.BountyRepository;
+import com.campusoverflow.reputation.domain.BountyStatus;
 import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
@@ -78,13 +79,14 @@ public class BountyService {
 
     @Transactional
     public long open(Actor actor, long questionId, int points, int days) {
-        QuestionRef question = qa.findQuestion(questionId)
+        // 锁问题行：与采纳/删除问题串行化，避免“校验通过后又发生采纳/删除”仍开出 OPEN 悬赏。
+        QuestionRef question = qa.findQuestionForUpdate(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
 
         // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，与 docs/final/user-guide.md
         // 「发起悬赏需要教师/助教且必须是该课程的问题」保持一致。
-        // 公开问题（courseId == null）没有课程归属，而 canManageCourse(userId, null) 会对任意
-        // 全局 TEACHER 返回 true（等于放开给全校教师），与文档矛盾且无法审计归属。
+        // 公开问题（courseId == null）没有课程归属，无法审计“哪位教师负责”，
+        // 因此即使 canManageCourse 对 ADMIN 返回 true，也一律拒绝发起悬赏。
         if (question.courseId() == null) {
             throw new BusinessRuleException("REP-1007", "公开问题不能发起悬赏，请选择所属课程的问题");
         }
@@ -115,8 +117,9 @@ public class BountyService {
     }
 
     /** 由 AnswerAccepted 事件触发（在处理器事务内）。幂等：悬赏已结束则直接返回。 */
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void settleOnAccept(long questionId, long answerId, long winnerId, String sourceEventId) {
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void settleOnAccept(long questionId, long answerId, long winnerId, long questionAuthorId,
+                               long acceptedById, Instant acceptedAt, String sourceEventId) {
         Optional<Bounty> found = bounties.findOpenByQuestion(questionId);
         if (found.isEmpty()) {
             return;
@@ -126,14 +129,34 @@ public class BountyService {
                 .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
         Instant now = clock.instant();
 
-        // 已到期但定时任务尚未处理：采纳不能再发奖，按到期规则退款。
-        if (bounty.isDue(now)) {
+        // 旧采纳事件/重放保护：事件发生时间早于本悬赏创建时间，或问题当前采纳的不是本回答，
+        // 都不能把新悬赏发给旧/已删除回答的作者。
+        if (acceptedAt.isBefore(bounty.createdAt())) {
+            return;
+        }
+        QuestionRef current = qa.findQuestion(questionId).orElse(null);
+        if (current == null || current.deleted()
+                || (current.acceptedAnswerId() != null && current.acceptedAnswerId() != answerId)
+                // 管理者删除已采纳回答会释放采纳关系（acceptedAnswerId 变回 null）；
+                // 此时迟到的采纳事件不能再把悬赏发给已删除回答的作者。
+                || !qa.hasVisibleAcceptedAnswer(questionId)) {
+            return;
+        }
+
+        // 用“采纳事件发生时间”判断是否到期，而不是事件被消费的时间：
+        // 采纳发生在到期前、只是 outbox 积压到到期后才处理时，仍应发奖。
+        if (bounty.isDue(acceptedAt)) {
             closeAndRefund(bounty, sponsor, now);
             return;
         }
 
         // 自己的回答获得采纳：悬赏作废，冻结积分退回，不进入声誉流水。
         if (winnerId == bounty.sponsorId()) {
+            closeAndRefund(bounty, sponsor, now);
+            return;
+        }
+        // 防自问自答领奖：提问者采纳自己的回答，或采纳操作者自己就是获奖回答作者，均退款。
+        if (winnerId == questionAuthorId || acceptedById == winnerId) {
             closeAndRefund(bounty, sponsor, now);
             return;
         }
@@ -161,31 +184,58 @@ public class BountyService {
         Instant now = clock.instant();
         List<Bounty> due = bounties.findDue(now, 100);
         int closed = 0;
-        for (Bounty bounty : due) {
+        for (Bounty snapshot : due) {
             try {
-                if (expiryTx == null) {
-                    expireOne(bounty, now);
-                } else {
-                    expiryTx.executeWithoutResult(status -> expireOne(bounty, now));
+                boolean done = expiryTx == null
+                        ? expireOne(snapshot.id(), now)
+                        : Boolean.TRUE.equals(expiryTx.execute(status -> expireOne(snapshot.id(), now)));
+                if (done) {
+                    closed++;
                 }
-                closed++;
             } catch (BusinessRuleException | NotFoundException e) {
-                log.warn("悬赏 {} 到期处理跳过：{}", bounty.id(), e.getMessage());
+                log.warn("悬赏 {} 到期处理跳过：{}", snapshot.id(), e.getMessage());
             } catch (RuntimeException e) {
-                log.error("悬赏 {} 到期处理失败，下一轮重试", bounty.id(), e);
+                log.error("悬赏 {} 到期处理失败，下一轮重试", snapshot.id(), e);
             }
         }
         return closed;
     }
 
-    private void expireOne(Bounty bounty, Instant now) {
-        ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
-                .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
-        closeAndRefund(bounty, sponsor, now);
+    /**
+     * 必须在独立事务内按 id 重读并加锁，不能使用 findDue 返回的事务外快照：
+     * 否则并发采纳已经关闭/发放的悬赏会被旧快照二次退款并覆盖状态。
+     */
+    private boolean expireOne(long bountyId, Instant now) {
+        Optional<Bounty> found = bounties.findByIdForUpdate(bountyId);
+        if (found.isEmpty()) {
+            return false;
+        }
+        Bounty bounty = found.get();
+        if (bounty.status() != BountyStatus.OPEN || !bounty.isDue(now)) {
+            return false;
+        }
+        // 锁问题行：与 AnswerCommandService.accept 使用同一把锁。否则“查到没有采纳 → 退款提交”
+        // 之间并发 accept 已提交时，会把本应发给回答者的悬赏退掉，且结算事件之后找不到 OPEN 悬赏。
+        qa.findQuestionForUpdate(bounty.questionId());
+        // 采纳事件可能已发生但尚在 outbox：问题已有可见采纳回答时先不退款，
+        // 让 AnswerAcceptedEvent 按“采纳优先”结算。若事件已死信，需要人工重放（本方法不会永久重试）。
+        if (qa.hasVisibleAcceptedAnswer(bounty.questionId())) {
+            return false;
+        }
+        Optional<ReputationAccount> sponsor = accounts.findByUserId(bounty.sponsorId());
+        if (sponsor.isEmpty()) {
+            // 发起人账户已丢失（历史脏数据/人工清理）：无法退款，但必须把悬赏关闭，
+            // 否则它会永远停在 OPEN 并占住到期批次的前 100 条。
+            log.error("悬赏 {} 的发起人账户 {} 不存在，关闭悬赏但不退款", bounty.id(), bounty.sponsorId());
+            closeWithoutRefund(bounty, now);
+            return true;
+        }
+        closeAndRefund(bounty, sponsor.get(), now);
+        return true;
     }
 
     /** 问题被删除时关闭其进行中的悬赏并退款；幂等，没有 OPEN 悬赏时无操作。 */
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void closeForDeletedQuestion(long questionId) {
         bounties.findOpenByQuestion(questionId).ifPresent(bounty -> {
             ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
@@ -232,5 +282,15 @@ public class BountyService {
                 bounty.sponsorId(), bounty.points()));
         audit.record("BOUNTY_CLOSE", null, "BOUNTY", String.valueOf(saved.id()),
                 "question=" + bounty.questionId() + ",refunded=" + bounty.points());
+    }
+
+    /** 发起人账户缺失时只关闭悬赏，不退款（没有账户可退）；审计里明确记 refunded=0。 */
+    private void closeWithoutRefund(Bounty bounty, Instant now) {
+        bounty.close(now);
+        Bounty saved = bounties.save(bounty);
+        events.publish(new BountyClosedEvent(EventIds.next(), now, saved.id(), bounty.questionId(),
+                bounty.sponsorId(), 0));
+        audit.record("BOUNTY_CLOSE", null, "BOUNTY", String.valueOf(saved.id()),
+                "question=" + bounty.questionId() + ",refunded=0,sponsorMissing");
     }
 }

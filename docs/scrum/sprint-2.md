@@ -96,7 +96,7 @@ bounty        : status=AWARDED, points=50
 === All checks passed ===
 ```
 
-到期退款（把 expires_at 改成过去，定时任务每 2 秒扫描）：
+到期退款（把 `expires_at` 改成过去；此处是当时为验收临时设置 `co.reputation.bounty-expiry-interval-ms=2000` 的扫描节奏，当前默认 5 分钟，见 `application.yml`）：
 
 ```text
 到期前：available=950,  frozen=50, bounty=OPEN

@@ -149,6 +149,11 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public Optional<Bounty> findByIdForUpdate(long id) {
+        return bounties.findByIdForUpdate(id).map(ReputationPersistenceAdapter::toDomain);
+    }
+
+    @Override
     public Optional<Bounty> findLatestByQuestion(long questionId) {
         return bounties.findFirstByQuestionIdOrderByIdDesc(questionId).map(ReputationPersistenceAdapter::toDomain);
     }
@@ -158,6 +163,15 @@ public class ReputationPersistenceAdapter
         return bounties.findByStatusAndExpiresAtLessThanEqualOrderByExpiresAt(BountyStatus.OPEN.name(), now,
                         org.springframework.data.domain.PageRequest.of(0, limit)).stream()
                 .map(ReputationPersistenceAdapter::toDomain).toList();
+    }
+
+    @Override
+    public Map<Long, Long> sumOpenPointsBySponsor() {
+        Map<Long, Long> result = new HashMap<>();
+        for (Object[] row : bounties.sumPointsByStatus(BountyStatus.OPEN.name())) {
+            result.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+        }
+        return result;
     }
 
     @Override

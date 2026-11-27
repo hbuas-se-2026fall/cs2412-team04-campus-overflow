@@ -40,6 +40,14 @@ public class ReputationAccount {
         reputation += delta;
     }
 
+    /** 发放初始可用积分；只由注册事件（事件 ID 幂等）调用。 */
+    public void grantAvailablePoints(int points) {
+        if (points < 0) {
+            throw new BusinessRuleException("REP-1006", "初始积分不能为负数");
+        }
+        availablePoints += points;
+    }
+
     public void freezePoints(int points) {
         requirePositive(points);
         if (points > availablePoints) {

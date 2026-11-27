@@ -9,7 +9,8 @@ public interface SearchIndex {
 
     void insert(SearchDocument document);
 
-    void updateText(long questionId, String title, String bodyText, List<String> tags, Instant at);
+    /** @return 受影响行数；0 表示投影缺失，调用方可用事件内容重建。 */
+    int updateText(long questionId, String title, String bodyText, List<String> tags, Instant at);
 
     void adjustAnswerCount(long questionId, int delta, Instant at);
 

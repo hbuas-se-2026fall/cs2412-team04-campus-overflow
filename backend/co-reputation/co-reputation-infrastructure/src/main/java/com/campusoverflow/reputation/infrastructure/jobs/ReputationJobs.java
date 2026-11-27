@@ -19,11 +19,13 @@ public class ReputationJobs {
     private final BountyService bounties;
     private final ReconciliationService reconciliation;
     private final AtomicInteger mismatches;
+    private final AtomicInteger pointsMismatches;
 
     public ReputationJobs(BountyService bounties, ReconciliationService reconciliation, MeterRegistry registry) {
         this.bounties = bounties;
         this.reconciliation = reconciliation;
         this.mismatches = registry.gauge("co_reputation_mismatches", new AtomicInteger(0));
+        this.pointsMismatches = registry.gauge("co_reputation_points_mismatches", new AtomicInteger(0));
     }
 
     @Scheduled(fixedDelayString = "${co.reputation.bounty-expiry-interval-ms:300000}")
@@ -39,11 +41,14 @@ public class ReputationJobs {
             initialDelayString = "${co.reputation.reconcile-initial-delay-ms:15000}")
     public void reconcile() {
         List<ReconciliationService.Mismatch> result = reconciliation.reconcile();
+        List<ReconciliationService.PointsMismatch> points = reconciliation.reconcilePoints();
         mismatches.set(result.size());
-        if (result.isEmpty()) {
-            log.info("声誉对账通过：余额与流水一致");
+        pointsMismatches.set(points.size());
+        if (result.isEmpty() && points.isEmpty()) {
+            log.info("对账通过：声誉=流水，冻结积分=OPEN 悬赏");
         } else {
-            log.error("声誉对账发现 {} 个不一致账户: {}", result.size(), result);
+            log.error("对账发现 {} 个声誉不一致、{} 个积分不一致: {} / {}",
+                    result.size(), points.size(), result, points);
         }
     }
 }

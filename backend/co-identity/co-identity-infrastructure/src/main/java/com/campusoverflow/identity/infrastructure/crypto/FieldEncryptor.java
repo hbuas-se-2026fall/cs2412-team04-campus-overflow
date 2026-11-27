@@ -41,6 +41,9 @@ public class FieldEncryptor {
         if (mac.length != 32) {
             throw new IllegalStateException("co.security.field-mac-key 必须是 Base64 编码的 32 字节密钥");
         }
+        if (Arrays.equals(key, mac)) {
+            throw new IllegalStateException("字段加密 AES 密钥与 HMAC 密钥不能相同");
+        }
         this.aesKey = new SecretKeySpec(key, "AES");
         this.macKey = new SecretKeySpec(mac, "HmacSHA256");
     }

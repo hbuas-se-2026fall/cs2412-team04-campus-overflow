@@ -123,6 +123,11 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public Optional<Long> findQuestionId(long answerId) {
+            return Optional.ofNullable(store.get(answerId)).map(Answer::questionId);
+        }
+
+        @Override
         public Answer save(Answer answer) {
             if (answer.id() == null) {
                 answer.assignId(sequence.incrementAndGet());
@@ -284,6 +289,14 @@ public final class QaTestFixtures {
         @Override
         public void adjustUsage(Collection<String> tagNames, int delta) {
             tagNames.forEach(name -> {
+                adjustments.add((delta > 0 ? "+" : "") + delta + ":" + name);
+                usage.merge(name, delta, Integer::sum);
+            });
+        }
+
+        @Override
+        public void adjustDeltas(java.util.Map<String, Integer> deltas) {
+            deltas.forEach((name, delta) -> {
                 adjustments.add((delta > 0 ? "+" : "") + delta + ":" + name);
                 usage.merge(name, delta, Integer::sum);
             });

@@ -19,9 +19,10 @@
 
 | 上游 → 下游 | 关系类型 | 集成方式 |
 |---|---|---|
-| Identity → Q&A / Reputation / Discovery | OHS/PL | 同步 `IdentityApi`；异步 `UserRegisteredEvent`；只暴露 `UserSummary`，下游各自 ACL 转换 |
-| Q&A → Reputation | 事件驱动 + 查询契约 | `AnswerSubmitted / AnswerAccepted / VoteCast` 事件；`QaQueryApi.findQuestion` 查询问题引用 |
-| Q&A → Discovery | 事件驱动 | `QuestionPosted / QuestionEdited / AnswerSubmitted / VoteCast / CommentPosted / ContentDeleted / AnswerAccepted` |
+| Identity → Q&A / Discovery | OHS/PL | 同步 `IdentityApi`；只暴露 `UserSummary`，下游各自 ACL 转换 |
+| Identity → Reputation | 事件 + 查询契约 | 异步 `UserRegisteredEvent`（开立账户/初始积分）；同步 `IdentityApi` 查用户 |
+| Q&A → Reputation | 事件驱动 + 查询契约 | `AnswerSubmitted / AnswerAccepted / AnswerEndorsed / VoteCast / ContentDeleted`；`QaQueryApi.findQuestion` 查询问题引用 |
+| Q&A → Discovery | 事件驱动 | `QuestionPosted / QuestionEdited / AnswerSubmitted / VoteCast / CommentPosted / ContentDeleted / AnswerAccepted / AnswerEndorsed` |
 | Reputation → Discovery | 事件驱动 | `BountyOpened / BountyAwarded / BountyClosed / BadgeAwarded` |
 | 全部上下文 → Shared Kernel | 共享内核 | 依赖 `co-shared-kernel`；修改需全组评审 |
 

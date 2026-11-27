@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -57,6 +58,9 @@ public class QuestionQueryService {
      * <p>课程问题仅课程成员可见；公开问题（course_id 为空）始终可见。未登录用户只看公开问题。
      * 缓存 key 带 viewerId，避免把某成员可见的课程列表返回给未加入课程的人。</p>
      */
+    // READ_COMMITTED：identity.courseIdsOfUser 是本事务第一条 SQL；若沿用 RR 快照，
+    // 在 cache.get 读到新代际后仍可能把旧快照写进新代际，污染 75 秒缓存。
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public PageResult<QuestionSummaryView> list(Long courseId, PageRequest page, Actor viewerOrNull) {
         boolean allCourses = viewerOrNull != null && viewerOrNull.isAdmin();
         Set<Long> visibleCourseIds = viewerOrNull == null

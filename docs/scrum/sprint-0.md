@@ -71,7 +71,7 @@
 | 1 | 组织仓库 + develop/main 分支保护（不允许绕过） | `docs/lab1-submission/screenshots/branch-protection.png`、PR #13；API 核验见 [lab1 README 第 1 节](../lab1-submission/README.md) | ✅ |
 | 2 | Issue/PR 模板 + CODEOWNERS + 看板四列 | `.github/`（PR #23）、`docs/lab1-submission/screenshots/lab1-board.png` | ✅ |
 | 3 | 团队章程、角色承诺书、团队约定、DoR/DoD | `docs/team/charter-v1.0.md`、`role-commitment.md`（5 人签署 2026-10-26）、PR #24 | ✅ |
-| 4 | DDD 文档：事件风暴 30 事件 / 4 上下文、上下文映射、词汇表 | `docs/ddd/event-storming.png`、`events.md`、`context-map.md`、`glossary.md`、PR #17/#18 | ✅ |
+| 4 | DDD 文档：事件风暴（S0 当时为 30 事件，2026-11-25 已修订为 14 个实际事件）/ 4 上下文、上下文映射、词汇表 | `docs/ddd/event-storming.png`、`events.md`、`context-map.md`、`glossary.md`、PR #17/#18 | ✅ |
 | 5 | 架构理解笔记 | `docs/notes/architecture.md`；T0-05 讲解分工见其第 8 节 | ✅ |
 | 6 | 渐进式 CI 门禁 + ADR-009 | `.github/workflows/ci.yml`、`docs/adr/009-渐进式质量门禁.md` | ✅ |
 | 7 | Product Backlog（48 PBI）与 Sprint 1 DoR | `docs/backlog/product-backlog.md`、Projects 看板 | ✅ |
@@ -104,3 +104,10 @@
 - ADR-009：`docs/adr/009-渐进式质量门禁.md`
 - CI：`.github/workflows/ci.yml`
 - 版本标签：`v0.1.0` → `704cd60`
+
+## 七、Scrum 事件说明（2026-11-27 补记）
+
+- S0 未生成燃尽图：启动周以 Lab 1 清单与环境矩阵作为进度证据；
+- 每日站会未达到每周 ≥3 次：S0 以群内异步同步与周五收尾会替代，未留逐日站会记录；
+- 未单独执行 Sprint Review/Retrospective：验收并入 S0 收尾会（§四）与回顾行动项（§五）。
+- 以上按 V3 9.4 明确记录为“未执行 + 原因”，不补造记录。

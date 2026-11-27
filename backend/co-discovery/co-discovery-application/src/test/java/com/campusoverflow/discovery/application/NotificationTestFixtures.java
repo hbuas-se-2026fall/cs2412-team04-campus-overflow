@@ -67,6 +67,14 @@ final class NotificationTestFixtures {
         }
 
         @Override
+        public int deleteByQuestionId(long questionId) {
+            String link = "/questions/" + questionId;
+            int before = store.size();
+            store.values().removeIf(n -> link.equals(n.link()));
+            return before - store.size();
+        }
+
+        @Override
         public int markAllRead(long recipientId) {
             int updated = 0;
             for (Notification n : store.values()) {
@@ -156,6 +164,11 @@ final class NotificationTestFixtures {
 
         StubQa withPublicQuestion(long id, long authorId, String title) {
             questions.put(id, new QuestionRef(id, authorId, null, title, null, false));
+            return this;
+        }
+
+        StubQa withDeletedQuestion(long id, long authorId, String title) {
+            questions.put(id, new QuestionRef(id, authorId, 100L, title, null, true));
             return this;
         }
 

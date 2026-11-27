@@ -16,11 +16,11 @@ Identity → Q&A → Reputation → Discovery
 | 2 | `QuestionPostedEvent` | 问题已发布 | Q&A | Question | Discovery 插入搜索投影 |
 | 3 | `QuestionEditedEvent` | 问题已编辑 | Q&A | Question | Discovery 更新投影标题/正文/标签 |
 | 4 | `AnswerSubmittedEvent` | 回答已提交 | Q&A | Answer | Discovery 回答数 +1、通知提问者；Reputation 检查徽章 |
-| 5 | `AnswerAcceptedEvent` | 回答已采纳 | Q&A | Question | Reputation +15、徽章、悬赏结算；Discovery 标记已采纳、通知回答者 |
+| 5 | `AnswerAcceptedEvent` | 回答已采纳 | Q&A | Question | Reputation +15（自答 +0，不写流水）、徽章、悬赏结算；Discovery 标记已采纳、通知回答者 |
 | 6 | `AnswerEndorsedEvent` | 回答已认证 | Q&A | Answer | Reputation 名师认可；Discovery 通知回答者 |
-| 7 | `VoteCastEvent` | 投票已投出/变更 | Q&A | Vote | Reputation 按新旧值差计分（受日上限）；Discovery 同步得分 |
+| 7 | `VoteCastEvent` | 投票已投出/变更 | Q&A | Vote | Reputation 按**实际入账值**回滚/计分（受日上限；被截断的赞撤销时不倒扣）；Discovery 同步**问题**得分（回答得分不在搜索投影中） |
 | 8 | `CommentPostedEvent` | 评论已发布 | Q&A | Comment | Discovery 解析 @提及并通知 |
-| 9 | `ContentDeletedEvent` | 内容已删除 | Q&A | Question / Answer | Discovery 标记投影删除、回答数 -1；已采纳回答删除时清除 accepted |
+| 9 | `ContentDeletedEvent` | 内容已删除 | Q&A | Question / Answer | Discovery 标记投影删除、回答数 -1；删除问题（QUESTION）时同时删除指向该问题的站内通知，并让 Reputation 关闭 OPEN 悬赏并退款；已采纳回答删除时清除 accepted |
 | 10 | `ReputationChangedEvent` | 声誉已变更 | Reputation | ReputationAccount | Reputation 内部排行榜更新周/月/学期 ZSET |
 | 11 | `BadgeAwardedEvent` | 徽章已授予 | Reputation | Badge | Discovery 通知获得者 |
 | 12 | `BountyOpenedEvent` | 悬赏已发起 | Reputation | Bounty | Discovery 维护“悬赏中”标记 |
