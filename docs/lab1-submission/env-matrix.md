@@ -107,7 +107,9 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | 魏志国 | ❌ 红（预期） | `co-discovery-domain`：`TODO(S3)：SearchQuery.terms / RelatedQuestionPolicy 尚未实现`（S3 未开工的 TDD 桩）；1 失败 2 错误 | ✅ shared-kernel 2、identity 9、qa-domain 42、qa-application 32、reputation 36，共 121 条全绿 | [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log)、[`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
 | 陈明哲 | ✅ 全绿（CI 全量） | 无 | ✅ CI 全量 268 用例（264 单测 + FlowIT 4，run 45742927110）；`P5` 修复分支本地 277 单测，新的 CI run 待补 | [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) + [`screenshots/mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png) |
 | 刘俊琒 | ✅ 全绿（S4 收口后） | 无 | ✅ 27 个模块、165 个用例全绿 | [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) + [`screenshots/mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) |
-| 青岑 | ✅ QA 两模块绿（42+32） | 无 | ✅ `co-qa-domain` 42、`co-qa-application` 32 | [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
+| 青岑 | ✅ QA 两模块绿（交付时 42+32） | 无 | ✅ 交付时 `co-qa-domain` 42、`co-qa-application` 32；2026-11-27 当前为 44、56 | [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
+
+> 上表是 **Lab1 交付时快照**，不是当前状态：`TODO(S2)`/`TODO(S3)` 桩已实现，全仓 2026-11-27 为 281 单测 + 5 FlowIT，见 [`final-test-report.md`](../qa/final-test-report.md)。保留历史失败口径仅用于说明当时的红/绿证据。
 
 ---
 

@@ -17,7 +17,7 @@
 | 提交回答 | SubmitAnswer | 用户针对问题提交回答 | 问答上下文(co-qa) |
 | 编辑问题 | EditQuestion | 修改已发布问题内容 | 问答上下文(co-qa) |
 | 编辑回答 | EditAnswer | 修改已提交回答内容 | 问答上下文(co-qa) |
-| 删除问题 | DeleteQuestion | 软删除问题；已删除问题统一 404 | 问答上下文(co-qa) |
+| 删除问题 | DeleteQuestion | 软删除问题；已删除问题统一 404；已删除问题上发起悬赏按业务规则拒绝（`REP-1001`/`REP-1007`） | 问答上下文(co-qa) |
 | 删除回答 | DeleteAnswer | 软删除回答；已采纳回答由管理者删除时释放采纳关系 | 问答上下文(co-qa) |
 | 声誉 | Reputation | 用户由互动行为累计的整数分；允许为负，等于账本流水之和 | 声誉上下文(co-reputation) |
 | 声誉流水 | LedgerEntry | 一次不可变的声誉变更记录（代码类名 `LedgerEntry`） | 声誉上下文(co-reputation) |

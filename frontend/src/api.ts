@@ -181,4 +181,5 @@ export const api = {
   }) => request<{ id: number }>('POST', '/v1/admin/users', body),
   changeRole: (userId: number, role: Role) =>
     request<void>('PUT', `/v1/admin/users/${userId}/role`, { role }),
+  disableUser: (userId: number) => request<void>('PUT', `/v1/admin/users/${userId}/disable`, {}),
 };

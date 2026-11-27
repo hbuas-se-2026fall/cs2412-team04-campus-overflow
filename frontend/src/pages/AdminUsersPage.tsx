@@ -32,6 +32,7 @@ function errorMessage(error: unknown): string {
  *   POST /api/v1/admin/users/{id}/verify
  *   POST /api/v1/admin/users
  *   PUT  /api/v1/admin/users/{id}/role
+ *   PUT  /api/v1/admin/users/{id}/disable
  */
 export function AdminUsersPage() {
   const { me } = useAuth();
@@ -98,6 +99,19 @@ export function AdminUsersPage() {
     }
   };
 
+  const disable = async (user: AdminUser) => {
+    if (!window.confirm(`确认禁用 ${user.displayName}？该账号现有会话会立即失效。`)) return;
+    setNotice('');
+    setError('');
+    try {
+      await api.disableUser(user.id);
+      setNotice(`已禁用 ${user.displayName}，其现有会话已失效`);
+      reload();
+    } catch (e: unknown) {
+      setError(errorMessage(e));
+    }
+  };
+
   const totalPages = data ? Math.max(1, Math.ceil(data.total / data.size)) : 1;
 
   return (
@@ -155,6 +169,7 @@ export function AdminUsersPage() {
                     currentUserId={me?.id}
                     onVerify={verify}
                     onChangeRole={changeRole}
+                    onDisable={disable}
                   />
                 ))}
               </tbody>
@@ -192,11 +207,13 @@ function AdminUserRow({
   currentUserId,
   onVerify,
   onChangeRole,
+  onDisable,
 }: {
   user: AdminUser;
   currentUserId?: number;
   onVerify: (user: AdminUser) => Promise<void>;
   onChangeRole: (user: AdminUser, role: Role) => Promise<void>;
+  onDisable: (user: AdminUser) => Promise<void>;
 }) {
   const [role, setRole] = useState<Role>(user.role);
   const [busy, setBusy] = useState(false);
@@ -206,6 +223,7 @@ function AdminUserRow({
   }, [user.role]);
 
   const isSelf = currentUserId === user.id;
+  const isDisabled = user.status === 'DISABLED';
 
   const run = async (action: () => Promise<void>) => {
     setBusy(true);
@@ -228,17 +246,22 @@ function AdminUserRow({
       </td>
       <td>{user.maskedUsername}</td>
       <td>{[user.college, user.className].filter(Boolean).join(' / ') || '—'}</td>
-      <td>{roleLabel(user.role)}</td>
+      <td>
+        {roleLabel(user.role)}
+        {isDisabled && <span className="muted">（已禁用）</span>}
+      </td>
       <td>{new Date(user.createdAt).toLocaleString('zh-CN')}</td>
       <td>
         <div className="admin-actions">
-          {!user.verified && (
+          {!user.verified && !isDisabled && (
             <button disabled={busy} onClick={() => void run(() => onVerify(user))}>
               认证
             </button>
           )}
           {isSelf ? (
             <span className="muted">当前账号</span>
+          ) : isDisabled ? (
+            <span className="muted">已禁用</span>
           ) : (
             <>
               <select
@@ -258,6 +281,9 @@ function AdminUserRow({
                 onClick={() => void run(() => onChangeRole(user, role))}
               >
                 改角色
+              </button>
+              <button className="danger" disabled={busy} onClick={() => void run(() => onDisable(user))}>
+                禁用
               </button>
             </>
           )}

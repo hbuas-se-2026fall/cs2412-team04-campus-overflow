@@ -5,7 +5,8 @@ Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,ReputationAccount,58,96,5,5,13,29,10,10,6,9
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,BadgeAward,12,0,0,0,1,0,1,0,1,0
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,BadgePolicy,4,38,3,5,1,12,3,3,0,2
+Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,VoteAward,21,0,0,0,1,0,1,0,1,0
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,BadgeType,0,68,0,0,0,13,0,4,0,4
-Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,BountyStatus,0,21,0,0,0,4,0,1,0,1
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,AcademicTerm,0,79,0,4,0,15,0,6,0,4
+Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,BountyStatus,0,21,0,0,0,4,0,1,0,1
 Reputation 声誉与激励 :: domain（纯 Java）,com.campusoverflow.reputation.domain,Bounty,54,156,3,19,15,38,11,18,9,9

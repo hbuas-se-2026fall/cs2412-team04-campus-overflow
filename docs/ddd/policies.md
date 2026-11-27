@@ -11,7 +11,7 @@
 6. 当 `AnswerEndorsedEvent` 发生，则 Reputation 记“名师认可”，Discovery 通知回答者。
 7. 当 `VoteCastEvent` 发生，则 Reputation 按**实际入账值**回滚/计分并受每日上限约束（被截断为 0 的赞撤销时不倒扣，避免刷负），Discovery 同步**问题**得分；回答得分不在搜索投影中（`SearchIndexProjector` 只处理 `QUESTION` 目标）。
 8. 当 `CommentPostedEvent` 发生，则 Discovery 解析 `@昵称` 并创建站内通知。
-9. 当 `ContentDeletedEvent` 发生，则 Discovery 标记搜索投影删除、回答数 -1；若删除的是已采纳回答且 Q&A 已释放采纳关系，则同时清除搜索投影的 `accepted` 标记；若删除的是问题，则 Discovery 删除指向该问题的站内通知，Reputation 关闭该问题仍 OPEN 的悬赏并退款。
+9. 当 `ContentDeletedEvent` 发生，则 Discovery 标记搜索投影删除、回答数 -1；若删除的是已采纳回答且 Q&A 已释放采纳关系，则同时清除搜索投影的 `accepted` 标记；若删除的是问题，则 Discovery 删除指向该问题的站内通知，Reputation 关闭该问题仍 OPEN 的悬赏并退款。**例外**：发起人账户缺失时只关闭悬赏、不退款（`refunded=0`，写审计/日志），避免异常数据让事件反复回滚。
 10. 当 `BountyOpenedEvent` / `BountyAwardedEvent` / `BountyClosedEvent` 发生，则 Discovery 维护“悬赏中”标记，并在获奖时通知；悬赏到期和自答退款由 Reputation 内部处理，统一发布 `BountyClosedEvent`。
 11. 当 `ReputationChangedEvent` 发生，则 Reputation 内部 `LeaderboardService` 更新周/月/学期排行榜 ZSET（经 `ProcessedEventStore` 幂等）。
 12. 当 `BadgeAwardedEvent` 发生，则 Discovery 通知徽章获得者。

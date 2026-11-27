@@ -1,0 +1,20 @@
+== Q-63 initial-points marker check ==
+executed: 2026-11-27, database co-mysql-dev/campus_overflow
+
+-- 1) nonzero accounts without marker (expect 0 rows) --
+mysql: [Warning] Using a password on the command line interface can be insecure.
+
+-- 2) all accounts vs marker --
+mysql: [Warning] Using a password on the command line interface can be insecure.
++---------+-------------+---------+------------------+---------------+------------+------------+
+| user_id | username    | role    | available_points | frozen_points | reputation | has_marker |
++---------+-------------+---------+------------------+---------------+------------+------------+
+|       1 | admin01     | ADMIN   |                0 |             0 |          0 | YES        |
+|       2 | T2001       | TEACHER |             1000 |             0 |          0 | YES        |
+|       3 | TA3001      | TA      |             1000 |             0 |          0 | YES        |
+|       4 | 2023001     | STUDENT |                0 |             0 |         10 | YES        |
+|       5 | 2023002     | STUDENT |                0 |             0 |         35 | YES        |
+|       6 | 2023003     | STUDENT |                0 |             0 |          0 | YES        |
+|       7 | SeedUser    | STUDENT |                0 |             0 |          0 | YES        |
+|       8 | TestStudent | STUDENT |                0 |             0 |          0 | YES        |
++---------+-------------+---------+------------------+---------------+------------+------------+

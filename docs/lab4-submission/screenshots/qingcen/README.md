@@ -10,7 +10,7 @@
 | `qa-vote-comment-terminal.png` | 终端完整截图：5 个请求 + Summary | ✅ 完整 |
 | `env-qingcen.png` | Java 21 / Maven 3.9.2 / Node / Docker 环境验证截图（从 Lab 1 E3 证据复制归档） | ✅ |
 | `env-qingcen.txt` | 环境版本文本记录 | ✅ |
-| `mvn-test-qingcen.png` | `co-qa-domain` 42 条 + `co-qa-application` 32 条全绿、`BUILD SUCCESS` | ✅ |
+| `mvn-test-qingcen.png` | 交付时快照：`co-qa-domain` 42 条 + `co-qa-application` 32 条全绿、`BUILD SUCCESS`；2026-11-27 当前为 **44 + 56**（`QingcenVoteCommentServiceTest` 11 条） | ✅ 历史快照 |
 
 完整执行结果（见日志末尾 Summary）：
 
@@ -35,8 +35,9 @@ POST /api/v1/comments         -> 201  {"id":10}
 
 ```text
 mvn -pl co-qa/co-qa-domain,co-qa/co-qa-application test
-co-qa-domain:      42 tests, 0 failures
-co-qa-application: 32 tests, 0 failures（QingcenVoteCommentServiceTest 9 条）
+co-qa-domain:      42 tests, 0 failures          # 交付时快照
+co-qa-application: 32 tests, 0 failures          # 交付时快照；QingcenVoteCommentServiceTest 9 条
+# 2026-11-27 当前：44 / 56，QingcenVoteCommentServiceTest 11 条
 ```
 
 ## 复现方式

@@ -1,6 +1,6 @@
 # Lab 3 领域建模：聚合识别与不变式
 
-> 负责人：青岑（Dev-1 后端视角）
+> 负责人：青岑（Developer C）
 > 范围：Q&A + Reputation 聚合，含 Identity 的 UserRegistered 事件，附 Discovery 的 Notification / SearchIndex 读模型
 > 依据：`backend/co-qa/co-qa-domain`、`backend/co-reputation/co-reputation-domain`、`backend/co-identity/co-identity-domain` 与 `backend/co-discovery/co-discovery-domain`
 ## 1. 领域事件（实际发布，14 个）
@@ -88,6 +88,7 @@
   1. 只有课程问题可以发起悬赏；公开问题（`course_id=null`）拒绝 `REP-1007`。
   2. 同一问题最多一个 `OPEN` 悬赏；数据库唯一索引兜底，冲突映射 `REP-2002`。
   3. 终态只有 `AWARDED` / `EXPIRED`，终态不可再变；自答只能关闭退款。
+  4. **异常分支**：发起人账户缺失时，`closeWithoutRefund` 会关闭悬赏但不退款（`refunded=0`，写审计/日志）；此时“冻结积分 = 全部 OPEN 悬赏”不成立，对账应报告账户缺失。
 
 ### Notification（根：Notification）
 
