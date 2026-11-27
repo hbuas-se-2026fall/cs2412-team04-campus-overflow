@@ -109,6 +109,6 @@ mvn -B -f backend/pom.xml verify -Dtest=none -Dsurefire.failIfNoSpecifiedTests=f
 | BUG-003（已关闭） | 曾因 develop 无必需状态检查，CI 失败不一定阻断合并 | 2026-11-17 通过规则集 #27436601 启用 `后端构建与验证`/`前端构建`；`enforce_admins=true`，改作业名需同步规则集 |
 | 本地 JDK 25 下 JaCoCo 0.8.12 agent 不兼容 | 本机取证需 `-Djacoco.skip=true` | 统一用 JDK 21 取证；CI 固定 21 |
 | 集成测试已硬门禁 | 失败即阻断，不再漏过端到端问题 | 阶段 5 移除了 `continue-on-error`，Testcontainers 起 MySQL/Redis；见 ADR-009 |
-| Sonar Quality Gate（**已关闭**） | 曾因 `java:S5998` 与覆盖率卡线导致 Lab 7 门禁 Failed | 2026-11-25 在最终代码上复扫：**Gate PASSED**（Bugs 0 / Vulnerabilities 0 / 安全热点 100% 复核 / Coverage 73.8% / 219 单测），证据见 [`lab7-sonar-final-rescan.md`](../reports/lab7-sonar-final-rescan.md) |
+| Sonar Quality Gate（baseline PASSED，HEAD 待复扫） | 曾因 `java:S5998` 与覆盖率卡线导致 Lab 7 门禁 Failed | 2026-11-25 baseline `3750111` 复扫 **Gate PASSED**（Bugs 0 / Vulnerabilities 0 / 安全热点 100% / Coverage 73.8% / 219 单测）；该 baseline 早于当前 HEAD `62332d2`，最终 HEAD 尚未复扫，不能写成“最终代码已通过” |
 | 排行榜 Redis 数据可重建 | 周期榜为派生数据，Redis 丢失/误清会偏低 | 2026-11-25 实现 `LeaderboardService.rebuild` + `POST /api/v1/admin/leaderboard/rebuild`，以声誉账本为准重算；总榜读账户表不受影响 |
 | Sonar 覆盖率 73.8% 接近 70% 阈值 | 新增低覆盖代码可能让门禁回红 | 新代码需带测试；`infrastructure/interfaces` 已按既有政策排除；当前 New Code 覆盖率 88.2% |
