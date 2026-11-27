@@ -18,6 +18,7 @@ import com.campusoverflow.shared.security.Actor;
 import java.time.Clock;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /** 用例：评论与二级回复。评论中的 @昵称 由 Discovery 解析并发送提醒。 */
@@ -41,7 +42,7 @@ public class CommentService {
         this.clock = clock;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public long post(Actor actor, PostCommentCommand cmd) {
         Question question = resolveQuestionForUpdate(cmd.targetType(), cmd.targetId());
         requireCanParticipate(question, actor);
@@ -66,7 +67,7 @@ public class CommentService {
      * 删除评论。只有作者或管理员可以删；删除顶层评论时级联删除它的全部回复，
      * 避免留下挂在不存在的父评论下的孤儿回复。
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(Actor actor, long commentId) {
         // 先取 questionId，再按“问题行 -> 评论行”的固定顺序加锁，和 post 保持同一锁序。
         Comment initial = comments.findById(commentId)

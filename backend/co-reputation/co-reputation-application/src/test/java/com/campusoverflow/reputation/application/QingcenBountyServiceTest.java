@@ -252,6 +252,21 @@ class QingcenBountyServiceTest {
     }
 
     @Test
+    void expireDueClosesBountyWithoutRefundWhenSponsorAccountMissing() {
+        Bounty bounty = seedBounty(50, 1);
+        when(accounts.findByUserId(SPONSOR_ID)).thenReturn(Optional.empty());
+        BountyService later = serviceAt(NOW.plus(Duration.ofDays(1)));
+
+        int count = later.expireDue();
+
+        assertThat(count).isEqualTo(1);
+        assertThat(bounty.status()).isEqualTo(BountyStatus.EXPIRED);
+        verify(sponsor, never()).refundFrozen(anyInt());
+        BountyClosedEvent event = (BountyClosedEvent) events.get(0);
+        assertThat(event.refundedPoints()).isZero();
+    }
+
+    @Test
     void latestMapsSponsorDisplayName() {
         Bounty bounty = seedBounty(50, 7);
         when(identity.findUser(SPONSOR_ID)).thenReturn(Optional.of(
