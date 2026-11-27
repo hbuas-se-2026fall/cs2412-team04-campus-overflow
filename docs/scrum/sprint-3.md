@@ -45,7 +45,7 @@
 | 刘俊琒（A） | T3-04 | `SearchIndexProjector` 十个方法：firstTime 幂等 + Posted/Edited/AnswerSubmitted/ContentDeleted/Accepted/VoteCast(仅 QUESTION)/Bounty 事件投影 | 同一事件投递两次只生效一次 |
 | 青岑（C） | T3-05 | `DiscoveryQueryService` search/related：SearchPort → 批量作者 → 视图；中文词命中、单字 422 DIS-1001 | 域测试 + 应用测试全绿 |
 | 房国栋（D） | T3-10 | 前端搜索页（标签/未回答/悬赏筛选 + 四排序）、相关问题侧栏、通知单条已读、@昵称高亮 | 三处在界面可用；**T4-03 之外的 S3 前端全部收口** |
-| 房国栋（D） | SM | 主持计划会（确认本文件）+ 开工/中途/收口 **3 次同步**（压缩执行，未按周一/三/五逐日站会）+ 燃尽图归档 | `docs/scrum/sprint-3-burndown.png`、§四 |
+| 房国栋（D） | SM | 开工/收口 **2 次同步**（压缩执行：未开计划会、未按周一/三/五逐日站会）；中途 11-16 14:00 有一次例行复核，不计入正式同步）+ 燃尽图归档 | `docs/scrum/sprint-3-burndown.png`、§四 |
 | 陈明哲（E） | T3-08 | 删除 Discovery 剩余骨架；本地与 CI 跑 `mvn verify`（含 CampusOverflowFlowIT）；CI 恢复完整门禁；ADR-009 状态改“已完成” | 5 个后端阶段 + 前端阶段全绿 |
 | 陈明哲（E） | T3-09 | 根 POM `domain.coverage.minimum` 收口 0.70 并保证通过 | JaCoCo 报告 ≥70% |
 | 魏志国（B，PO） | PO | PB-31~40 验收口径与 Milestone 描述；评审会 9.1 七维度自查 | 任意证据当场可指出 |
@@ -71,15 +71,16 @@
 - [x] `domain.coverage.minimum=0.70` 通过；ADR-009 状态改“已完成”
 - [x] 中文搜索命中（ADR-005 ngram 口径）：`q=红黑树` → `total=2`，命中 id=7/id=8，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-hit.png`](sprint-3-search-hit.png)
 - [x] 相关问题返回有序列表：`Related count: 1`，排序口径见 `RelatedQuestionPolicy`（同文件 §3、[`sprint-3-search-related.png`](sprint-3-search-related.png)）
-- [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 5 条（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
+- [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 7 条（原 5 条 + 2 条课程成员可见性）（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
 - [x] 前端三处可用（2026-11-18 补逐条截图，此前只有 S4 视频覆盖）：`QuestionListPage`（关键词 + 标签 + 未回答 + 四排序）、`QuestionDetailPage` 相关问题侧栏与 `@昵称` 高亮、`NotificationsPage`（单条已读/全部已读/未读数）；演示见 `docs/final/demo-v1.0.0.webm`（55 秒）
   - 逐条截图（2026-11-18 复采，本机 `demo` profile + 浏览器实拍）：
     - 搜索页两栏布局（左结果 / 右相关标签 + 相关问题 + 热门标签）：[`s3-front-search.png`](s3-front-search.png)
     - 单字关键词 422 中文提示（`DIS-1001` → 「每个关键词至少 2 个字符」）：[`s3-front-search-422.png`](s3-front-search-422.png)
     - 详情页 `@昵称` 高亮（评论里 `@小红` 蓝底标记）：[`s3-front-mention.png`](s3-front-mention.png)
-    - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)
+    - 详情页相关问题侧栏：**该截图为 `s3-front-mention.png` 的重复副本（字节相同，且右侧显示「暂无相关问题」），不构成 related 证据，已删除（审计 P-19）**；相关问题以接口实测为准，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-related.png`](sprint-3-search-related.png)
     - 通知页未读数角标（`通知 6`）与 6 条未读列表：[`s3-front-notifications.png`](s3-front-notifications.png)
     - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)
+      ⚠️ **该图拍于修复前（审计 P-21）**：顶栏角标仍是 6，与页面「5 条未读」不一致——正是后来修掉的缺陷（角标改为服务端 `unread-count` + 已读后立即刷新，见 `App.tsx` 的 `co:notifications-changed` 监听）。图保留作对照，不作为当前行为的证据。
 - [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频（[`docs/qa/defects.md`](../qa/defects.md)）
 - [x] 缺陷台账：S3 收口时 BUG-001/002/003/005/006 已关闭；**BUG-004 当时仍为「部分修复」**，其最终关闭发生在 S4（2026-11-25 重写 `events.md` 与 `event-storming.png` 为 14 事件；审计 2-19 更正）
 - [x] T3-12 功能冻结：S3 范围 31 SP 全部合入 `develop`，v1.0.0 于 2026-11-17 发布
@@ -103,6 +104,9 @@
 ![Sprint 3 burndown](sprint-3-burndown.png)
 
 生成脚本：[`scripts/dev-env/make-sprint3-burndown.ps1`](../../scripts/dev-env/make-sprint3-burndown.ps1)（改数据后重跑即可）。
+
+> ⚠️ **口径说明（审计 P-60）**：该脚本内的数据点是**手工写死的数组**，不是从 PR/Issue 记录计算得出；
+> 上表「实际剩余」以合并 PR 记录人工归集，燃尽图仅作趋势示意。
 
 ## 六、CI 与验证（E 复核，2026-11-16）
 
@@ -134,7 +138,7 @@
 | --- | --- | --- | --- |
 | 1 | 可运行软件 | ✅ 通过 | 搜索 `q=红黑树` 命中、单字 422 `DIS-1001`、相关问题 200；通知未读/已读；排行榜四周期 200 |
 | 2 | 提交历史 | ✅ 通过 | S3 相关 PR：#117（词归一/相关排序）、#120（投影器十方法）、#126（通知测试 + CI 纳入 discovery）、#160（S3 收口） |
-| 3 | 贡献者分布 | ✅ 通过 | A/B/C/D 均有提交：青岑 #117/#122、刘俊琒 #120/#160、房国栋 #127–#130 通知前端、魏志国验收与决策 |
+| 3 | 贡献者分布 | ✅ 通过（口径已更正） | A/B/C/D 均有提交：青岑 #117/#122、刘俊琒 #120/#160、房国栋 #126（通知测试与前端）/S3 前端走查、魏志国验收与决策。**原写「房国栋 #127–#130 通知前端」有误**：#127–#130 是 S4 的 T4-02/04/05/07（魏志国/陈明哲/青岑），已改正（审计 P-18） |
 | 4 | PR 与评审 | ✅ 通过 | 各 PR 经非作者 Approve 合并；#160 由刘俊琒收口并经评审 |
 | 5 | Issue | ✅ 通过 | PB-31~39 对应 Issue（#57–#65）随交付关闭；看板同步见 `docs/backlog/board-sync-2026-11-17.md` |
 | 6 | 分支 | ✅ 通过 | 短生命周期分支 + PR；`develop` 保护含必需检查（2026-11-17 起） |

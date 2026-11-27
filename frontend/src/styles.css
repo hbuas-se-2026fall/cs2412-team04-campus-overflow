@@ -173,6 +173,16 @@ button.link {
   color: var(--accent);
   font-weight: 600;
 }
+/* 审计 P-54：列表里的「已采纳」需要看得见的文字，而不只是一段颜色类 */
+.accepted-tag {
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--accent);
+  font-size: 11px;
+  font-style: normal;
+}
 .qtitle {
   font-size: 17px;
   font-weight: 600;
