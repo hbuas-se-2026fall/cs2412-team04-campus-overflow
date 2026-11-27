@@ -12,6 +12,7 @@ import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerEndorsedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.event.CommentPostedEvent;
+import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.reputation.api.event.BadgeAwardedEvent;
 import com.campusoverflow.reputation.api.event.BountyAwardedEvent;
 import com.campusoverflow.shared.security.Role;
@@ -144,5 +145,14 @@ public class NotificationProjector {
 
     private boolean questionVisible(long questionId) {
         return qa.findQuestion(questionId).filter(question -> !question.deleted()).isPresent();
+    }
+
+    /** 问题删除后清理已存在的通知；顺序消费下 AnswerSubmitted 通知可能已先落库。 */
+    @EventListener
+    @Transactional
+    public void on(ContentDeletedEvent e) {
+        if ("QUESTION".equalsIgnoreCase(e.targetType())) {
+            notifications.deleteByQuestionId(e.targetId());
+        }
     }
 }

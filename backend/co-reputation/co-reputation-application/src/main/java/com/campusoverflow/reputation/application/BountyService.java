@@ -85,8 +85,8 @@ public class BountyService {
 
         // PO 决策（2026-11-25，审计 REP-02）：悬赏只能挂在课程问题上，与 docs/final/user-guide.md
         // 「发起悬赏需要教师/助教且必须是该课程的问题」保持一致。
-        // 公开问题（courseId == null）没有课程归属，而 canManageCourse(userId, null) 会对任意
-        // 全局 TEACHER 返回 true（等于放开给全校教师），与文档矛盾且无法审计归属。
+        // 公开问题（courseId == null）没有课程归属，无法审计“哪位教师负责”，
+        // 因此即使 canManageCourse 对 ADMIN 返回 true，也一律拒绝发起悬赏。
         if (question.courseId() == null) {
             throw new BusinessRuleException("REP-1007", "公开问题不能发起悬赏，请选择所属课程的问题");
         }
@@ -128,6 +128,20 @@ public class BountyService {
         ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
                 .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
         Instant now = clock.instant();
+
+        // 旧采纳事件/重放保护：事件发生时间早于本悬赏创建时间，或问题当前采纳的不是本回答，
+        // 都不能把新悬赏发给旧/已删除回答的作者。
+        if (acceptedAt.isBefore(bounty.createdAt())) {
+            return;
+        }
+        QuestionRef current = qa.findQuestion(questionId).orElse(null);
+        if (current == null || current.deleted()
+                || (current.acceptedAnswerId() != null && current.acceptedAnswerId() != answerId)
+                // 管理者删除已采纳回答会释放采纳关系（acceptedAnswerId 变回 null）；
+                // 此时迟到的采纳事件不能再把悬赏发给已删除回答的作者。
+                || !qa.hasVisibleAcceptedAnswer(questionId)) {
+            return;
+        }
 
         // 用“采纳事件发生时间”判断是否到期，而不是事件被消费的时间：
         // 采纳发生在到期前、只是 outbox 积压到到期后才处理时，仍应发奖。
@@ -198,6 +212,11 @@ public class BountyService {
         }
         Bounty bounty = found.get();
         if (bounty.status() != BountyStatus.OPEN || !bounty.isDue(now)) {
+            return false;
+        }
+        // 采纳事件可能已发生但尚在 outbox：问题已有可见采纳回答时先不退款，
+        // 让 AnswerAcceptedEvent 按“采纳优先”结算；若事件永久丢失，下一轮仍会重试。
+        if (qa.hasVisibleAcceptedAnswer(bounty.questionId())) {
             return false;
         }
         ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())

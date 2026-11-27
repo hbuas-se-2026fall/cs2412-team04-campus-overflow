@@ -12,6 +12,7 @@ import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationReason;
 import com.campusoverflow.shared.security.Actor;
 import java.time.Duration;
+import java.time.Instant;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -91,6 +92,7 @@ class ReputationSettlementTest {
         fx.seedAccount(2, 0, 0, 0);
         fx.seedQuestion(10, 1, 100L);
         long bountyId = fx.openBounty(teacher, 10, 50, 7);
+        fx.acceptQuestion(10, 50);
 
         AnswerAcceptedEvent event = new AnswerAcceptedEvent("evt-acc-bounty", fx.clock.instant(),
                 50, 10, 2, 1, 1, "红黑树插入后为什么必须旋转？");
@@ -115,6 +117,7 @@ class ReputationSettlementTest {
         fx.seedAccount(9, 0, 1000, 0);
         fx.seedQuestion(10, 9, 100L);
         long bountyId = fx.openBounty(teacher, 10, 50, 7);
+        fx.acceptQuestion(10, 50);
 
         fx.handlers.on(new AnswerAcceptedEvent("evt-acc-self", fx.clock.instant(),
                 50, 10, 9, 9, 9, "红黑树插入后为什么必须旋转？"));
@@ -126,6 +129,27 @@ class ReputationSettlementTest {
         assertThat(fx.ledger.countByUserAndReason(9, ReputationReason.BOUNTY_AWARDED)).isZero();
         assertThat(fx.ledger.size()).isZero();
         assertThat(fx.events.ofType(BountyClosedEvent.class)).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("到期任务先跑但问题已有可见采纳：不退款，等采纳事件结算")
+    void expireDueSkipsWhenQuestionAlreadyHasVisibleAcceptedAnswer() {
+        Actor teacher = fx.teacher(9);
+        fx.seedAccount(9, 0, 1000, 0);
+        fx.seedQuestion(10, 1, 100L);
+        long bountyId = fx.openBounty(teacher, 10, 50, 1);
+        Instant acceptedAt = fx.clock.instant();
+        fx.acceptQuestion(10, 50);
+        fx.clock.advance(Duration.ofDays(2));
+
+        assertThat(fx.bountyService.expireDue()).isZero();
+        assertThat(fx.bounties.get(bountyId).status()).isEqualTo(BountyStatus.OPEN);
+
+        fx.handlers.on(new AnswerAcceptedEvent("evt-acc-before-expiry", acceptedAt, 50, 10, 2, 1, 1,
+                "红黑树插入后为什么必须旋转？"));
+
+        assertThat(fx.bounties.get(bountyId).status()).isEqualTo(BountyStatus.AWARDED);
+        assertThat(fx.accounts.findByUserId(9).orElseThrow().frozenPoints()).isZero();
     }
 
     @Test

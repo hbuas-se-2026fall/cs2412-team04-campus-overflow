@@ -62,19 +62,17 @@ public class ReputationEventHandlers {
     @EventListener
     @Transactional
     public void on(UserRegisteredEvent e) {
-        // 用事件 ID 判幂等，而不是“账户是否存在”：账户可能先被投票/悬赏事件懒创建为 0，
-        // 后到的注册事件仍必须补发教师/助教的初始积分。
-        if (!processed.markProcessed(e.eventId(), "reputation-user-registered")) {
+        // 双重幂等：同一事件重复投递按 eventId 拦截；同一用户跨事件重复注册按持久化 marker
+        // 拦截。不能靠账户余额判断——账户可能先被投票/悬赏事件懒创建并已有余额，
+        // 后到的注册事件仍必须补发初始积分。
+        if (!processed.markProcessed(e.eventId(), "reputation-user-registered")
+                || !processed.markProcessed("initial-points:" + e.userId(), "reputation-initial-points")) {
             return;
         }
         ReputationAccount account = accounts.findByUserId(e.userId())
                 .orElseGet(() -> ReputationAccount.open(e.userId(), 0));
         int initialPoints = ReputationRulebook.initialPoints(e.role());
-        // 已存在且有余额/冻结/声誉的账户视为已发过初始积分，避免旧事件重放导致翻倍；
-        // 只有“懒创建的空账户”才补发。
-        boolean untouched = account.availablePoints() == 0 && account.frozenPoints() == 0
-                && account.reputation() == 0;
-        if (initialPoints > 0 && untouched) {
+        if (initialPoints > 0) {
             account.grantAvailablePoints(initialPoints);
         }
         accounts.save(account);
