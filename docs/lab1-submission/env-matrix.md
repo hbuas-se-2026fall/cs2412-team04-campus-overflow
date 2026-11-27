@@ -37,9 +37,9 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 
 ## 2. 环境版本汇总表
 
-| 成员 | GitHub | OS | JDK | Maven | Node.js | Docker | 采集日期 | env 截图 | mvn 测试证据 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | **21.0.10（JBR-21.0.10+1-1163.110，需先设 `JAVA_HOME`）**；⚠️ 默认 PATH 的 `java` 是 **1.8.0_481** 且 `javac` 未安装（见 [`env-fangguodong.txt`](env/env-fangguodong.txt) §三采 A/B 两段） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-27（JDK 口径复核） | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`screenshots/mvn-test-fangguodong.png`](screenshots/mvn-test-fangguodong.png)（2026-11-18 全绿）+ 日志 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log) |
+| 成员 | GitHub | OS | JDK | Maven | Node.js | **Git** | Docker | 采集日期 | env 截图 | mvn 测试证据 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | **21.0.10（JBR-21.0.10+1-1163.110，需先设 `JAVA_HOME`）**；⚠️ 默认 PATH 的 `java` 是 **1.8.0_481** 且 `javac` 未安装（见 [`env-fangguodong.txt`](env/env-fangguodong.txt) §三采 A/B 两段） | 3.9.11 | v24.18.1 / npm 11.16.0 | 2.55.0.windows.3 | **29.9.3**（本机实测，Engine running） | 2026-11-27（JDK 口径复核） | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`screenshots/mvn-test-fangguodong.png`](screenshots/mvn-test-fangguodong.png)（2026-11-18 全绿）+ 日志 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log) |
 > **CI run 号口径（2026-11-27，审计 P-03/P-04）**：表格里的 run 号与截图右上角的 run 号不一致时，以「run 号 + sha」成对出现的一处为准。
 > 当前可核验的最新一次全量是 PR #253 的 [`45966108449`](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/actions/runs/45966108449)（sha `432c76c1`）：
 > 后端构建与验证 ✅、集成测试 ✅（Testcontainers）、前端构建 ✅、部署配置校验 ✅，
@@ -51,10 +51,10 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 > 项目实际构建/测试在同一窗口内 `export JAVA_HOME=.../jbr` 后进行，此时 `java/javac` 均为 21.0.10（`mvn -v` 显示
 > `Java version: 21.0.10, runtime: ...\jbr`）。两种状态已分别在 `env/env-fangguodong.txt` 的 A/B 两段记录，不再混写成一行。
 
-| 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
-| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装（见 §6；全栈 compose 由房国栋机器验证） | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ [`mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png)（历史 CI run 45742927110 / `62332d2`：264 单测 + FlowIT 4 = **268**；`P5` 修复分支本地 277 单测 / 总口径 281，已在 PR #253 的 CI run [`45966108449`](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/actions/runs/45966108449)（sha `432c76c1`）上跑通全量；204 为更早批次）+ [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) |
-| 刘俊琒 | `Liujunfeng520` | Microsoft Windows 10.0.19045 | 21.0.11（java/javac 同版本） | 3.9.11 | v24.20.0 / npm 11.19.0 | ⬜ 未安装（见 §6） | 2026-11-17 | ✅ [`env-liujunfeng.png`](env/env-liujunfeng.png) | ✅ [`mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) + [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) |
-| 青岑 | `qing963666` | Microsoft Windows 10.0.26200 | 21.0.10 | 3.9.2 | v26.13.0 / npm 11.20.0 | 29.9.2 | 2026-11-09 | ✅ [`env-qingcen.png`](env/env-qingcen.png) | ✅ [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
+| 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 2.55.0.windows.5 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
+| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | 2.56.0.windows.2 | ⬜ 未安装（见 §6；全栈 compose 由房国栋机器验证） | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ [`mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png)（历史 CI run 45742927110 / `62332d2`：264 单测 + FlowIT 4 = **268**；`P5` 修复分支本地 277 单测 / 总口径 281，已在 PR #253 的 CI run [`45966108449`](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/actions/runs/45966108449)（sha `432c76c1`）上跑通全量；204 为更早批次）+ [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) |
+| 刘俊琒 | `Liujunfeng520` | Microsoft Windows 10.0.19045 | 21.0.11（java/javac 同版本） | 3.9.11 | v24.20.0 / npm 11.19.0 | 2.56.0.windows.2 | ⬜ 未安装（见 §6） | 2026-11-17 | ✅ [`env-liujunfeng.png`](env/env-liujunfeng.png) | ✅ [`mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) + [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) |
+| 青岑 | `qing963666` | Microsoft Windows 10.0.26200 | 21.0.10 | 3.9.2 | v26.13.0 / npm 11.20.0 | —（未采集） | 29.9.2 | 2026-11-09 | ✅ [`env-qingcen.png`](env/env-qingcen.png) | ✅ [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
 图例：✅ 达标　⚠️ 版本不符但已记录　⬜ 待采集
 
@@ -169,7 +169,6 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | 魏志国 | 本机 JDK 为 25.0.2（达标线 21） | 高于达标线、可编译运行；JaCoCo 0.8.12 agent 不支持 JDK 25，本地取证用 `-Djacoco.skip=true`（CI 用 JDK 21 正常出覆盖率）；不再为此降级本机环境 | ⚠️ 已记录 |
 | 刘俊琒 | 系统 PATH 里 `java` 指向 `...\Oracle\Java\javapath` 转发存根（本机已无对应 JDK，执行无输出）；`mvn` 完全未入 PATH（Maven 由 IDEA 内置，在 `D:\ideal\IntelliJ IDEA 2026.1\plugins\maven\lib\maven3\bin`）；`C:\Program Files\nodejs` 条目被截断成 `gram Files\nodejs\`（丢了 `C:\Pro`），导致终端里 `node` 找不到 | 采集前在同一窗口临时修正（命令见 [`env/env-liujunfeng.txt`](env/env-liujunfeng.txt) §0）；长期方案同本文末「PATH 修正」，把三条写进系统变量 | ⚠️ 已记录（2026-11-17） |
 | 刘俊琒 | Docker Desktop 未安装（`C:\Program Files\Docker` 不存在） | 本机不参与容器化冒烟与镜像构建；Docker 相关验证由房国栋/青岑代跑，与本表房国栋 2026-10-29 同一处置 | ⚠️ 已记录 |
-
 | 陈明哲 | Docker Desktop 未安装（WSL2/Hyper-V 未启用；本机不参与容器化验证） | 全栈 compose 由房国栋机器完成（[`s4-compose-fullstack-verify.md`](../reports/s4-compose-fullstack-verify.md)）；本机用 jar + MySQL/Redis 完成干净库全流程冒烟 | ⚠️ 已记录（2026-11-19） |
 ### PATH 修正（长期，一次到位）
 
