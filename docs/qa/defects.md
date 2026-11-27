@@ -41,7 +41,7 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 281 个单测 + 前端 8 条 Vitest；本地已跑 5 条 FlowIT，但 CI 只在 `62332d2` 跑过 4 条（run 45742927110），P5 后的新 HEAD 仍需重跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 281 个单测 + 前端 Vitest（当时 8 条，2026-11-28 已增至 16 条）；本地已跑 5 条 FlowIT，但 CI 只在 `62332d2` 跑过 4 条（run 45742927110），P5 后的新 HEAD 仍需重跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |

@@ -18,7 +18,7 @@
 | --- | --- | --- |
 | 课程页（列表 / 我的课程 / 加入课程）与提问页选课 | `frontend/src/pages/courses/*.tsx`、`AskPage.tsx` 课程下拉 | ✅ 注册→登录→课程列表→加入课程全流程可点通 |
 | 问答闭环前端（编辑 / 删除 / 评论 / 采纳 / 投票） | `QuestionDetailPage.tsx`，按钮显隐由后端 `permissions` 驱动 | ✅ S1 演示 8 条 Given/When/Then 可在界面演完 |
-| 错误码中文映射 | `frontend/src/errors.ts`（25 个业务码 + HTTP 状态兜底） | ✅ `QA-3001/2002/1015/1020`、`REP-1002/1003/1004` 均有中文提示 |
+| 错误码中文映射 | `frontend/src/errors.ts`（36 个业务码 + HTTP 状态兜底；2026-11-28 勘误：PR #253 补悬赏错误码后由 25 增至 36） | ✅ `QA-3001/2002/1015/1020`、`REP-1002/1003/1004` 均有中文提示 |
 | 通知中心后端（T3-03/06/07） | `MentionParser.java`、`Notification.java`、`NotificationProjector.java`、`NotificationService.java` | ✅ `DiscoveryDomainTest` 6/6、`NotificationProjectorTest` 7/7、`NotificationServiceTest` 3/3 通过；`(eventId, recipient)` 幂等（原写 2/2 是早期批次） |
 | 徽章墙与排行榜周期切换的前端呈现 | `pages/ReputationPage.tsx`（六枚徽章墙 + 未解锁置灰）、`pages/LeaderboardPage.tsx`（周/月/学期/总榜四处切换） | ✅ 徽章墙与四周期切换可点通；**领域侧 `BadgePolicy`/`AcademicTerm` 的实现由 E（提交 `d07dab91`，作者 `cmz666-BOT`）完成，不在本人提交内**（审计 2-20 更正） |
 | 排行榜周期切换 + 悬赏对话框 + 声誉主页（T2-13） | `LeaderboardPage.tsx`、`components/BountyDialog.tsx`、`pages/ReputationPage.tsx` | ✅ 四周期可切；悬赏倒计时（剩 1 小时变红、过期「已结束」） |
@@ -26,7 +26,7 @@
 | Markdown 实时预览与代码高亮（T4-03） | `components/MarkdownPreview.tsx`，`AskPage.tsx` 编辑/预览/分屏 | ✅ `marked` + 按需注册的 `highlight.js`，原始 HTML 已禁用；产物 **约 339 kB（gzip 约 109 kB，取 `npm run build` 输出；数字随代码变化）**。**注**：PR #151 合入时间为 2026-11-17 15:50（北京），晚于 v1.0.0 tag（11:01），属 tag 后增量，**不计入 v1.0.0 交付**（审计 2-13 更正） |
 | 环境证据（E3） | `docs/lab1-submission/env-matrix.md`、`env/`、`scripts/dev-env/collect-env.*` | ✅ 5/5 人采集齐；本人 Docker 29.9.3 与 `mvn-test` 全绿 165 用例均已补 |
 | 身份绑定核查（E4） | `docs/lab1-submission/identity-audit.md`、`scripts/dev-env/audit-authors.*` | ✅ 定位「邮箱绑在个人小号、课程账号贡献为 0」并整改为 noreply |
-| ADR-003 主讲（T0-05） | `docs/notes/architecture.md` §8 | ✅ 含代码落点表与 `RedisLoginThrottle` 逐行讲解 |
+| ADR-003 主讲（T0-05） | `docs/notes/architecture.md` §9（2026-11-28 勘误：主讲笔记在 §9，§8 为分工表） | ✅ 含代码落点表与 `RedisLoginThrottle` 逐行讲解 |
 | Sprint 3 过程记录（SM） | `docs/scrum/sprint-3.md` | ⚠️ **实际是压缩执行**：只做了「开工同步」与「收口同步」两次，**未出计划会纪要、未开正式 Sprint Review、未单独出回顾纪要**；燃尽图已归档（审计 2-18 更正） |
 
 ## 二、技术收获（2～3 条）
