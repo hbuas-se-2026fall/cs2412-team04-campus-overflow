@@ -41,7 +41,7 @@
 | Q-17 | 低 | actors 与 read-models 角色/外部系统重复且分叉 | `docs/ddd/actors.md` 改为实际角色/无外部服务 | 已修复；`read-models.md` 由房国栋处理 |
 | Q-18 | 中 | 缺陷台账停在 Sprint 0 | 本节补入 v1.0 审计与状态 | 已更新 |
 | Q-19 | 中 | user-guide/错误码与可见性口径 | PO 已在 #224 统一为“课程成员可见”；代码与文档一致 | 已关闭（PO 决策） |
-| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 270 个单测 + 前端 6 条 Vitest；CI Testcontainers 仍待跑 | 部分修复 |
+| Q-20 | 低 | test-plan 是 Sprint 0 历史归档，不能充当最终报告 | `docs/qa/final-test-report.md` 更新为 277 个单测 + 前端 6 条 Vitest；CI 已在 `62332d2` 跑过 4 条 FlowIT（run 45742927110），P5 后的新 HEAD 仍需重跑 | 部分修复 |
 | Q-21 | 中 | S2 燃尽图把两条 5 SP 写成合计 5 SP，D5 从 24 跳 0 | `sprint-2.md:110-119` 改为各 5 SP、D1=32，D5 标注“收口”非实测 | 已修复 |
 | Q-22 | 高 | `GET /questions/{id}/bounty` 绕过课程可见性，匿名可读悬赏金额/发起人 | Controller 增加 `Optional<Actor>`；Service 复用作者/成员/管理员判定，否则 403 | 已修复 |
 | Q-23 | 中 | 相关问题只校验源问题存在，外部人可间接看到课程问题标签 | `DiscoveryQueryService.related` 先校验源问题可见性，再查候选 | 已修复 |
@@ -74,5 +74,36 @@
 | Q-50 | 中 | 迟到的旧 `AnswerAccepted` 事件可结算新悬赏（采纳发生在悬赏创建前/当前采纳已是别的回答/回答已被删除） | `settleOnAccept` 校验 `acceptedAt >= createdAt`，并重读当前 `acceptedAnswerId` 一致且 `hasVisibleAcceptedAnswer` 为真后才结算；补“删除释放采纳”用例 | 已修复 |
 | Q-51 | 低 | 浏览量失败批次合并后 `__batch_id` 留在 FLUSHING；测试未断言合并脚本 | Lua 脚本补 `HDEL KEYS[2] '__batch_id'`；测试改为区分合并/解锁两次 `execute` | 已修复 |
 | Q-52 | 低 | W-06 已让 `canManageCourse(userId, null)` 对非管理员返回 false，但 `IdentityApi` 接口注释与 `BountyService.open` 注释仍写“全局教师可管理公开问题” | 两处注释改为当前口径：公开问题仅作者与 ADMIN；悬赏仍按 REP-1007 拒绝公开问题 | 已修复 |
+| Q-53 | 高 | 投票日上限按票面差回滚：被上限截断的赞撤销/改踩会多扣分；反复“赞→撤”可绕过上限把声誉刷成负数 | 新增 `rep_vote_award` 记录每次投票实际入账值；改投/撤销增量 = 新实际入账值 − 旧实际入账值；补 3 个上限反转用例。旧版本投票没有该行，首次改投按票面回退一次（仅历史数据边界） | 已修复（需 MySQL 并发 IT） |
+| Q-54 | 中 | Q-31/Q-35/Q-39 的“标量投影→锁问题→再读回答”仍受 MySQL RR 旧快照影响：并发删除已提交后，投票/评论/编辑仍可能读到未删回答 | `VoteService`、`AnswerCommandService`、`CommentService` 改 `READ_COMMITTED`，锁问题后读取看到已提交删除 | 已修复（需 MySQL 交错 IT） |
+| Q-55 | 中 | 评论删除的级联查询是普通读，并发回复提交后可能漏删，留下孤儿回复 | `CommentService.delete` 改 `READ_COMMITTED`；问题→评论锁序不变 | 已修复（需 MySQL 交错 IT） |
+| Q-56 | 中 | 认证列表请求在 `courseIdsOfUser` 建立 RR 旧快照，可能在读到新代际后把旧页写进新代际，污染约 75 秒缓存 | `QuestionQueryService.list` 改 `READ_COMMITTED` | 已修复（需 MySQL/缓存 IT） |
+| Q-57 | 高（罕见） | 到期退款与 in-flight accept 竞态：退款检查看不到未提交采纳，事件到达时悬赏已 EXPIRED，回答者永远拿不到悬赏 | `expireOne` 先锁问题行，与 accept 串行化，再复查可见采纳 | 已修复（需 MySQL 交错 IT） |
+| Q-58 | 中 | 发起人账户缺失的到期悬赏永远 OPEN，并可能占满到期批次前 100 条，饿死后续悬赏 | 到期时关闭悬赏但不退款（`refunded=0` + 审计/日志），不再抛异常卡住 | 已修复 |
+| Q-59 | 中 | `AnswerAccepted` 处理先写 +15 再 `REQUIRES_NEW` 结算，同一获奖者账户版本冲突，每次悬赏奖励都多一次回滚重投 | 先结算悬赏，再记 +15/徽章，避免外层脏账户与内层提交冲突 | 已修复（需 Spring+MySQL IT） |
+| Q-60 | 低 | 对账漏“有流水但账户缺失且净额为 0”的用户 | 账户缺失即上报，不再只看余额是否相等 | 已修复 |
+| Q-61 | 中 | 投影防御：晚到的 QuestionPosted 可把已删除问题重新插入搜索；编辑遇到缺失投影会静默丢失 | QuestionPosted 先查 Q&A 未删除；`updateText` 返回影响行数，0 行时用编辑事件+Q&A 信息重建 | 已修复（乱序根因在 OutboxRelay，跨模块） |
+| Q-62 | 低 | P4 按 `link` 删通知无索引，问题删除时全表扫描并持有大量 next-key lock | 新增 `V202611270002__notification_link_index.sql` | 已修复 |
+| Q-63 | 中 | P4 初始积分迁移把所有非零账户标记为“已发”；若账户是懒创建且注册事件仍在死信/待重放，会永久少 1000 | 迁移已合入，无法无证据回滚；需人工核对（见下方 SQL），新库/正常顺序不受影响 | 已知限制（需人工核对） |
+| Q-64 | 中 | 排行榜 `rebuild(days)` 只重置有流水的周期 key；部分窗口会丢分、幽灵 key 无法清除、与实时事件无互斥 | 记录为已知限制；建议全学期 rebuild + 独立锁，本次未改 | 已知限制 |
+| Q-65 | 中 | 浏览量刷新锁 TTL 到期后，另一实例可把同一 FLUSHING 批次合并重放；A 的 DB 事务若 10 分钟后才提交会双计 | 需故障注入 IT；建议事务超时 < 锁 TTL 或恢复时保留原 batch id，本次未改 | 已知限制（待故障注入） |
+| Q-66 | 低 | 回答/评论删除后已有通知不清（问题删除已清）；评论删除没有事件 | 记录为已知限制；要修需通知存 targetId 并补评论删除事件 | 已知限制 |
+| Q-67 | 低 | 学生被提升为 TEACHER/TA 不补 1000 悬赏积分；课程级 TA 无积分 | 属产品口径，待 PO 决策；文档不宣称可用 | 待产品确认 |
+| Q-68 | 低 | 对账未检查 `available < 0`、积分守恒、AWARDED 悬赏与流水一一对应 | 净零账户缺失已修；其余记录为缺口 | 部分修复 |
+| Q-69 | 低 | `acceptedAt >= createdAt` 跨实例时钟偏差可能把合法采纳判旧；单实例 compose 不受影响 | 多实例部署需序列号/容忍窗口 | 已知限制（多实例） |
+| Q-70 | 低 | 首账户创建在单 outbox 线程下安全；多实例/调度池 >1 时 read-modify-overwrite 可覆盖注册发放的 1000 | 当前单实例设计；多实例需原子 upsert | 已知限制（多实例） |
+| Q-71 | 低 | 跨模块：OutboxRelay 严格顺序在“批次外新事件”/崩溃窗口下仍可能被越过；同一事件多消费者共命运，死信会丢投影 | 不在青岑模块改；已报告 Outbox 负责人，并在 Q-61 做投影侧防御 | 跨模块遗留 |
 
-> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37/Q-38/Q-39/Q-42/Q-45/Q-46 的真实 MySQL/多实例/故障注入验证、Q-20 的 CI Testcontainers；这些不在本分支伪称完成。
+> **Q-63 人工核对 SQL（需在真实库执行，identity 角色不在 rep 库）**：
+> ```sql
+> -- 找出有注册处理记录、但没有任何 initial-points marker 的账户；
+> -- 再按 identity 的角色确认是否 TEACHER/TA，并核对 1000 分是否确实从未发放。
+> SELECT a.user_id, a.available_points, a.frozen_points, a.reputation
+> FROM rep_account a
+> WHERE a.available_points <> 0 OR a.frozen_points <> 0 OR a.reputation <> 0;
+> -- 只处理“确认从未发放”的账户，人工补 1000 并写入 marker：
+> -- INSERT IGNORE INTO processed_event(event_id, consumer, processed_at)
+> -- VALUES (CONCAT('initial-points:', ?), 'reputation-initial-points', NOW(6));
+> ```
+
+> 剩余未关闭：Q-03/Q-07/Q-10/Q-11/Q-25/Q-27/Q-29/Q-30/Q-31/Q-33/Q-34/Q-35/Q-37/Q-38/Q-39/Q-42/Q-45/Q-46/Q-53/Q-54/Q-55/Q-56/Q-57/Q-59 的真实 MySQL/多实例/故障注入验证、Q-20 的 CI Testcontainers、Q-63/Q-64/Q-65/Q-66/Q-67/Q-68/Q-69/Q-70 的已知限制；这些不在本分支伪称完成。
