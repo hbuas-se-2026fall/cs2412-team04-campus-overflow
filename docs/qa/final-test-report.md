@@ -1,7 +1,7 @@
 # v1.0 最终测试报告（青岑本地复核）
 
-> 日期：2026-11-25
-> 基线：`develop` + 本次 QA 修复分支（含 Q&A 并发、悬赏可见性、缓存/浏览量修复）
+> 日期：2026-11-26
+> 基线：`develop` + 本次 QA 修复分支（含 Q&A 并发、悬赏可见性、缓存/浏览量、通知删除、初始积分幂等修复）
 > 环境：Windows 11 / JDK 21.0.10 / Maven 3.9.2；前端 Node.js
 > 说明：本报告只记录本轮实际跑过的命令；Testcontainers 集成测试需 CI 的 Docker runner，本地未跑。
 
@@ -14,7 +14,7 @@ export PATH="$JAVA_HOME/bin:/e/java内容/IntelliJ IDEA Community Edition 2023.2
 mvn -o test -Djacoco.skip=true -DskipITs
 ```
 
-结果：**BUILD SUCCESS，264 个测试，0 失败 / 0 错误**。
+结果：**BUILD SUCCESS，270 个测试，0 失败 / 0 错误**。
 
 | 模块 | 测试数 |
 | --- | ---: |
@@ -27,14 +27,14 @@ mvn -o test -Djacoco.skip=true -DskipITs
 | `co-qa-application` | 56 |
 | `co-qa-infrastructure` | 6 |
 | `co-reputation-domain` | 20 |
-| `co-reputation-application` | 62 |
+| `co-reputation-application` | 67 |
 | `co-reputation-infrastructure` | 3 |
 | `co-discovery-domain` | 6 |
-| `co-discovery-application` | 26 |
+| `co-discovery-application` | 27 |
 | `co-bootstrap` | 8（ArchUnit 1 + EnvironmentGuard 7） |
 
 > 另有 `CampusOverflowFlowIT` 4 条集成测试由 failsafe 执行，需要 Docker/Testcontainers，本地未跑；
-> 完整口径为 **264 单测 + 4 集成 = 268**。
+> 完整口径为 **270 单测 + 4 集成 = 274**。
 
 ## 二、前端
 

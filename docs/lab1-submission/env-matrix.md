@@ -41,7 +41,7 @@ mvn clean test          # 结果决定第 3 节怎么填，红也要截，见 3.
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 房国栋 | `2177023844` | Windows 11（`10.0.26200`） | 21.0.10（JBR-21.0.10+1-1163.110） | 3.9.11 | v24.18.1 / npm 11.16.0 | **29.9.3**（本机实测，Engine running） | 2026-11-18 | ✅ [`env-fangguodong.png`](env/env-fangguodong.png)（10-29 首采）+ ✅ [`env-fangguodong-docker.png`](env/env-fangguodong-docker.png)（11-18 Docker 二采） | ✅ [`screenshots/mvn-test-fangguodong.png`](screenshots/mvn-test-fangguodong.png)（2026-11-18 全绿）+ 日志 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log) |
 | 魏志国 | `2123345397-star` | Windows 11（`10.0.26200`）Git Bash（MINGW64） | ⚠️ 25.0.2（达标线 21；本机为更高版本，CI 固定 JDK 21） | 3.9.13 | v24.21.0 / npm 11.19.0 | 29.9.2（Engine running） | 2026-11-16 | ✅ [`env-weizhiguo.png`](env/env-weizhiguo.png) | ✅ [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log) + [`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
-| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装（见 §6；全栈 compose 由房国栋机器验证） | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ [`mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png)（截图/日志为 204 历史批次，对应 CI run 45517081755 / `ec27055`；当前本地 HEAD 264 见 `docs/qa/final-test-report.md`；264 的 CI run 待补）+ [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) |
+| 陈明哲 | `cmz666-BOT` | Windows 11（`10.0.26200`） | 21.0.10 | 3.9.9 | v24.21.0 / npm 11.19.0 | ⬜ 未安装（见 §6；全栈 compose 由房国栋机器验证） | 2026-11-16 | ✅ [`env-chenmingzhe.png`](env/env-chenmingzhe.png) | ✅ [`mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png)（截图/日志为 204 历史批次，对应 CI run 45517081755 / `ec27055`；当前本地 HEAD 270 见 `docs/qa/final-test-report.md`；270 的 CI run 待补）+ [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) |
 | 刘俊琒 | `Liujunfeng520` | Microsoft Windows 10.0.19045 | 21.0.11（java/javac 同版本） | 3.9.11 | v24.20.0 / npm 11.19.0 | ⬜ 未安装（见 §6） | 2026-11-17 | ✅ [`env-liujunfeng.png`](env/env-liujunfeng.png) | ✅ [`mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) + [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) |
 | 青岑 | `qing963666` | Microsoft Windows 10.0.26200 | 21.0.10 | 3.9.2 | v26.13.0 / npm 11.20.0 | 29.9.2 | 2026-11-09 | ✅ [`env-qingcen.png`](env/env-qingcen.png) | ✅ [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
@@ -105,7 +105,7 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 | --- | --- | --- | --- | --- |
 | 房国栋 | ❌ 红（预期） | `co-qa-domain`：`TODO(S2)：MarkdownBody.ofQuestion 尚未实现`；18 个用例中 2 失败 13 错误 | ✅ `co-shared-kernel` 2、`co-identity-domain` 9 全绿 | [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log) |
 | 魏志国 | ❌ 红（预期） | `co-discovery-domain`：`TODO(S3)：SearchQuery.terms / RelatedQuestionPolicy 尚未实现`（S3 未开工的 TDD 桩）；1 失败 2 错误 | ✅ shared-kernel 2、identity 9、qa-domain 42、qa-application 32、reputation 36，共 121 条全绿 | [`logs/mvn-test-weizhiguo.log`](logs/mvn-test-weizhiguo.log)、[`screenshots/mvn-test-weizhiguo.png`](screenshots/mvn-test-weizhiguo.png) |
-| 陈明哲 | ✅ 全绿（CI 全量） | 无 | ✅ 该 CI run 为 204 单测（含 FlowIT 4）；当前本地 HEAD 为 264 单测（`docs/qa/final-test-report.md`），264 的 CI run 待补 | [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) + [`screenshots/mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png) |
+| 陈明哲 | ✅ 全绿（CI 全量） | 无 | ✅ 该 CI run 为 204 单测（含 FlowIT 4）；当前本地 HEAD 为 270 单测（`docs/qa/final-test-report.md`），270 的 CI run 待补 | [`logs/mvn-test-chenmingzhe.log`](logs/mvn-test-chenmingzhe.log) + [`screenshots/mvn-test-chenmingzhe.png`](screenshots/mvn-test-chenmingzhe.png) |
 | 刘俊琒 | ✅ 全绿（S4 收口后） | 无 | ✅ 27 个模块、165 个用例全绿 | [`logs/mvn-test-liujunfeng.log`](logs/mvn-test-liujunfeng.log) + [`screenshots/mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png) |
 | 青岑 | ✅ QA 两模块绿（42+32） | 无 | ✅ `co-qa-domain` 42、`co-qa-application` 32 | [`screenshots/mvn-test-qingcen.png`](screenshots/mvn-test-qingcen.png) |
 
@@ -130,7 +130,7 @@ mvn -pl co-shared-kernel test                        # 单独跑，应全绿
 ## 5. E3 关闭条件（逐条打勾才算交付）
 
 - [x] **5/5** 份 `env-<拼音>.png` 齐备（房国栋、魏志国、陈明哲、刘俊琒、青岑）
-- [x] **5/5** 份 `mvn-test-*` 齐备（房国栋/刘俊琒/青岑有本机全绿截图；魏志国 121 条；陈明哲为 CI 全量截图+日志（CI 204 / 本地 HEAD 264），属环境例外已记录）
+- [x] **5/5** 份 `mvn-test-*` 齐备（房国栋/刘俊琒/青岑有本机全绿截图；魏志国 121 条；陈明哲为 CI 全量截图+日志（CI 204 / 本地 HEAD 270），属环境例外已记录）
 - [x] 至少 1 份"已实现模块全绿"证据：房国栋 `screenshots/mvn-test-fangguodong.png`——27 模块 165 用例全绿
 - [x] 本页第 2、3 节表格无空白 ⬜（陈明哲 Docker「未安装」+ 刘俊琒 Docker 例外已在 §6 登记；全栈部署由房国栋机器完成）
 - [x] 版本差异（如有）已写入下方"已知差异"并说明处置
