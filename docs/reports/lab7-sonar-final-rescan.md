@@ -1,7 +1,7 @@
 # Lab 7 · SonarQube 最终复扫证据（Gate PASSED）
 
 > 执行人：房国栋（D，2177023844）　执行日期：2026-11-25 10:20（分析时间戳）
-> 代码基线：`fix/audit-f-findings-fangguodong`（已合入 `develop` @ `3750111`，即含 #209/#216/#230/#232/#233 之后的最终代码）
+> 代码基线：`fix/audit-f-findings-fangguodong`（合入 `develop` @ `3750111`）。**注意：该 baseline 早于当前 HEAD `62332d2`，3750111..HEAD 仍有 78 个 backend 文件变更；本次 Gate PASSED 只对 3750111 成立，最终 HEAD 尚未复扫。**
 > 工具：SonarQube Community Edition 9.9.8（build 100196），`sonarqube:lts-community` 容器，`http://localhost:9000`
 > 结论：**Quality Gate PASSED**（Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 安全热点复核 100%）
 > 本文替代 [`lab7-sonar-rescan.md`](lab7-sonar-rescan.md) 末尾「最终代码未再扫描」的待办状态。

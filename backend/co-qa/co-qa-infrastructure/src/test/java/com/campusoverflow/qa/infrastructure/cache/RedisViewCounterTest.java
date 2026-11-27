@@ -125,7 +125,10 @@ class RedisViewCounterTest {
 
         counter.flush();
 
-        verify(redis).execute(any(RedisScript.class), anyList(), any());
+        verify(redis, org.mockito.Mockito.times(2)).execute(any(RedisScript.class), anyList(),
+                any(Object[].class));
+        verify(redis).execute(any(RedisScript.class), eq(java.util.List.of(RedisViewCounter.PENDING,
+                RedisViewCounter.FLUSHING)), any(Object[].class));
         verify(redis).rename(RedisViewCounter.PENDING, RedisViewCounter.FLUSHING);
     }
 }

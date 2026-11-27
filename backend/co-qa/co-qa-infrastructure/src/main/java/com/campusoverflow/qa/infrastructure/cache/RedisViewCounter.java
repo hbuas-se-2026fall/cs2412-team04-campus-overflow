@@ -49,6 +49,7 @@ public class RedisViewCounter implements ViewCounter {
                 redis.call('HINCRBY', KEYS[1], ARGV[i], ARGV[i + 1])
                 redis.call('HDEL', KEYS[2], ARGV[i])
             end
+            redis.call('HDEL', KEYS[2], '__batch_id')
             if redis.call('HLEN', KEYS[2]) == 0 then
                 redis.call('DEL', KEYS[2])
             end
