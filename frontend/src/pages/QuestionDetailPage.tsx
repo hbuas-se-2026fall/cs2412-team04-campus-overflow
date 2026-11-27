@@ -16,7 +16,9 @@ export function QuestionDetailPage() {
 
   const [q, setQ] = useState<QuestionDetail | null>(null);
   const [state, setState] = useState<PageState>('loading');
-  const [related, setRelated] = useState<{ id: number; title: string }[]>([]);
+  const [related, setRelated] = useState<
+    { id: number; title: string; answerCount: number; accepted: boolean; similarity: number }[]
+  >([]);
   // 审计 P-51：原实现 .catch(() => undefined) 把失败吞成「暂无相关问题」，用户看不出是加载失败
   const [relatedError, setRelatedError] = useState('');
   const [relatedReloadKey, setRelatedReloadKey] = useState(0);
@@ -269,6 +271,12 @@ export function QuestionDetailPage() {
             {related.map((r) => (
               <li key={r.id}>
                 <Link to={`/questions/${r.id}`}>{r.title}</Link>
+                {/* 验收标准 6.5.3：相关问题需展示相似度（后端 RelatedQuestionView.similarity） */}
+                <span className="muted">
+                  {' '}
+                  · 相似度 {Math.round(r.similarity * 100)}% · {r.answerCount} 回答
+                  {r.accepted ? ' · 已采纳' : ''}
+                </span>
               </li>
             ))}
             {related.length === 0 && <li className="muted">暂无相关问题</li>}
