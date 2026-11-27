@@ -85,6 +85,49 @@ class ReputationSettlementTest {
     }
 
     @Test
+    @DisplayName("被上限截断为 +5 的赞，撤销时只扣实际入账的 5 分")
+    void removingCappedUpvoteReversesOnlyCreditedDelta() {
+        fx.seedAccount(2, 195, 0, 0);
+        fx.seedVoteGain(2, 195);
+
+        fx.handlers.on(new VoteCastEvent("evt-cap-up", fx.clock.instant(), "ANSWER", 60, 2, 1, 10, 0, 1));
+        fx.handlers.on(new VoteCastEvent("evt-cap-remove", fx.clock.instant(), "ANSWER", 60, 2, 1, 10, 1, 0));
+
+        assertThat(fx.accounts.findByUserId(2).orElseThrow().reputation()).isEqualTo(195);
+        assertThat(fx.ledger.sumFor(2)).isEqualTo(195);
+    }
+
+    @Test
+    @DisplayName("到上限后「赞→撤」反复切换不会绕过上限刷负分")
+    void cappedVoteToggleCannotDriveReputationNegative() {
+        fx.seedAccount(2, 200, 0, 0);
+        fx.seedVoteGain(2, 200);
+
+        for (int i = 0; i < 5; i++) {
+            fx.handlers.on(new VoteCastEvent("evt-toggle-up-" + i, fx.clock.instant(),
+                    "ANSWER", 60, 2, 1, 10, 0, 1));
+            fx.handlers.on(new VoteCastEvent("evt-toggle-remove-" + i, fx.clock.instant(),
+                    "ANSWER", 60, 2, 1, 10, 1, 0));
+        }
+
+        assertThat(fx.accounts.findByUserId(2).orElseThrow().reputation()).isEqualTo(200);
+        assertThat(fx.ledger.sumFor(2)).isEqualTo(200);
+    }
+
+    @Test
+    @DisplayName("到上限后踩改赞：先退回已扣的 2 分，不再继续加正向分")
+    void downvoteToUpvoteAtCapReversesPenaltyOnly() {
+        fx.seedAccount(2, 200, 0, 0);
+        fx.seedVoteGain(2, 200);
+        fx.handlers.on(new VoteCastEvent("evt-down-at-cap", fx.clock.instant(),
+                "ANSWER", 60, 2, 1, 10, 0, -1));
+        fx.handlers.on(new VoteCastEvent("evt-down-to-up-at-cap", fx.clock.instant(),
+                "ANSWER", 60, 2, 1, 10, -1, 1));
+
+        assertThat(fx.accounts.findByUserId(2).orElseThrow().reputation()).isEqualTo(200);
+    }
+
+    @Test
     @DisplayName("悬赏结算：采纳后获奖者 +50，发起人冻结清零，重复事件不重复结算")
     void acceptedAnswerSettlesBountyOnce() {
         Actor teacher = fx.teacher(9);

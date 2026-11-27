@@ -214,7 +214,9 @@ class DiscoveryQueryServiceTest {
         }
 
         @Override public void insert(SearchDocument document) { }
-        @Override public void updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) { }
+        @Override public int updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
+            return 0;
+        }
         @Override public void adjustAnswerCount(long questionId, int delta, Instant at) { }
         @Override public void adjustScore(long questionId, int delta) { }
         @Override public void markAccepted(long questionId, Instant at) { }

@@ -47,8 +47,13 @@ public class ReconciliationService {
 
         for (Long userId : userIds) {
             ReputationAccount account = byUser.get(userId);
-            int accountReputation = account == null ? 0 : account.reputation();
             long ledgerSum = ledgerSums.getOrDefault(userId, 0L);
+            // 账户行缺失本身就要报，哪怕流水的净和为 0（+10 后被撤销的净零用户）。
+            if (account == null) {
+                mismatches.add(new Mismatch(userId, 0, ledgerSum));
+                continue;
+            }
+            int accountReputation = account.reputation();
             if (accountReputation != ledgerSum) {
                 mismatches.add(new Mismatch(userId, accountReputation, ledgerSum));
             }

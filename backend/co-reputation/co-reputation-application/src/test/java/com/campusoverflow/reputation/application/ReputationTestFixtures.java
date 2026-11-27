@@ -16,6 +16,8 @@ import com.campusoverflow.reputation.domain.LedgerRepository;
 import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
+import com.campusoverflow.reputation.domain.VoteAward;
+import com.campusoverflow.reputation.domain.VoteAwardRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
 import com.campusoverflow.shared.event.IntegrationEvent;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -87,6 +89,7 @@ public class ReputationTestFixtures {
     public final MutableClock clock = new MutableClock(Instant.parse("2026-10-10T10:00:00Z"));
     public final InMemoryAccounts accounts = new InMemoryAccounts();
     public final InMemoryLedger ledger = new InMemoryLedger();
+    public final InMemoryVoteAwards voteAwards = new InMemoryVoteAwards();
     public final InMemoryBadges badges = new InMemoryBadges();
     public final InMemoryBounties bounties = new InMemoryBounties();
     public final RecordingEvents events = new RecordingEvents();
@@ -104,7 +107,7 @@ public class ReputationTestFixtures {
 
     public ReputationTestFixtures() {
         this.badgeService = new BadgeService(badges, events, clock);
-        this.ledgerService = new ReputationLedgerService(accounts, ledger, badgeService, events, clock);
+        this.ledgerService = new ReputationLedgerService(accounts, ledger, voteAwards, badgeService, events, clock);
         this.bountyService = new BountyService(bounties, accounts, ledgerService, qa, identity, events, audit, clock);
         this.handlers = new ReputationEventHandlers(accounts, ledger, ledgerService, badgeService, bountyService,
                 processedStore, clock);
@@ -272,6 +275,26 @@ public class ReputationTestFixtures {
 
         public List<LedgerEntry> all() {
             return List.copyOf(entries);
+        }
+    }
+
+    /** 内存投票实际入账状态：按 (voterId, targetType, targetId) 唯一。 */
+    public static final class InMemoryVoteAwards implements VoteAwardRepository {
+
+        private final Map<String, VoteAward> store = new LinkedHashMap<>();
+
+        @Override
+        public Optional<VoteAward> find(long voterId, String targetType, long targetId) {
+            return Optional.ofNullable(store.get(key(voterId, targetType, targetId)));
+        }
+
+        @Override
+        public void save(VoteAward award) {
+            store.put(key(award.voterId(), award.targetType(), award.targetId()), award);
+        }
+
+        private static String key(long voterId, String targetType, long targetId) {
+            return voterId + ":" + targetType + ":" + targetId;
         }
     }
 

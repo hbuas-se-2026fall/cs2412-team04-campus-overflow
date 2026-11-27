@@ -9,6 +9,7 @@ import com.campusoverflow.discovery.domain.search.SearchIndex;
 import com.campusoverflow.qa.api.event.AnswerAcceptedEvent;
 import com.campusoverflow.qa.api.event.AnswerSubmittedEvent;
 import com.campusoverflow.qa.api.QaQueryApi;
+import com.campusoverflow.qa.api.QuestionRef;
 import com.campusoverflow.qa.api.event.ContentDeletedEvent;
 import com.campusoverflow.qa.api.event.QuestionEditedEvent;
 import com.campusoverflow.qa.api.event.QuestionPostedEvent;
@@ -51,6 +52,10 @@ public class SearchIndexProjector {
         if (!firstTime(e)) {
             return;
         }
+        // 防御乱序：若 ContentDeleted 已先被消费（或死信重放），不能再把已删除问题插回索引。
+        if (qa.findQuestion(e.questionId()).filter(q -> !q.deleted()).isEmpty()) {
+            return;
+        }
         index.insert(new SearchDocument(e.questionId(), e.courseId(), e.authorId(), e.title(), e.plainText(),
                 e.tags(), e.occurredAt()));
     }
@@ -61,7 +66,16 @@ public class SearchIndexProjector {
         if (!firstTime(e)) {
             return;
         }
-        index.updateText(e.questionId(), e.title(), e.plainText(), e.tags(), e.occurredAt());
+        QuestionRef current = qa.findQuestion(e.questionId()).filter(q -> !q.deleted()).orElse(null);
+        if (current == null) {
+            return;
+        }
+        int updated = index.updateText(e.questionId(), e.title(), e.plainText(), e.tags(), e.occurredAt());
+        if (updated == 0) {
+            // 投影缺失（如 QuestionPosted 曾失败）：用编辑事件 + Q&A 的课程/作者信息重建，避免编辑永久丢失。
+            index.insert(new SearchDocument(e.questionId(), current.courseId(), current.authorId(), e.title(),
+                    e.plainText(), e.tags(), e.occurredAt()));
+        }
     }
 
     @EventListener

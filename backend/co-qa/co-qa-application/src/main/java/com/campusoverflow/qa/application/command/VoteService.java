@@ -20,6 +20,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -55,7 +56,9 @@ public class VoteService {
     private record Target(long authorId, long questionId, Long courseId) {
     }
 
-    @Transactional
+    // READ_COMMITTED：先做的 findQuestionId 只能当“定位投影”，不能留下 RR 旧快照；
+    // 锁问题行后必须让 answers.findById 看到并发删除已提交的结果，否则会给已删回答投票。
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public VoteResult cast(Actor actor, TargetType type, long targetId, int value) {
         if (value < -1 || value > 1) {
             throw new BusinessRuleException("QA-1014", "投票值只能是 -1、0 或 1");

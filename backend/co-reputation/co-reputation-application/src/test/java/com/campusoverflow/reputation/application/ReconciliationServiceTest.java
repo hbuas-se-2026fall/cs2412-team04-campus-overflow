@@ -76,6 +76,19 @@ class ReconciliationServiceTest {
     }
 
     @Test
+    void shouldReportNetZeroLedgerUserWithMissingAccountRow() {
+        when(accounts.findAll()).thenReturn(List.of());
+        when(ledger.sumByUser()).thenReturn(Map.of(9L, 0L));
+
+        var mismatches = reconciliationService.reconcile();
+
+        assertThat(mismatches).hasSize(1);
+        assertThat(mismatches.getFirst().userId()).isEqualTo(9L);
+        assertThat(mismatches.getFirst().accountReputation()).isZero();
+        assertThat(mismatches.getFirst().ledgerSum()).isZero();
+    }
+
+    @Test
     void pointsReconcilePassesWhenFrozenEqualsOpenBounties() {
         ReputationAccount account = ReputationAccount.reconstitute(1L, 0, 950, 50, 0L);
         when(accounts.findAll()).thenReturn(List.of(account));

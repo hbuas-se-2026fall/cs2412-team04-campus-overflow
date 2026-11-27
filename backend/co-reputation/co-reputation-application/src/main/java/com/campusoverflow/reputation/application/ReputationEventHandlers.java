@@ -18,9 +18,6 @@ import com.campusoverflow.shared.domain.ConflictException;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.event.ProcessedEventStore;
 import java.time.Clock;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneOffset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.event.EventListener;
@@ -78,24 +75,26 @@ public class ReputationEventHandlers {
         accounts.save(account);
     }
 
-    /** 场景 R-2 的异步后半段：采纳 → 回答者 +15 → 徽章 → 悬赏结算。 */
+    /** 场景 R-2 的异步后半段：采纳 → 悬赏结算 → 回答者 +15 → 徽章。 */
     @EventListener
     @Transactional
     public void on(AnswerAcceptedEvent e) {
+        try {
+            // 先做 REQUIRES_NEW 的悬赏结算：它会把 +50 写进获奖者账户并提交。
+            // 若先在本事务里把同一账户改脏（+15 尚未 flush），内层提交后外层再 flush 会命中
+            // 旧 @Version，导致整条事件回滚重投（Q-33 之后的隐藏重试）。
+            bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.questionAuthorId(),
+                    e.acceptedById(), e.occurredAt(), e.eventId());
+        } catch (BusinessRuleException | ConflictException | NotFoundException ex) {
+            // 悬赏数据脏/已结算不能回滚随后要做的采纳加分/徽章；记录后交给对账处理。
+            log.warn("采纳事件 {} 的悬赏结算跳过：{}", e.eventId(), ex.getMessage());
+        }
         int delta = ReputationRulebook.acceptedDelta(e.answerAuthorId(), e.questionAuthorId());
         ledgerService.record(e.answerAuthorId(), e.eventId(), ReputationReason.ANSWER_ACCEPTED, delta,
                 "ANSWER", e.answerId());
         long acceptedCount = ledger.countByUserAndReason(e.answerAuthorId(), ReputationReason.ANSWER_ACCEPTED);
         BadgePolicy.forAcceptedCount(acceptedCount)
                 .forEach(type -> badges.grant(e.answerAuthorId(), type));
-        try {
-            // REQUIRES_NEW：悬赏子事务失败只回滚悬赏，不会把本 handler 的 +15/徽章一并标记回滚。
-            bounties.settleOnAccept(e.questionId(), e.answerId(), e.answerAuthorId(), e.questionAuthorId(),
-                    e.acceptedById(), e.occurredAt(), e.eventId());
-        } catch (BusinessRuleException | ConflictException | NotFoundException ex) {
-            // 悬赏数据脏/已结算不能回滚已经完成的采纳加分/徽章；记录后交给对账处理。
-            log.warn("采纳事件 {} 的悬赏结算跳过：{}", e.eventId(), ex.getMessage());
-        }
     }
 
     @EventListener
@@ -111,13 +110,10 @@ public class ReputationEventHandlers {
         }
         ReputationReason reason = "QUESTION".equalsIgnoreCase(e.targetType())
                 ? ReputationReason.QUESTION_VOTE : ReputationReason.ANSWER_VOTE;
-        // 审计魏-11：日累计的求和已移入 ledgerService 的账户行锁内（recordVoteCapped），
-        // 避免「先求和、后加载账户」两步之间被并发投票读到旧值；截断为 0 时不写流水。
-        Instant todayStart = LocalDate.now(clock.withZone(ZoneOffset.UTC))
-                .atStartOfDay(ZoneOffset.UTC).toInstant();
-        ledgerService.recordVoteCapped(e.targetAuthorId(), e.eventId(), reason, delta,
-                e.targetType(), e.targetId(),
-                () -> ledger.sumPositiveVoteDeltaSince(e.targetAuthorId(), todayStart));
+        // 日累计、实际入账值与改投回滚都在 ledgerService 的账户行锁内完成，
+        // 避免「先求和、后加载账户」两步之间被并发投票读到旧值；被截断为 0 也不再写流水。
+        ledgerService.recordVoteCapped(e.targetAuthorId(), e.eventId(), reason,
+                e.oldValue(), e.newValue(), e.voterId(), e.targetType(), e.targetId());
     }
 
     @EventListener

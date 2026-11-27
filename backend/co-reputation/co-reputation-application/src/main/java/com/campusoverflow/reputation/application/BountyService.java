@@ -214,14 +214,23 @@ public class BountyService {
         if (bounty.status() != BountyStatus.OPEN || !bounty.isDue(now)) {
             return false;
         }
+        // 锁问题行：与 AnswerCommandService.accept 使用同一把锁。否则“查到没有采纳 → 退款提交”
+        // 之间并发 accept 已提交时，会把本应发给回答者的悬赏退掉，且结算事件之后找不到 OPEN 悬赏。
+        qa.findQuestionForUpdate(bounty.questionId());
         // 采纳事件可能已发生但尚在 outbox：问题已有可见采纳回答时先不退款，
-        // 让 AnswerAcceptedEvent 按“采纳优先”结算；若事件永久丢失，下一轮仍会重试。
+        // 让 AnswerAcceptedEvent 按“采纳优先”结算。若事件已死信，需要人工重放（本方法不会永久重试）。
         if (qa.hasVisibleAcceptedAnswer(bounty.questionId())) {
             return false;
         }
-        ReputationAccount sponsor = accounts.findByUserId(bounty.sponsorId())
-                .orElseThrow(() -> new NotFoundException("REP-4001", "悬赏发起人账户不存在"));
-        closeAndRefund(bounty, sponsor, now);
+        Optional<ReputationAccount> sponsor = accounts.findByUserId(bounty.sponsorId());
+        if (sponsor.isEmpty()) {
+            // 发起人账户已丢失（历史脏数据/人工清理）：无法退款，但必须把悬赏关闭，
+            // 否则它会永远停在 OPEN 并占住到期批次的前 100 条。
+            log.error("悬赏 {} 的发起人账户 {} 不存在，关闭悬赏但不退款", bounty.id(), bounty.sponsorId());
+            closeWithoutRefund(bounty, now);
+            return true;
+        }
+        closeAndRefund(bounty, sponsor.get(), now);
         return true;
     }
 
@@ -273,5 +282,15 @@ public class BountyService {
                 bounty.sponsorId(), bounty.points()));
         audit.record("BOUNTY_CLOSE", null, "BOUNTY", String.valueOf(saved.id()),
                 "question=" + bounty.questionId() + ",refunded=" + bounty.points());
+    }
+
+    /** 发起人账户缺失时只关闭悬赏，不退款（没有账户可退）；审计里明确记 refunded=0。 */
+    private void closeWithoutRefund(Bounty bounty, Instant now) {
+        bounty.close(now);
+        Bounty saved = bounties.save(bounty);
+        events.publish(new BountyClosedEvent(EventIds.next(), now, saved.id(), bounty.questionId(),
+                bounty.sponsorId(), 0));
+        audit.record("BOUNTY_CLOSE", null, "BOUNTY", String.valueOf(saved.id()),
+                "question=" + bounty.questionId() + ",refunded=0,sponsorMissing");
     }
 }

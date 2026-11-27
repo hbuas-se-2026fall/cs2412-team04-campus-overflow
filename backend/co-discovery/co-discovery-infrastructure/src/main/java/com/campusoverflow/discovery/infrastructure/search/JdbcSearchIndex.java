@@ -37,13 +37,16 @@ public class JdbcSearchIndex implements SearchIndex {
     }
 
     @Override
-    public void updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
-        jdbc.update("""
+    public int updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
+        int updated = jdbc.update("""
                 UPDATE dis_search_doc SET title = :title, body_text = :body, tag_count = :tagCount,
                        last_activity_at = :at WHERE question_id = :id
                 """, new MapSqlParameterSource().addValue("id", questionId).addValue("title", title)
                 .addValue("body", bodyText).addValue("tagCount", tags.size()).addValue("at", UtcTime.toDb(at)));
-        replaceTags(questionId, tags);
+        if (updated > 0) {
+            replaceTags(questionId, tags);
+        }
+        return updated;
     }
 
     @Override

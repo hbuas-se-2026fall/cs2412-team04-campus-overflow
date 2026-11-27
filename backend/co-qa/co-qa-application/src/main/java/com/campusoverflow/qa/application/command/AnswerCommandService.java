@@ -21,6 +21,7 @@ import com.campusoverflow.shared.security.Actor;
 import java.time.Clock;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /** 用例：提交 / 编辑 / 删除回答，采纳最佳答案，教师认证。 */
@@ -47,7 +48,7 @@ public class AnswerCommandService {
         this.clock = clock;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public long submit(Actor actor, long questionId, String body) {
         Question question = loadQuestion(questionId);
         requireCanParticipate(question, actor);
@@ -67,7 +68,7 @@ public class AnswerCommandService {
         return answer.id();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void edit(Actor actor, long answerId, String body) {
         // 先用标量投影拿 questionId，不把 Answer 加载进一级缓存；锁问题后再读一次回答。
         long questionId = loadAnswerQuestionId(answerId);
@@ -81,7 +82,7 @@ public class AnswerCommandService {
         answers.save(answer);
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(Actor actor, long answerId) {
         long questionId = loadAnswerQuestionId(answerId);
         Question question = loadQuestionForUpdate(questionId);
@@ -111,7 +112,7 @@ public class AnswerCommandService {
         listCache.invalidateAll();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void accept(Actor actor, long questionId, long answerId) {
         // 先锁问题再读回答：与“删除回答”使用同一把锁，二者不再能同时基于旧快照通过校验。
         Question question = loadQuestionForUpdate(questionId);
@@ -138,7 +139,7 @@ public class AnswerCommandService {
         listCache.invalidateAll();
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void endorse(Actor actor, long answerId) {
         long questionId = loadAnswerQuestionId(answerId);
         Question question = loadQuestionForUpdate(questionId);
