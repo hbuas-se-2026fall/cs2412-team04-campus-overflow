@@ -1,7 +1,7 @@
 # 3. 质量证据
 
 > 答辩口径：先给结论（CI 门禁全绿、覆盖率达标、端到端可跑、**Sonar 质量门禁 PASSED**），再按需展开 CI 与报告。
-> 数据截至：2026-11-25（最新 CI 全量 + 四域覆盖率重采）。
+> 数据截至：2026-11-27（最新 CI 全量 + 四域覆盖率重采）。
 
 ## 3.1 CI 门禁（五个后端阶段 + 前端）
 
@@ -24,36 +24,38 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 
 | 模块 | 测试数 | 行覆盖率 | 门槛 |
 | --- | ---: | ---: | --- |
-| co-shared-kernel | 2 | — | — |
+| co-shared-kernel | 3 | — | — |
 | co-identity-domain | 13 | 77.30% | ✅ ≥70% |
-| co-identity-application | 3 | — | — |
-| co-qa-domain | 42 | 81.86% | ✅ |
+| co-identity-application | 8 | — | — |
+| co-identity-infrastructure | 1 | — | — |
+| co-qa-domain | 44 | 82.57% | ✅ |
 | co-qa-api | 8 | — | — |
-| co-qa-application | 45 | — | — |
-| co-qa-infrastructure | 3 | — | — |
-| co-reputation-domain | 20 | 81.93% | ✅ |
-| co-reputation-application | 38 | — | — |
+| co-qa-application | 56 | — | — |
+| co-qa-infrastructure | 6 | — | — |
+| co-reputation-domain | 20 | 80.00% | ✅ |
+| co-reputation-application | 62 | — | — |
+| co-reputation-infrastructure | 3 | — | — |
 | co-discovery-domain | 6 | 78.49% | ✅ |
-| co-discovery-application | 19 | — | — |
-| co-bootstrap | 5（ArchUnit 1 + FlowIT 4） | — | 分层约束 + 端到端 |
+| co-discovery-application | 26 | — | — |
+| co-bootstrap | 12（ArchUnit 1 + FlowIT 4 + 其他 7） | — | 分层约束 + 端到端 |
 
 > 覆盖率来自 JaCoCo `jacoco.csv` 汇总（LINE COVERED / (COVERED+MISSED)）；四个 domain 模块均通过 `check-domain-coverage`。
 
-> 2026-11-25 CI 全量 **204** 个用例（surefire/failsafe XML 汇总；含 `CampusOverflowFlowIT` 4 个）。此前的 168/174 为 11-18/11-23 的历史批次，已过期。
+> 2026-11-27 CI 全量 **268** 个用例（surefire/failsafe XML 汇总；其中 FlowIT 4 个）。此前的 168/174/204 为历史批次，已过期。
 
 四个 domain 模块的报告截图与原始 CSV 逐模块归档（不复用同一张图，便于当场复核）：
 
 | 模块 | 行覆盖 | 行覆盖率 | 分支覆盖 | 报告截图 | 原始 CSV |
 | --- | ---: | ---: | ---: | --- | --- |
 | `co-identity-domain` | 109 / 141 | **77.30%** | 54 / 80（67.50%） | [`coverage-identity.png`](screenshots/coverage/coverage-identity.png) | [`coverage-identity.csv`](screenshots/coverage/coverage-identity.csv) |
-| `co-qa-domain` | 194 / 237 | **81.86%** | 71 / 94（75.53%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
-| `co-reputation-domain` | 136 / 166 | **81.93%** | 46 / 56（82.14%） | [`coverage-reputation.png`](screenshots/coverage/coverage-reputation.png) | [`coverage-reputation.csv`](screenshots/coverage/coverage-reputation.csv) |
+| `co-qa-domain` | 199 / 241 | **82.57%** | 76 / 100（76.00%） | [`coverage-qa.png`](screenshots/coverage/coverage-qa.png) | [`coverage-qa.csv`](screenshots/coverage/coverage-qa.csv) |
+| `co-reputation-domain` | 136 / 170 | **80.00%** | 46 / 58（79.31%） | [`coverage-reputation.png`](screenshots/coverage/coverage-reputation.png) | [`coverage-reputation.csv`](screenshots/coverage/coverage-reputation.csv) |
 | `co-discovery-domain` | 73 / 93 | **78.49%** | 42 / 62（67.74%） | [`coverage-discovery.png`](screenshots/coverage/coverage-discovery.png) | [`coverage-discovery.csv`](screenshots/coverage/coverage-discovery.csv) |
 
 | | |
 | :---: | :---: |
-| ![co-identity-domain 77.30%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 81.86%](screenshots/coverage/coverage-qa.png) |
-| ![co-reputation-domain 81.93%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.49%](screenshots/coverage/coverage-discovery.png) |
+| ![co-identity-domain 77.30%](screenshots/coverage/coverage-identity.png) | ![co-qa-domain 82.57%](screenshots/coverage/coverage-qa.png) |
+| ![co-reputation-domain 80.00%](screenshots/coverage/coverage-reputation.png) | ![co-discovery-domain 78.49%](screenshots/coverage/coverage-discovery.png) |
 
 > 采集口径与复现命令见 [`screenshots/coverage/README.md`](screenshots/coverage/README.md)（采集人 陈明哲，2026-11-25，基于最新 CI `jacoco-coverage-reports` 工件重新生成 CSV/截图）。
 
@@ -70,7 +72,7 @@ S4 收口起删除 `SPRINT_MODULES`，单元测试与覆盖率门禁恢复全量
 
 | 状态 | 条目 |
 | --- | --- |
-| 已修复 | BUG-001 课程页、BUG-002 PR 无 CI、BUG-003 分支保护必需检查、BUG-004 DDD 不一致、BUG-005 提交身份、BUG-006 团队文档/ADR-009 |
+| 已修复 | BUG-001 课程页、BUG-002 PR 无 CI、BUG-003 分支保护必需检查、BUG-004 DDD 不一致（14 事件版，PNG 已重绘）、BUG-005 提交身份、BUG-006 团队文档/ADR-009 |
 
 BUG-003 于 2026-11-17 复核关闭：`main` 为 2 Approve + 后端/前端/容器三项必需检查，`develop` 为 1 Approve + 后端/前端两项必需检查（规则集 `develop required checks`，`enforce_admins=true`）；`容器镜像构建` 因 `if` 限定 `push` / `base=main`，只挂 `main`。证据见 [`docs/qa/defects.md`](../qa/defects.md#复核记录)。
 

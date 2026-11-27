@@ -25,5 +25,11 @@
 4. 相关文档已同步更新（接口、错误码、架构或术语变更时）。
 5. PR 已合并到目标分支、功能分支已删除，看板卡片已移入 Done。
 6. 无明文密钥、无调试残留（console.log、注释掉的代码块等）。
+7. `ArchitectureTest`（ArchUnit）通过，领域分层/依赖未被放宽。
+8. 四个 domain 模块行覆盖率 ≥ 70%（`mvn verify -DskipITs -Djacoco.skip=false`）。
+9. PR 的后端 `后端构建与验证` 与前端 `前端构建` 双绿；PR→main 另需 `容器镜像构建` 绿。
+10. Swagger/OpenAPI 页面可打开，新增/修改接口可在 Swagger 调用。
+11. 本地 `docker compose -f deploy/docker-compose.dev.yml up -d --build` 能起 MySQL/Redis/后端/前端，health=UP。
+12. 接口错误码与 `docs/错误码.md` 一致；新增错误码已登记。
 
-判定方式：以上 6 条全部有客观证据（CI 结果、评审记录、场景运行结果、合并记录），缺一不可，否则不允许宣称“完成”。
+判定方式：以上 12 条全部有客观证据（CI 结果、评审记录、场景运行结果、合并记录），缺一不可，否则不允许宣称“完成”。
