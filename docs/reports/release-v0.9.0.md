@@ -2,7 +2,7 @@
 
 > 状态：**RC（Release Candidate）**　日期：2026-11-16
 > 目标分支：`develop`（PR #126）；正式发布仍按「develop → main 发布 PR → 打 tag」流程复核
-> 范围：PB-31～PB-40（搜索 / 相关推荐 / 通知中心）
+> 范围：PB-31～PB-39（搜索 / 相关推荐 / 通知中心，31 SP）；PB-40（禁用违规账号，5 SP）属 S4（T4-02），不计入本版本——与 `docs/scrum/sprint-3.md` 及 `product-backlog.md` 的迭代归属一致（审计 W-31 更正）
 
 ## 一、本版本包含
 
