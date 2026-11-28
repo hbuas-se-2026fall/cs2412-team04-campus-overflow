@@ -6,9 +6,9 @@
 
 | 文件 | 场景 | 图中要点 |
 | --- | --- | --- |
-| [`admin-users-pending.png`](admin-users-pending.png) | 管理员登录后进入 `/admin` | 右上角 `ADMIN`、导航有「管理」；当前待认证学生 2 人（`SeedUser`/`TestStudent`），含认证/改角色/禁用按钮、分页 |
+| [`admin-users-pending.png`](admin-users-pending.png) | 管理员登录后进入 `/admin` | 右上角 `ADMIN`、导航有「管理」；当前待认证学生 2 人（`SeedUser`/`TestStudent`），含认证/改角色/禁用按钮、分页（2026-11-17 历史截图，见文末说明） |
 | [`admin-forbidden.png`](admin-forbidden.png) | 学生登录后直接访问 `/admin` | 导航没有「管理」；页面显示「无权限访问 / 管理页仅管理员可用」 |
-| [`admin-verify.png`](admin-verify.png) | 对 `TestStudent` 点「认证」 | 绿色提示“已认证 TestStudent”；待认证列表从 3 人变 2 人 |
+| [`admin-verify.png`](admin-verify.png) | 对 `TestStudent` 点「认证」 | 绿色提示“已认证 TestStudent”；待认证列表从 3 人变 2 人（2026-11-17 历史截图，见文末说明） |
 | [`admin-create-staff.png`](admin-create-staff.png) | 创建教职工账号 `T9001` | 绿色提示“教职工账号已创建”；已认证用户出现“测试教师 / 教师” |
 | [`admin-change-role.png`](admin-change-role.png) | 将 `测试教师` 从教师改为助教 | 绿色提示“已将 测试教师 的角色改为助教”；角色列显示“助教” |
 | [`admin-disable.png`](admin-disable.png) | 对 `TestStudent` 点「禁用」并确认 | 绿色提示“已禁用 TestStudent，其现有会话已失效”；角色列显示“学生（已禁用）”，操作区显示“已禁用”，认证/改角色/禁用按钮均消失（2026-11-27 当前构建） |
