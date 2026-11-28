@@ -181,8 +181,8 @@ mvn -B sonar:sonar \
 | Lab 7 · JaCoCo 报告与 70% 门禁 | ✅ 既有 | 4 个 domain 模块的 `check-domain-coverage` |
 | Lab 7 · 同行评审清单 | ✅ 已入库 | [`docs/team/peer-review-checklist.md`](../team/peer-review-checklist.md) |
 | Lab 7 · SonarQube 配置与 CI 接入 | ✅ 已配置（凭 token 启用） | `sonar-project.properties`、`backend/pom.xml`、`ci.yml` 阶段 6 |
-| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ 已跑通（修复前 Failed → 复扫后剩 1 Bug，见 §4.6b） | `docs/screenshots/lab7-sonar/`（修复前）+ [`lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)（复扫） |
-| Lab 7 · SonarQube 重扫截图 | ✅ **已执行（2026-11-23）** | 六张见 [`screenshots/lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)；结果见 §4.6b |
+| Lab 7 · 真实 Dashboard 截图 + Quality Gate 跑通 | ✅ **PASSED**（2026-11-25 最终代码复扫） | `docs/screenshots/lab7-sonar/`（修复前）+ [`lab7-sonar-rescan/`](../screenshots/lab7-sonar-rescan/)（中间轮）+ [`lab7-sonar-final/`](../screenshots/lab7-sonar-final/)（最终） |
+| Lab 7 · SonarQube 重扫截图 | ✅ **已终态（2026-11-25）** | 五张见 [`screenshots/lab7-sonar-final/`](../screenshots/lab7-sonar-final/)；结果见 [`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md)：Bugs 0 / Vulnerabilities 0 / Coverage 73.8% / 219 单测 |
 
 ---
 
@@ -333,7 +333,10 @@ Pattern.compile("^[\\w.+-]+@[\\w-]+(\\.[\\w-]+)*$")
 - **方案 B（改判定，未采用）**：保留当前正则并标 `Won't Fix`；理由里的 `@Size(max=254)` 是错误数字，实际 DTO 与领域上限为 **100**。
 
 > 结论：这条**不应再靠试正则关闭**，需 PO / 身份上下文负责人选一个方案显式处置。
-> 处置后门禁即可 PASSED；在此之前，Lab 7 的「质量门禁」事实是 **Failed 且原因已定位**。
+>
+> ✅ **终态（2026-11-25）**：按方案 A 处置后，在最终代码上复扫，`S5998` 已归零，Quality Gate **PASSED**。
+> 完整证据（Bugs 0 / Vulnerabilities 0 / 安全热点 100% 复核 / Coverage 73.8% / 219 单测）见
+> [`lab7-sonar-final-rescan.md`](lab7-sonar-final-rescan.md) 与 [`screenshots/lab7-sonar-final/`](../screenshots/lab7-sonar-final/)。
 
 ---
 

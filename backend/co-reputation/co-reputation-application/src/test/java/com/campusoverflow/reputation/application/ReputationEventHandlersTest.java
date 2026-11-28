@@ -54,6 +54,34 @@ class ReputationEventHandlersTest {
     }
 
     @Test
+    @DisplayName("账户先被其他事件懒创建为 0，后到的教师注册事件仍补 1000 初始积分")
+    void teacherRegistrationRepairsLazilyCreatedZeroAccount() {
+        fx.seedAccount(9, 0, 0, 0);
+        UserRegisteredEvent event = new UserRegisteredEvent("evt-user-late", fx.clock.instant(), 9, "王老师",
+                Role.TEACHER);
+
+        fx.handlers.on(event);
+        fx.handlers.on(event);
+
+        ReputationAccount account = fx.accounts.findByUserId(9).orElseThrow();
+        assertThat(account.availablePoints()).isEqualTo(1000);
+    }
+
+    @Test
+    @DisplayName("账户已有声誉但尚未发初始积分，后到注册事件仍补 1000")
+    void teacherRegistrationRepairsLazilyCreatedNonZeroAccount() {
+        fx.seedAccount(9, 5, 0, 0);
+        UserRegisteredEvent event = new UserRegisteredEvent("evt-user-late-2", fx.clock.instant(), 9, "王老师",
+                Role.TEACHER);
+
+        fx.handlers.on(event);
+
+        ReputationAccount account = fx.accounts.findByUserId(9).orElseThrow();
+        assertThat(account.availablePoints()).isEqualTo(1000);
+        assertThat(account.reputation()).isEqualTo(5);
+    }
+
+    @Test
     @DisplayName("AnswerSubmitted 重复投递：只发一枚「初来乍到」")
     void answerSubmittedCalledTwiceOnlyOnce() {
         AnswerSubmittedEvent event = new AnswerSubmittedEvent("evt-ans-1", fx.clock.instant(),

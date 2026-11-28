@@ -1,0 +1,2048 @@
+[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] CampusOverflow :: Parent                                           [pom]
+[INFO] CampusOverflow :: Shared Kernel                                    [jar]
+[INFO] CampusOverflow :: Identity 身份与认证                                   [pom]
+[INFO] Identity 身份与认证 :: api（发布语言）                                        [jar]
+[INFO] Identity 身份与认证 :: domain（纯 Java）                                   [jar]
+[INFO] Identity 身份与认证 :: application（用例编排）                                [jar]
+[INFO] Identity 身份与认证 :: infrastructure（持久化与适配器）                          [jar]
+[INFO] Identity 身份与认证 :: interfaces（REST 接口层）                             [jar]
+[INFO] CampusOverflow :: Q&A 问答核心                                         [pom]
+[INFO] Q&A 问答核心 :: api（发布语言）                                              [jar]
+[INFO] Q&A 问答核心 :: domain（纯 Java）                                         [jar]
+[INFO] Q&A 问答核心 :: application（用例编排）                                      [jar]
+[INFO] Q&A 问答核心 :: infrastructure（持久化与适配器）                                [jar]
+[INFO] Q&A 问答核心 :: interfaces（REST 接口层）                                   [jar]
+[INFO] CampusOverflow :: Reputation 声誉与激励                                 [pom]
+[INFO] Reputation 声誉与激励 :: api（发布语言）                                      [jar]
+[INFO] Reputation 声誉与激励 :: domain（纯 Java）                                 [jar]
+[INFO] Reputation 声誉与激励 :: application（用例编排）                              [jar]
+[INFO] Reputation 声誉与激励 :: infrastructure（持久化与适配器）                        [jar]
+[INFO] Reputation 声誉与激励 :: interfaces（REST 接口层）                           [jar]
+[INFO] CampusOverflow :: Discovery 内容发现                                   [pom]
+[INFO] Discovery 内容发现 :: api（发布语言）                                        [jar]
+[INFO] Discovery 内容发现 :: domain（纯 Java）                                   [jar]
+[INFO] Discovery 内容发现 :: application（用例编排）                                [jar]
+[INFO] Discovery 内容发现 :: infrastructure（持久化与适配器）                          [jar]
+[INFO] Discovery 内容发现 :: interfaces（REST 接口层）                             [jar]
+[INFO] CampusOverflow :: Bootstrap（启动装配）                                  [jar]
+[INFO] 
+[INFO] -----------------< com.campusoverflow:campus-overflow >-----------------
+[INFO] Building CampusOverflow :: Parent 0.1.0-SNAPSHOT                  [1/27]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ campus-overflow ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ campus-overflow ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ campus-overflow ---
+[INFO] Skipping JaCoCo execution due to missing execution data file.
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ campus-overflow ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------< com.campusoverflow:co-shared-kernel >-----------------
+[INFO] Building CampusOverflow :: Shared Kernel 0.1.0-SNAPSHOT           [2/27]
+[INFO]   from co-shared-kernel\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-shared-kernel ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-shared-kernel ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-shared-kernel\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-shared-kernel\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-shared-kernel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-shared-kernel ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-shared-kernel\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-shared-kernel ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-shared-kernel ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.shared.page.PageRequestTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.217 s -- in com.campusoverflow.shared.page.PageRequestTest
+[INFO] Running com.campusoverflow.shared.util.MaskingTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.029 s -- in com.campusoverflow.shared.util.MaskingTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-shared-kernel ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-shared-kernel ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-shared-kernel ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'CampusOverflow :: Shared Kernel' with 14 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-shared-kernel ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -------------------< com.campusoverflow:co-identity >-------------------
+[INFO] Building CampusOverflow :: Identity 身份与认证 0.1.0-SNAPSHOT          [3/27]
+[INFO]   from co-identity\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity ---
+[INFO] Skipping JaCoCo execution due to missing classes directory.
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -----------------< com.campusoverflow:co-identity-api >-----------------
+[INFO] Building Identity 身份与认证 :: api（发布语言） 0.1.0-SNAPSHOT               [4/27]
+[INFO]   from co-identity\co-identity-api\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity-api ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-identity-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-api\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-api\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-identity-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-identity-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-api\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-identity-api ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-identity-api ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity-api ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Identity 身份与认证 :: api（发布语言）' with 3 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ---------------< com.campusoverflow:co-identity-domain >----------------
+[INFO] Building Identity 身份与认证 :: domain（纯 Java） 0.1.0-SNAPSHOT          [5/27]
+[INFO]   from co-identity\co-identity-domain\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity-domain ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-identity-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-domain\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-domain\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-identity-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-identity-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-domain\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-identity-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-domain ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.identity.domain.CourseTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.244 s -- in com.campusoverflow.identity.domain.CourseTest
+[INFO] Running com.campusoverflow.identity.domain.UsernamesTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in com.campusoverflow.identity.domain.UsernamesTest
+[INFO] Running com.campusoverflow.identity.domain.UserTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.074 s -- in com.campusoverflow.identity.domain.UserTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-identity-domain ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity-domain ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity-domain ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Identity 身份与认证 :: domain（纯 Java）' with 7 classes
+[INFO] 
+[INFO] --- jacoco:0.8.12:check (check-domain-coverage) @ co-identity-domain ---
+[INFO] Skipping JaCoCo execution due to missing execution data file:E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-domain\target\jacoco.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -------------< com.campusoverflow:co-identity-application >-------------
+[INFO] Building Identity 身份与认证 :: application（用例编排） 0.1.0-SNAPSHOT       [6/27]
+[INFO]   from co-identity\co-identity-application\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity-application ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-identity-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-application\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-application\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-identity-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-identity-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-application\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-identity-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-application ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.identity.application.AdminUserServiceTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.369 s -- in com.campusoverflow.identity.application.AdminUserServiceTest
+[INFO] Running com.campusoverflow.identity.application.IdentityApiImplPermissionTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\13507\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.406 s -- in com.campusoverflow.identity.application.IdentityApiImplPermissionTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-identity-application ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity-application ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity-application ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Identity 身份与认证 :: application（用例编排）' with 13 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity-application ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -----------< com.campusoverflow:co-identity-infrastructure >------------
+[INFO] Building Identity 身份与认证 :: infrastructure（持久化与适配器） 0.1.0-SNAPSHOT [7/27]
+[INFO]   from co-identity\co-identity-infrastructure\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity-infrastructure ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-identity-infrastructure ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-identity-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-identity-infrastructure ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-infrastructure\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-identity-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-infrastructure ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.identity.infrastructure.crypto.FieldEncryptorTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.296 s -- in com.campusoverflow.identity.infrastructure.crypto.FieldEncryptorTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-identity-infrastructure ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity-infrastructure ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity-infrastructure ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Identity 身份与认证 :: infrastructure（持久化与适配器）' with 11 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -------------< com.campusoverflow:co-identity-interfaces >--------------
+[INFO] Building Identity 身份与认证 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT    [8/27]
+[INFO]   from co-identity\co-identity-interfaces\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-identity-interfaces ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-identity-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-interfaces\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-interfaces\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-identity-interfaces ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-identity-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-identity\co-identity-interfaces\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-identity-interfaces ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-identity-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-identity-interfaces ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-identity-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-identity-interfaces ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Identity 身份与认证 :: interfaces（REST 接口层）' with 9 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-identity-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------------< com.campusoverflow:co-qa >----------------------
+[INFO] Building CampusOverflow :: Q&A 问答核心 0.1.0-SNAPSHOT                [9/27]
+[INFO]   from co-qa\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa ---
+[INFO] Skipping JaCoCo execution due to missing classes directory.
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --------------------< com.campusoverflow:co-qa-api >--------------------
+[INFO] Building Q&A 问答核心 :: api（发布语言） 0.1.0-SNAPSHOT                    [10/27]
+[INFO]   from co-qa\co-qa-api\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa-api ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-qa-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-api\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-api\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-qa-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-qa-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-api\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-qa-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-api ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.qa.api.event.EventFieldOrderContractTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.278 s -- in com.campusoverflow.qa.api.event.EventFieldOrderContractTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-qa-api ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa-api ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa-api ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Q&A 问答核心 :: api（发布语言）' with 10 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------------< com.campusoverflow:co-qa-domain >-------------------
+[INFO] Building Q&A 问答核心 :: domain（纯 Java） 0.1.0-SNAPSHOT               [11/27]
+[INFO]   from co-qa\co-qa-domain\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa-domain ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-qa-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-domain\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-domain\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-qa-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-qa-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-domain\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-qa-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-domain ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.qa.domain.AnswerTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.268 s -- in com.campusoverflow.qa.domain.AnswerTest
+[INFO] Running com.campusoverflow.qa.domain.QingcenLab4Test
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.011 s -- in com.campusoverflow.qa.domain.QingcenLab4Test
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest$Endorsing
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.006 s -- in com.campusoverflow.qa.domain.QuestionTest$Endorsing
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest$EditingAndDeleting
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.038 s -- in com.campusoverflow.qa.domain.QuestionTest$EditingAndDeleting
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest$Accepting
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.campusoverflow.qa.domain.QuestionTest$Accepting
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest$Boundaries
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in com.campusoverflow.qa.domain.QuestionTest$Boundaries
+[INFO] Running com.campusoverflow.qa.domain.QuestionTest$Posting
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.019 s -- in com.campusoverflow.qa.domain.QuestionTest$Posting
+[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.137 s -- in com.campusoverflow.qa.domain.QuestionTest
+[INFO] Running com.campusoverflow.qa.domain.VoteAndCommentTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in com.campusoverflow.qa.domain.VoteAndCommentTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 44, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-qa-domain ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa-domain ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa-domain ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Q&A 问答核心 :: domain（纯 Java）' with 9 classes
+[INFO] 
+[INFO] --- jacoco:0.8.12:check (check-domain-coverage) @ co-qa-domain ---
+[INFO] Skipping JaCoCo execution due to missing execution data file:E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-domain\target\jacoco.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------< com.campusoverflow:co-qa-application >----------------
+[INFO] Building Q&A 问答核心 :: application（用例编排） 0.1.0-SNAPSHOT            [12/27]
+[INFO]   from co-qa\co-qa-application\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa-application ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-qa-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-application\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-application\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-qa-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-qa-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-application\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-qa-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-application ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.qa.application.command.AnswerAndVoteServiceTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.453 s -- in com.campusoverflow.qa.application.command.AnswerAndVoteServiceTest
+[INFO] Running com.campusoverflow.qa.application.command.QingcenVoteCommentServiceTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.045 s -- in com.campusoverflow.qa.application.command.QingcenVoteCommentServiceTest
+[INFO] Running com.campusoverflow.qa.application.command.QuestionCommandServiceTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.098 s -- in com.campusoverflow.qa.application.command.QuestionCommandServiceTest
+[INFO] Running com.campusoverflow.qa.application.QaQueryApiImplTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in com.campusoverflow.qa.application.QaQueryApiImplTest
+[INFO] Running com.campusoverflow.qa.application.query.QuestionQueryServiceTest
+[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.081 s -- in com.campusoverflow.qa.application.query.QuestionQueryServiceTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 56, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-qa-application ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa-application ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa-application ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Q&A 问答核心 :: application（用例编排）' with 23 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa-application ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --------------< com.campusoverflow:co-qa-infrastructure >---------------
+[INFO] Building Q&A 问答核心 :: infrastructure（持久化与适配器） 0.1.0-SNAPSHOT      [13/27]
+[INFO]   from co-qa\co-qa-infrastructure\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa-infrastructure ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-qa-infrastructure ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-qa-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-qa-infrastructure ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-infrastructure\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-qa-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-infrastructure ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.qa.infrastructure.cache.RedisQuestionListCacheTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\13507\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.801 s -- in com.campusoverflow.qa.infrastructure.cache.RedisQuestionListCacheTest
+[INFO] Running com.campusoverflow.qa.infrastructure.cache.RedisViewCounterTest
+18:16:04.636 [main] WARN com.campusoverflow.qa.infrastructure.cache.RedisViewCounter -- 浏览计数落库失败，保留批次等待下个周期重试: db down
+18:16:04.675 [main] WARN com.campusoverflow.qa.infrastructure.cache.RedisViewCounter -- 浏览计数落库失败，保留批次等待下个周期重试: redis cleanup failed
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.490 s -- in com.campusoverflow.qa.infrastructure.cache.RedisViewCounterTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-qa-infrastructure ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa-infrastructure ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa-infrastructure ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Q&A 问答核心 :: infrastructure（持久化与适配器）' with 15 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------< com.campusoverflow:co-qa-interfaces >-----------------
+[INFO] Building Q&A 问答核心 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT         [14/27]
+[INFO]   from co-qa\co-qa-interfaces\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-qa-interfaces ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-qa-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-interfaces\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-interfaces\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-qa-interfaces ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-qa-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-qa\co-qa-interfaces\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-qa-interfaces ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-qa-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-qa-interfaces ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-qa-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-qa-interfaces ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Q&A 问答核心 :: interfaces（REST 接口层）' with 10 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-qa-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------------< com.campusoverflow:co-reputation >------------------
+[INFO] Building CampusOverflow :: Reputation 声誉与激励 0.1.0-SNAPSHOT       [15/27]
+[INFO]   from co-reputation\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation ---
+[INFO] Skipping JaCoCo execution due to missing classes directory.
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------< com.campusoverflow:co-reputation-api >----------------
+[INFO] Building Reputation 声誉与激励 :: api（发布语言） 0.1.0-SNAPSHOT            [16/27]
+[INFO]   from co-reputation\co-reputation-api\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation-api ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-reputation-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-api\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-api\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-reputation-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-reputation-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-api\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-reputation-api ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-reputation-api ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation-api ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Reputation 声誉与激励 :: api（发布语言）' with 6 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --------------< com.campusoverflow:co-reputation-domain >---------------
+[INFO] Building Reputation 声誉与激励 :: domain（纯 Java） 0.1.0-SNAPSHOT       [17/27]
+[INFO]   from co-reputation\co-reputation-domain\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation-domain ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-reputation-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-domain\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-domain\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-reputation-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-reputation-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-domain\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-reputation-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-domain ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.reputation.domain.BountyAndAccountTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.283 s -- in com.campusoverflow.reputation.domain.BountyAndAccountTest
+[INFO] Running com.campusoverflow.reputation.domain.ReputationDomainMetaTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.025 s -- in com.campusoverflow.reputation.domain.ReputationDomainMetaTest
+[INFO] Running com.campusoverflow.reputation.domain.ReputationRulebookTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.163 s -- in com.campusoverflow.reputation.domain.ReputationRulebookTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-reputation-domain ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation-domain ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation-domain ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Reputation 声誉与激励 :: domain（纯 Java）' with 11 classes
+[INFO] 
+[INFO] --- jacoco:0.8.12:check (check-domain-coverage) @ co-reputation-domain ---
+[INFO] Skipping JaCoCo execution due to missing execution data file:E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-domain\target\jacoco.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------< com.campusoverflow:co-reputation-application >------------
+[INFO] Building Reputation 声誉与激励 :: application（用例编排） 0.1.0-SNAPSHOT    [18/27]
+[INFO]   from co-reputation\co-reputation-application\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation-application ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-reputation-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-application\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-application\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-reputation-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-reputation-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-application\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-reputation-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-application ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.reputation.application.LeaderboardServiceTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\13507\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.187 s -- in com.campusoverflow.reputation.application.LeaderboardServiceTest
+[INFO] Running com.campusoverflow.reputation.application.QingcenBountyServiceTest
+18:16:10.253 [main] ERROR com.campusoverflow.reputation.application.BountyService -- 悬赏 1 的发起人账户 9 不存在，关闭悬赏但不退款
+[INFO] Tests run: 28, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.489 s -- in com.campusoverflow.reputation.application.QingcenBountyServiceTest
+[INFO] Running com.campusoverflow.reputation.application.ReconciliationServiceTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.055 s -- in com.campusoverflow.reputation.application.ReconciliationServiceTest
+[INFO] Running com.campusoverflow.reputation.application.ReputationApiImplTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.054 s -- in com.campusoverflow.reputation.application.ReputationApiImplTest
+[INFO] Running com.campusoverflow.reputation.application.ReputationEventHandlersTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.057 s -- in com.campusoverflow.reputation.application.ReputationEventHandlersTest
+[INFO] Running com.campusoverflow.reputation.application.ReputationQueryAuthorizationTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in com.campusoverflow.reputation.application.ReputationQueryAuthorizationTest
+[INFO] Running com.campusoverflow.reputation.application.ReputationSettlementTest
+[INFO] Tests run: 12, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.028 s -- in com.campusoverflow.reputation.application.ReputationSettlementTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 72, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-reputation-application ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation-application ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation-application ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Reputation 声誉与激励 :: application（用例编排）' with 17 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation-application ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------< com.campusoverflow:co-reputation-infrastructure >-----------
+[INFO] Building Reputation 声誉与激励 :: infrastructure（持久化与适配器） 0.1.0-SNAPSHOT [19/27]
+[INFO]   from co-reputation\co-reputation-infrastructure\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation-infrastructure ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-reputation-infrastructure ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 6 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-reputation-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-reputation-infrastructure ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-infrastructure\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-reputation-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-infrastructure ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.reputation.infrastructure.leaderboard.RedisLeaderboardStoreTest
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\13507\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.095 s -- in com.campusoverflow.reputation.infrastructure.leaderboard.RedisLeaderboardStoreTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-reputation-infrastructure ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation-infrastructure ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation-infrastructure ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Reputation 声誉与激励 :: infrastructure（持久化与适配器）' with 9 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------< com.campusoverflow:co-reputation-interfaces >-------------
+[INFO] Building Reputation 声誉与激励 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT [20/27]
+[INFO]   from co-reputation\co-reputation-interfaces\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-reputation-interfaces ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-reputation-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-interfaces\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-interfaces\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-reputation-interfaces ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-reputation-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-reputation\co-reputation-interfaces\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-reputation-interfaces ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-reputation-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-reputation-interfaces ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-reputation-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-reputation-interfaces ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Reputation 声誉与激励 :: interfaces（REST 接口层）' with 6 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-reputation-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------------< com.campusoverflow:co-discovery >-------------------
+[INFO] Building CampusOverflow :: Discovery 内容发现 0.1.0-SNAPSHOT         [21/27]
+[INFO]   from co-discovery\pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery ---
+[INFO] Skipping JaCoCo execution due to missing classes directory.
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ----------------< com.campusoverflow:co-discovery-api >-----------------
+[INFO] Building Discovery 内容发现 :: api（发布语言） 0.1.0-SNAPSHOT              [22/27]
+[INFO]   from co-discovery\co-discovery-api\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery-api ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-discovery-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-api\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-api\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-discovery-api ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-discovery-api ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-api\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-discovery-api ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-discovery-api ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery-api ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Discovery 内容发现 :: api（发布语言）' with 0 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery-api ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ---------------< com.campusoverflow:co-discovery-domain >---------------
+[INFO] Building Discovery 内容发现 :: domain（纯 Java） 0.1.0-SNAPSHOT         [23/27]
+[INFO]   from co-discovery\co-discovery-domain\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery-domain ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-discovery-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-domain\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-domain\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-discovery-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-discovery-domain ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-domain\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-discovery-domain ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-domain ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.discovery.domain.DiscoveryDomainTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.282 s -- in com.campusoverflow.discovery.domain.DiscoveryDomainTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-discovery-domain ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery-domain ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery-domain ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Discovery 内容发现 :: domain（纯 Java）' with 9 classes
+[INFO] 
+[INFO] --- jacoco:0.8.12:check (check-domain-coverage) @ co-discovery-domain ---
+[INFO] Skipping JaCoCo execution due to missing execution data file:E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-domain\target\jacoco.exec
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery-domain ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------< com.campusoverflow:co-discovery-application >-------------
+[INFO] Building Discovery 内容发现 :: application（用例编排） 0.1.0-SNAPSHOT      [24/27]
+[INFO]   from co-discovery\co-discovery-application\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery-application ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-discovery-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-application\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-application\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-discovery-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-discovery-application ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-application\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-discovery-application ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-application ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.discovery.application.DiscoveryQueryServiceTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.325 s -- in com.campusoverflow.discovery.application.DiscoveryQueryServiceTest
+[INFO] Running com.campusoverflow.discovery.application.NotificationProjectorTest
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.049 s -- in com.campusoverflow.discovery.application.NotificationProjectorTest
+[INFO] Running com.campusoverflow.discovery.application.NotificationServiceTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.010 s -- in com.campusoverflow.discovery.application.NotificationServiceTest
+[INFO] Running com.campusoverflow.discovery.application.SearchIndexProjectorTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.016 s -- in com.campusoverflow.discovery.application.SearchIndexProjectorTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 29, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-discovery-application ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery-application ---
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery-application ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Discovery 内容发现 :: application（用例编排）' with 8 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery-application ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -----------< com.campusoverflow:co-discovery-infrastructure >-----------
+[INFO] Building Discovery 内容发现 :: infrastructure（持久化与适配器） 0.1.0-SNAPSHOT [25/27]
+[INFO]   from co-discovery\co-discovery-infrastructure\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery-infrastructure ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-discovery-infrastructure ---
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] Copying 2 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-discovery-infrastructure ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-discovery-infrastructure ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-infrastructure\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-discovery-infrastructure ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-discovery-infrastructure ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery-infrastructure ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Discovery 内容发现 :: infrastructure（持久化与适配器）' with 6 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery-infrastructure ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] -------------< com.campusoverflow:co-discovery-interfaces >-------------
+[INFO] Building Discovery 内容发现 :: interfaces（REST 接口层） 0.1.0-SNAPSHOT   [26/27]
+[INFO]   from co-discovery\co-discovery-interfaces\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-discovery-interfaces ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-discovery-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-interfaces\src\main\resources
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-interfaces\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-discovery-interfaces ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-discovery-interfaces ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-discovery\co-discovery-interfaces\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-discovery-interfaces ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-discovery-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-discovery-interfaces ---
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-discovery-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-discovery-interfaces ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'Discovery 内容发现 :: interfaces（REST 接口层）' with 2 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-discovery-interfaces ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] ------------------< com.campusoverflow:co-bootstrap >-------------------
+[INFO] Building CampusOverflow :: Bootstrap（启动装配） 0.1.0-SNAPSHOT        [27/27]
+[INFO]   from co-bootstrap\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (prepare-agent) @ co-bootstrap ---
+[INFO] argLine set to -javaagent:C:\\Users\\13507\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=E:\\tmp\\coverage-all-6.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ co-bootstrap ---
+[INFO] Copying 3 resources from src\main\resources to target\classes
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ co-bootstrap ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ co-bootstrap ---
+[INFO] skip non existing resourceDirectory E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-bootstrap\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.13.0:testCompile (default-testCompile) @ co-bootstrap ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ co-bootstrap ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.bootstrap.config.EnvironmentGuardTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.331 s -- in com.campusoverflow.bootstrap.config.EnvironmentGuardTest
+[INFO] Running com.campusoverflow.architecture.ArchitectureTest
+18:16:19.719 [main] INFO com.tngtech.archunit.core.PluginLoader -- Detected Java version 21.0.10
+18:16:22.643 [main] INFO com.tngtech.archunit.core.PluginLoader -- Detected Java version 21.0.10
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.002 s -- in com.campusoverflow.architecture.ArchitectureTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ co-bootstrap ---
+[INFO] 
+[INFO] --- spring-boot:3.4.5:repackage (repackage) @ co-bootstrap ---
+[INFO] Replacing main artifact E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-bootstrap\target\campus-overflow.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-bootstrap\target\campus-overflow.jar.original
+[INFO] 
+[INFO] --- failsafe:3.5.3:integration-test (default) @ co-bootstrap ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.campusoverflow.CampusOverflowFlowIT
+18:16:25.015 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.campusoverflow.CampusOverflowFlowIT]: CampusOverflowFlowIT does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+18:16:25.190 [main] INFO org.testcontainers.images.PullPolicy -- Image pull policy will be performed by: DefaultPullPolicy()
+18:16:25.196 [main] INFO org.testcontainers.utility.ImageNameSubstitutor -- Image name substitution will be performed by: DefaultImageNameSubstitutor (composite of 'ConfigurationFileImageNameSubstitutor' and 'PrefixingImageNameSubstitutor')
+18:16:25.278 [main] INFO org.testcontainers.DockerClientFactory -- Testcontainers version: 1.21.3
+18:16:25.726 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Loaded org.testcontainers.dockerclient.NpipeSocketClientProviderStrategy from ~/.testcontainers.properties, will try it first
+18:16:26.094 [main] INFO org.testcontainers.dockerclient.DockerClientProviderStrategy -- Found Docker environment with local Npipe socket (npipe:////./pipe/docker_engine)
+18:16:26.095 [main] INFO org.testcontainers.DockerClientFactory -- Docker host IP address is localhost
+18:16:26.119 [main] INFO org.testcontainers.DockerClientFactory -- Connected to docker: 
+  Server Version: 29.9.3
+  API Version: 1.56
+  Operating System: Docker Desktop
+  Total Memory: 7758 MB
+  Labels: 
+    com.docker.desktop.address=npipe://\\.\pipe\docker_cli
+18:16:26.197 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Creating container for image: testcontainers/ryuk:0.12.0
+18:16:26.324 [main] INFO org.testcontainers.utility.RegistryAuthLocator -- Credential helper/store (docker-credential-desktop) does not have credentials for https://index.docker.io/v1/
+18:16:26.469 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 is starting: cb353ee2a3056d7d6f2e787dd384f8969811eeeb988f1fc222b8d4bcf18bf6eb
+18:16:26.759 [main] INFO tc.testcontainers/ryuk:0.12.0 -- Container testcontainers/ryuk:0.12.0 started in PT0.5614496S
+18:16:26.764 [main] INFO org.testcontainers.utility.RyukResourceReaper -- Ryuk started - will monitor and terminate Testcontainers containers on JVM exit
+18:16:26.764 [main] INFO org.testcontainers.DockerClientFactory -- Checking the system...
+18:16:26.765 [main] INFO org.testcontainers.DockerClientFactory -- ✔︎ Docker server version should be at least 1.6.0
+18:16:26.905 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.campusoverflow.CampusOverflowApplication for test class com.campusoverflow.CampusOverflowFlowIT
+18:16:27.047 [main] INFO tc.mysql:8.0.39 -- Creating container for image: mysql:8.0.39
+18:16:27.156 [main] INFO tc.mysql:8.0.39 -- Container mysql:8.0.39 is starting: 72609de78e04c47028f37ff2d12409cd7ec08904a7cfd28633be571552dbaa51
+18:16:27.393 [main] INFO tc.mysql:8.0.39 -- Waiting for database connection to become available at jdbc:mysql://localhost:65278/test using query 'SELECT 1'
+18:16:37.052 [main] INFO tc.mysql:8.0.39 -- Container mysql:8.0.39 started in PT10.0048524S
+18:16:37.052 [main] INFO tc.mysql:8.0.39 -- Container is started (JDBC URL: jdbc:mysql://localhost:65278/test)
+18:16:37.053 [main] INFO tc.redis:7-alpine -- Creating container for image: redis:7-alpine
+18:16:37.137 [main] INFO tc.redis:7-alpine -- Container redis:7-alpine is starting: 93836286ed645769285ca78a280850fd0152332fd0b307fc7486b90e338a41a4
+18:16:37.459 [main] INFO tc.redis:7-alpine -- Container redis:7-alpine started in PT0.4063221S
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.5)
+
+2026-11-27T18:16:37.925+08:00  INFO 5684 --- [campus-overflow] [           main] c.campusoverflow.CampusOverflowFlowIT    : Starting CampusOverflowFlowIT using Java 21.0.10 with PID 5684 (started by 13507 in E:\deepseek\软件工程\lab1\cs2412-team04-campus-overflow\backend\co-bootstrap)
+2026-11-27T18:16:37.927+08:00 DEBUG 5684 --- [campus-overflow] [           main] c.campusoverflow.CampusOverflowFlowIT    : Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-11-27T18:16:37.927+08:00  INFO 5684 --- [campus-overflow] [           main] c.campusoverflow.CampusOverflowFlowIT    : No active profile set, falling back to 1 default profile: "dev"
+2026-11-27T18:16:39.778+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-27T18:16:39.780+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-11-27T18:16:40.066+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 275 ms. Found 13 JPA repository interfaces.
+2026-11-27T18:16:40.088+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-11-27T18:16:40.090+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-11-27T18:16:40.114+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.identity.infrastructure.persistence.CourseJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.114+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.identity.infrastructure.persistence.CourseMemberJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.115+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.identity.infrastructure.persistence.UserJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.115+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.qa.infrastructure.persistence.AnswerJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.115+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.qa.infrastructure.persistence.CommentJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.qa.infrastructure.persistence.QuestionJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.qa.infrastructure.persistence.VoteJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.reputation.infrastructure.persistence.AccountJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.reputation.infrastructure.persistence.BadgeJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.reputation.infrastructure.persistence.BountyJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.reputation.infrastructure.persistence.LedgerJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.116+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.reputation.infrastructure.persistence.VoteAwardJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.117+08:00  INFO 5684 --- [campus-overflow] [           main] .RepositoryConfigurationExtensionSupport : Spring Data Redis - Could not safely identify store assignment for repository candidate interface com.campusoverflow.discovery.infrastructure.notification.NotificationJpaRepository; If you want this repository to be a Redis repository, consider annotating your entities with one of these annotations: org.springframework.data.redis.core.RedisHash (preferred), or consider extending one of the following types with your repository: org.springframework.data.keyvalue.repository.KeyValueRepository
+2026-11-27T18:16:40.117+08:00  INFO 5684 --- [campus-overflow] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 12 ms. Found 0 Redis repository interfaces.
+2026-11-27T18:16:41.330+08:00  INFO 5684 --- [campus-overflow] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:mysql://localhost:65278/test (MySQL 8.0)
+2026-11-27T18:16:41.719+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table `test`.`flyway_schema_history` does not exist yet
+2026-11-27T18:16:41.724+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 12 migrations (execution time 00:00.029s)
+2026-11-27T18:16:41.749+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table `test`.`flyway_schema_history` ...
+2026-11-27T18:16:41.824+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema `test`: << Empty Schema >>
+2026-11-27T18:16:41.824+08:00  WARN 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : outOfOrder mode is active. Migration of schema `test` may not be reproducible.
+2026-11-27T18:16:41.837+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202609010001 - platform init"
+2026-11-27T18:16:41.944+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202609010100 - identity init"
+2026-11-27T18:16:42.049+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202609010200 - qa init"
+2026-11-27T18:16:42.203+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202609010300 - reputation init"
+2026-11-27T18:16:42.318+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202609010400 - discovery init"
+2026-11-27T18:16:42.508+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611230001 - bounty dedupe open"
+2026-11-27T18:16:42.546+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611240001 - bounty single open"
+2026-11-27T18:16:42.677+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611250001 - bounty refund orphaned frozen"
+2026-11-27T18:16:42.717+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611250002 - view batch applied"
+2026-11-27T18:16:42.756+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611260001 - initial points marker"
+2026-11-27T18:16:42.785+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611270001 - vote award"
+2026-11-27T18:16:42.832+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema `test` to version "202611270002 - notification link index"
+2026-11-27T18:16:42.876+08:00  INFO 5684 --- [campus-overflow] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 12 migrations to schema `test`, now at version v202611270002 (execution time 00:00.728s)
+2026-11-27T18:16:42.984+08:00  INFO 5684 --- [campus-overflow] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-11-27T18:16:43.048+08:00  INFO 5684 --- [campus-overflow] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2026-11-27T18:16:43.087+08:00  INFO 5684 --- [campus-overflow] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-11-27T18:16:43.371+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-11-27T18:16:43.402+08:00  INFO 5684 --- [campus-overflow] [           main] com.zaxxer.hikari.HikariDataSource       : co-pool - Starting...
+2026-11-27T18:16:43.432+08:00  INFO 5684 --- [campus-overflow] [           main] com.zaxxer.hikari.pool.HikariPool        : co-pool - Added connection com.mysql.cj.jdbc.ConnectionImpl@42f74394
+2026-11-27T18:16:43.433+08:00  INFO 5684 --- [campus-overflow] [           main] com.zaxxer.hikari.HikariDataSource       : co-pool - Start completed.
+2026-11-27T18:16:43.509+08:00  INFO 5684 --- [campus-overflow] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (co-pool)']
+	Database driver: undefined/unknown
+	Database version: 8.0.39
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-11-27T18:16:44.874+08:00  INFO 5684 --- [campus-overflow] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-11-27T18:16:44.876+08:00  INFO 5684 --- [campus-overflow] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-11-27T18:16:45.823+08:00  INFO 5684 --- [campus-overflow] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name dbUserDetailsService
+2026-11-27T18:16:46.291+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-11-27T18:16:48.277+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+2026-11-27T18:16:48.949+08:00 DEBUG 5684 --- [campus-overflow] [           main] c.c.bootstrap.security.ActiveUserFilter  : Filter 'activeUserFilter' configured for use
+2026-11-27T18:16:48.950+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-11-27T18:16:48.950+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-11-27T18:16:48.951+08:00  INFO 5684 --- [campus-overflow] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-11-27T18:16:49.035+08:00  INFO 5684 --- [campus-overflow] [           main] c.campusoverflow.CampusOverflowFlowIT    : Started CampusOverflowFlowIT in 11.531 seconds (process running for 25.81)
+2026-11-27T18:16:49.053+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:49.054+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+Java HotSpot(TM) 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended
+WARNING: A Java agent has been loaded dynamically (C:\Users\13507\.m2\repository\net\bytebuddy\byte-buddy-agent\1.15.11\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+2026-11-27T18:16:49.871+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:49.871+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:50.071+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.071+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.076+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.076+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.090+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.091+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:50.094+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.094+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?)]
+2026-11-27T18:16:50.096+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.096+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?) ORDER BY id]
+2026-11-27T18:16:50.117+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.117+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.120+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.120+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.159+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.159+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:50.272+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.273+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.346+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:50.346+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:50.365+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.365+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.366+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.366+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:50.368+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.368+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.382+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.382+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?)]
+2026-11-27T18:16:50.384+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.385+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?) ORDER BY id]
+2026-11-27T18:16:50.396+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.396+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.410+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.411+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_search_doc (question_id, course_id, author_id, title, body_text, tag_count, score,
+                            answer_count, accepted, bounty_open, deleted, created_at, last_activity_at)
+VALUES (?, ?, ?, ?, ?, ?, 0, 0, FALSE, FALSE, FALSE, ?, ?)
+ON DUPLICATE KEY UPDATE title = ?, body_text = ?, tag_count = ?
+]
+2026-11-27T18:16:50.415+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.415+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [DELETE FROM dis_question_tag WHERE question_id = ?]
+2026-11-27T18:16:50.418+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:50.418+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:50.424+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.424+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:50.509+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL query [SELECT COUNT(*) FROM information_schema.tables
+WHERE table_schema = DATABASE() AND table_name = 'rep_vote_award'
+]
+2026-11-27T18:16:50.573+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL query [SELECT COUNT(*) FROM information_schema.statistics
+WHERE table_schema = DATABASE() AND table_name = 'dis_notification'
+  AND index_name = 'idx_notification_link'
+]
+2026-11-27T18:16:50.646+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.646+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:50.648+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.648+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.650+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.650+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.723+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.723+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.724+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.724+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.802+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.802+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.803+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.803+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.863+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.863+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:50.864+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.864+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?, ?, ?)]
+2026-11-27T18:16:50.865+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:50.865+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?, ?, ?) ORDER BY id]
+2026-11-27T18:16:50.872+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.872+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.873+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.873+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.878+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.879+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:50.881+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.881+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:50.886+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.886+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:50.891+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.891+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.895+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.895+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.905+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.905+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:50.911+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.911+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.912+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.912+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:50.921+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.921+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:50.960+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:50.960+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.047+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.047+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.141+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.142+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:51.145+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.145+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?)]
+2026-11-27T18:16:51.147+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.147+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?) ORDER BY id]
+2026-11-27T18:16:51.153+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.153+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.154+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.154+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.162+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.162+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.167+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.167+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.251+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.252+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.296+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:51.296+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:51.300+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.300+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.300+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.301+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.348+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.348+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.386+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.386+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:51.387+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.387+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?, ?)]
+2026-11-27T18:16:51.388+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.389+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?, ?) ORDER BY id]
+2026-11-27T18:16:51.394+08:00 DEBUG 5684 --- [campus-overflow] [pool-4-thread-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.394+08:00 DEBUG 5684 --- [campus-overflow] [pool-4-thread-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.396+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.396+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.402+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.402+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_search_doc (question_id, course_id, author_id, title, body_text, tag_count, score,
+                            answer_count, accepted, bounty_open, deleted, created_at, last_activity_at)
+VALUES (?, ?, ?, ?, ?, ?, 0, 0, FALSE, FALSE, FALSE, ?, ?)
+ON DUPLICATE KEY UPDATE title = ?, body_text = ?, tag_count = ?
+]
+2026-11-27T18:16:51.403+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.403+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [DELETE FROM dis_question_tag WHERE question_id = ?]
+2026-11-27T18:16:51.406+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:51.406+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:51.415+08:00 DEBUG 5684 --- [campus-overflow] [pool-4-thread-2] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.415+08:00 DEBUG 5684 --- [campus-overflow] [pool-4-thread-2] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.417+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.417+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.423+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.423+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT COUNT(*) FROM qa_vote WHERE target_type = 'ANSWER' AND target_id = ?]
+2026-11-27T18:16:51.425+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.425+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT score FROM qa_answer WHERE id = ?]
+2026-11-27T18:16:51.438+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.439+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.482+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.482+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.485+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.485+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE dis_search_doc SET answer_count = GREATEST(answer_count + ?, 0),
+       last_activity_at = GREATEST(last_activity_at, ?) WHERE question_id = ?
+]
+2026-11-27T18:16:51.494+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.495+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.511+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.512+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.513+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.513+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.589+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.589+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.635+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.635+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE id_user SET status = 'DISABLED' WHERE id = ?]
+2026-11-27T18:16:51.661+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.662+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.709+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.709+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:51.712+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.712+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?, ?, ?, ?)]
+2026-11-27T18:16:51.713+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:51.713+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?, ?, ?, ?) ORDER BY id]
+2026-11-27T18:16:51.724+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.725+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.751+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.751+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.752+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.752+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.759+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.759+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.791+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.791+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.797+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.798+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.806+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.807+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.822+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.822+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.835+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.835+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:51.837+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.837+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:51.842+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.842+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.850+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.850+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.874+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.875+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.881+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.881+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.882+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.882+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:51.898+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.898+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:51.925+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:51.925+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:52.007+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.007+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:52.033+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:52.033+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO qa_tag (name, question_count) VALUES (?, GREATEST(?, 0))
+ON DUPLICATE KEY UPDATE question_count = GREATEST(question_count + ?, 0)
+]
+2026-11-27T18:16:52.036+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.036+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.038+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.038+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:52.067+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.067+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.103+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.103+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.105+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.105+08:00 DEBUG 5684 --- [campus-overflow] [           main] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO audit_log (action, actor_id, target_type, target_id, detail, created_at)
+VALUES (?, ?, ?, ?, ?, ?)
+]
+2026-11-27T18:16:52.108+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.108+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:52.118+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.118+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?, ?, ?, ?, ?, ?, ?)]
+2026-11-27T18:16:52.120+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.121+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?, ?, ?, ?, ?, ?, ?) ORDER BY id]
+2026-11-27T18:16:52.130+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.130+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.132+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.132+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.145+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.145+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.154+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.154+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.162+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.163+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.170+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.170+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.179+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.180+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.185+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.185+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.187+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.187+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.196+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.196+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.202+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.203+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.208+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.208+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_search_doc (question_id, course_id, author_id, title, body_text, tag_count, score,
+                            answer_count, accepted, bounty_open, deleted, created_at, last_activity_at)
+VALUES (?, ?, ?, ?, ?, ?, 0, 0, FALSE, FALSE, FALSE, ?, ?)
+ON DUPLICATE KEY UPDATE title = ?, body_text = ?, tag_count = ?
+]
+2026-11-27T18:16:52.210+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.210+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [DELETE FROM dis_question_tag WHERE question_id = ?]
+2026-11-27T18:16:52.211+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing SQL batch update [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:52.211+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO dis_question_tag (question_id, tag) VALUES (?, ?)]
+2026-11-27T18:16:52.220+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.220+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.230+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.230+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.255+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.255+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.257+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.257+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE dis_search_doc SET answer_count = GREATEST(answer_count + ?, 0),
+       last_activity_at = GREATEST(last_activity_at, ?) WHERE question_id = ?
+]
+2026-11-27T18:16:52.265+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.265+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.289+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.289+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.298+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.299+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT INTO outbox_event (event_id, event_type, payload, occurred_at, created_at, attempts)
+VALUES (?, ?, ?, ?, ?, 0)
+]
+2026-11-27T18:16:52.322+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.322+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.323+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.323+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE dis_search_doc SET accepted = TRUE, last_activity_at = GREATEST(last_activity_at, ?)
+WHERE question_id = ?
+]
+2026-11-27T18:16:52.328+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.328+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.536+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.536+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:52.540+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.540+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET locked_until = ?, locked_by = ? WHERE id IN (?, ?, ?)]
+2026-11-27T18:16:52.544+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.544+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id, event_id, event_type, payload FROM outbox_event WHERE id IN (?, ?, ?) ORDER BY id]
+2026-11-27T18:16:52.550+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.551+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT COUNT(*) FROM dis_search_doc d WHERE d.deleted = FALSE AND MATCH(d.title, d.body_text) AGAINST (? IN BOOLEAN MODE) AND (d.course_id IS NULL)]
+2026-11-27T18:16:52.553+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.553+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT d.question_id, d.title, LEFT(d.body_text, 200) AS snippet, d.course_id, d.author_id,
+       d.score, d.answer_count, d.accepted, d.bounty_open, d.created_at
+FROM dis_search_doc d WHERE d.deleted = FALSE AND MATCH(d.title, d.body_text) AGAINST (? IN BOOLEAN MODE) AND (d.course_id IS NULL) ORDER BY MATCH(d.title, d.body_text) AGAINST (? IN BOOLEAN MODE) DESC, d.created_at DESC, d.question_id DESC LIMIT ? OFFSET ?]
+2026-11-27T18:16:52.557+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.557+08:00 DEBUG 5684 --- [campus-overflow] [aitility-thread] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT question_id, tag FROM dis_question_tag WHERE question_id IN (?) ORDER BY tag]
+2026-11-27T18:16:52.565+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.565+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.571+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.571+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [INSERT IGNORE INTO processed_event (event_id, consumer, processed_at) VALUES (?, ?, ?)]
+2026-11-27T18:16:52.579+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.579+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.593+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL update
+2026-11-27T18:16:52.593+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [UPDATE outbox_event SET published_at = ?, locked_until = NULL, last_error = NULL WHERE id = ?]
+2026-11-27T18:16:52.805+08:00  INFO 5684 --- [campus-overflow] [xecutorLoop-1-1] i.l.core.protocol.ConnectionWatchdog     : Reconnecting, last destination was localhost/127.0.0.1:52101
+2026-11-27T18:16:52.813+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:52.814+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:52.812+08:00  WARN 5684 --- [campus-overflow] [ioEventLoop-4-2] i.l.core.protocol.ConnectionWatchdog     : Cannot reconnect to [localhost/<unresolved>:52101]: Connection closed prematurely
+
+io.lettuce.core.RedisConnectionException: Connection closed prematurely
+	at io.lettuce.core.protocol.RedisHandshakeHandler.channelInactive(RedisHandshakeHandler.java:76) ~[lettuce-core-6.4.2.RELEASE.jar:6.4.2.RELEASE/f4dfb40]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:303) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:281) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelInactive(AbstractChannelHandlerContext.java:274) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.ChannelInboundHandlerAdapter.channelInactive(ChannelInboundHandlerAdapter.java:81) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.lettuce.core.ChannelGroupListener.channelInactive(ChannelGroupListener.java:54) ~[lettuce-core-6.4.2.RELEASE.jar:6.4.2.RELEASE/f4dfb40]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:303) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:281) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelInactive(AbstractChannelHandlerContext.java:274) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelInactive(DefaultChannelPipeline.java:1352) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:301) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelInactive(AbstractChannelHandlerContext.java:281) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.DefaultChannelPipeline.fireChannelInactive(DefaultChannelPipeline.java:850) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.AbstractChannel$AbstractUnsafe$7.run(AbstractChannel.java:811) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.runTask(AbstractEventExecutor.java:173) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.concurrent.AbstractEventExecutor.safeExecute(AbstractEventExecutor.java:166) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor.runAllTasks(SingleThreadEventExecutor.java:472) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:566) ~[netty-transport-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:998) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.119.Final.jar:4.1.119.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+
+2026-11-27T18:16:53.033+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:53.034+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:53.248+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL query
+2026-11-27T18:16:53.248+08:00 DEBUG 5684 --- [campus-overflow] [   scheduling-1] o.s.jdbc.core.JdbcTemplate               : Executing prepared SQL statement [SELECT id FROM outbox_event
+WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
+ORDER BY id LIMIT ? FOR UPDATE
+]
+2026-11-27T18:16:53.463+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.ProxyConnection   : co-pool - Connection com.mysql.cj.jdbc.ConnectionImpl@6fc6dbdc marked as broken because of SQLSTATE(08S01), ErrorCode(0)
+
+com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet successfully received from the server was 211 milliseconds ago. The last packet sent successfully to the server was 211 milliseconds ago.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.setAutoCommit(ConnectionImpl.java:2217) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.zaxxer.hikari.pool.ProxyConnection.setAutoCommit(ProxyConnection.java:402) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setAutoCommit(HikariProxyConnection.java) ~[HikariCP-5.1.0.jar:na]
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.begin(AbstractLogicalConnectionImplementor.java:72) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:295) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:137) ~[spring-tx-6.2.6.jar:6.2.6]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.claim(OutboxRelay.java:90) ~[classes/:na]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.relay(OutboxRelay.java:80) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.runInternal(ScheduledMethodRunnable.java:130) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.lambda$run$2(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at io.micrometer.observation.Observation.observe(Observation.java:498) ~[micrometer-observation-1.14.6.jar:1.14.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.config.Task$OutcomeTrackingRunnable.run(Task.java:85) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.2.6.jar:6.2.6]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet successfully received from the server was 211 milliseconds ago. The last packet sent successfully to the server was 211 milliseconds ago.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486) ~[na:na]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:140) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:156) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.readMessage(NativeProtocol.java:592) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.checkErrorMessage(NativeProtocol.java:769) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.sendCommand(NativeProtocol.java:708) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.sendQueryPacket(NativeProtocol.java:940) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.NativeSession.execSQL(NativeSession.java:817) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.setAutoCommit(ConnectionImpl.java:2192) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 27 common frames omitted
+Caused by: java.io.EOFException: Can not read response from server. Expected to read 4 bytes, read 0 bytes before connection was unexpectedly lost.
+	at com.mysql.cj.protocol.FullReadInputStream.readFully(FullReadInputStream.java:58) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeaderLocal(SimplePacketReader.java:72) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeader(SimplePacketReader.java:54) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeader(SimplePacketReader.java:36) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.TimeTrackingPacketReader.readHeader(TimeTrackingPacketReader.java:43) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.TimeTrackingPacketReader.readHeader(TimeTrackingPacketReader.java:32) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.MultiPacketReader.readHeader(MultiPacketReader.java:45) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.MultiPacketReader.readHeader(MultiPacketReader.java:35) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.readMessage(NativeProtocol.java:586) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 32 common frames omitted
+
+2026-11-27T18:16:53.465+08:00 ERROR 5684 --- [campus-overflow] [   scheduling-1] o.s.s.s.TaskUtils$LoggingErrorHandler    : Unexpected error occurred in scheduled task
+
+org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:466) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:137) ~[spring-tx-6.2.6.jar:6.2.6]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.claim(OutboxRelay.java:90) ~[classes/:na]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.relay(OutboxRelay.java:80) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.runInternal(ScheduledMethodRunnable.java:130) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.lambda$run$2(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at io.micrometer.observation.Observation.observe(Observation.java:498) ~[micrometer-observation-1.14.6.jar:1.14.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.config.Task$OutcomeTrackingRunnable.run(Task.java:85) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.2.6.jar:6.2.6]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: org.hibernate.TransactionException: JDBC begin transaction failed: 
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.begin(AbstractLogicalConnectionImplementor.java:78) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:295) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420) ~[spring-orm-6.2.6.jar:6.2.6]
+	... 19 common frames omitted
+Caused by: com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet successfully received from the server was 211 milliseconds ago. The last packet sent successfully to the server was 211 milliseconds ago.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.setAutoCommit(ConnectionImpl.java:2217) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.zaxxer.hikari.pool.ProxyConnection.setAutoCommit(ProxyConnection.java:402) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyConnection.setAutoCommit(HikariProxyConnection.java) ~[HikariCP-5.1.0.jar:na]
+	at org.hibernate.resource.jdbc.internal.AbstractLogicalConnectionImplementor.begin(AbstractLogicalConnectionImplementor.java:72) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	... 24 common frames omitted
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet successfully received from the server was 211 milliseconds ago. The last packet sent successfully to the server was 211 milliseconds ago.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486) ~[na:na]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:140) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:156) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.readMessage(NativeProtocol.java:592) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.checkErrorMessage(NativeProtocol.java:769) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.sendCommand(NativeProtocol.java:708) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.sendQueryPacket(NativeProtocol.java:940) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.NativeSession.execSQL(NativeSession.java:817) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.setAutoCommit(ConnectionImpl.java:2192) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 27 common frames omitted
+Caused by: java.io.EOFException: Can not read response from server. Expected to read 4 bytes, read 0 bytes before connection was unexpectedly lost.
+	at com.mysql.cj.protocol.FullReadInputStream.readFully(FullReadInputStream.java:58) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeaderLocal(SimplePacketReader.java:72) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeader(SimplePacketReader.java:54) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.SimplePacketReader.readHeader(SimplePacketReader.java:36) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.TimeTrackingPacketReader.readHeader(TimeTrackingPacketReader.java:43) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.TimeTrackingPacketReader.readHeader(TimeTrackingPacketReader.java:32) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.MultiPacketReader.readHeader(MultiPacketReader.java:45) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.MultiPacketReader.readHeader(MultiPacketReader.java:35) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeProtocol.readMessage(NativeProtocol.java:586) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 32 common frames omitted
+
+2026-11-27T18:16:53.702+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@42f74394 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.704+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@ce1d2b (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.704+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@5d7f8c0a (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.704+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@53223658 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.705+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@516e5b0 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.705+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@7541977c (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.707+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@547f4a02 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.710+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@16ad3623 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.711+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@24a47a23 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.712+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@5da7e3bc (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.714+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@73a69d50 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.715+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@c45a129 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.716+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@bb7a7e0 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.716+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@696f1f29 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.717+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@2e644349 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.718+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@f89e345 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.718+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@39b7ddf3 (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.719+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@28301bbb (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+2026-11-27T18:16:53.719+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] com.zaxxer.hikari.pool.PoolBase          : co-pool - Failed to validate connection com.mysql.cj.jdbc.ConnectionImpl@24426bff (No operations allowed after connection closed.). Possibly consider using a shorter maxLifetime value.
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 29.13 s -- in com.campusoverflow.CampusOverflowFlowIT
+2026-11-27T18:16:57.902+08:00  INFO 5684 --- [campus-overflow] [xecutorLoop-1-7] i.l.core.protocol.ConnectionWatchdog     : Reconnecting, last destination was localhost/<unresolved>:52101
+2026-11-27T18:16:57.906+08:00  WARN 5684 --- [campus-overflow] [oEventLoop-4-13] i.l.core.protocol.ConnectionWatchdog     : Cannot reconnect to [localhost/<unresolved>:52101]: Connection refused: getsockopt: localhost/127.0.0.1:52101
+2026-11-27T18:17:10.402+08:00  INFO 5684 --- [campus-overflow] [ecutorLoop-1-11] i.l.core.protocol.ConnectionWatchdog     : Reconnecting, last destination was localhost/<unresolved>:52101
+2026-11-27T18:17:10.408+08:00  WARN 5684 --- [campus-overflow] [oEventLoop-4-15] i.l.core.protocol.ConnectionWatchdog     : Cannot reconnect to [localhost/<unresolved>:52101]: Connection refused: getsockopt: localhost/127.0.0.1:52101
+2026-11-27T18:17:23.696+08:00  WARN 5684 --- [campus-overflow] [   scheduling-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : SQL Error: 0, SQLState: 08S01
+2026-11-27T18:17:23.697+08:00 ERROR 5684 --- [campus-overflow] [   scheduling-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : co-pool - Connection is not available, request timed out after 30014ms (total=0, active=0, idle=0, waiting=0)
+2026-11-27T18:17:23.697+08:00 ERROR 5684 --- [campus-overflow] [   scheduling-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+2026-11-27T18:17:23.700+08:00 ERROR 5684 --- [campus-overflow] [   scheduling-1] o.s.s.s.TaskUtils$LoggingErrorHandler    : Unexpected error occurred in scheduled task
+
+org.springframework.transaction.CannotCreateTransactionException: Could not open JPA EntityManager for transaction
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:466) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.startTransaction(AbstractPlatformTransactionManager.java:532) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.AbstractPlatformTransactionManager.getTransaction(AbstractPlatformTransactionManager.java:405) ~[spring-tx-6.2.6.jar:6.2.6]
+	at org.springframework.transaction.support.TransactionTemplate.execute(TransactionTemplate.java:137) ~[spring-tx-6.2.6.jar:6.2.6]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.claim(OutboxRelay.java:90) ~[classes/:na]
+	at com.campusoverflow.bootstrap.outbox.OutboxRelay.relay(OutboxRelay.java:80) ~[classes/:na]
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[na:na]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.runInternal(ScheduledMethodRunnable.java:130) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.lambda$run$2(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at io.micrometer.observation.Observation.observe(Observation.java:498) ~[micrometer-observation-1.14.6.jar:1.14.6]
+	at org.springframework.scheduling.support.ScheduledMethodRunnable.run(ScheduledMethodRunnable.java:124) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.config.Task$OutcomeTrackingRunnable.run(Task.java:85) ~[spring-context-6.2.6.jar:6.2.6]
+	at org.springframework.scheduling.support.DelegatingErrorHandlingRunnable.run(DelegatingErrorHandlingRunnable.java:54) ~[spring-context-6.2.6.jar:6.2.6]
+	at java.base/java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:572) ~[na:na]
+	at java.base/java.util.concurrent.FutureTask.runAndReset(FutureTask.java:358) ~[na:na]
+	at java.base/java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask.run(ScheduledThreadPoolExecutor.java:305) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144) ~[na:na]
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642) ~[na:na]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: org.hibernate.exception.JDBCConnectionException: Unable to acquire JDBC Connection [co-pool - Connection is not available, request timed out after 30014ms (total=0, active=0, idle=0, waiting=0)] [n/a]
+	at org.hibernate.exception.internal.SQLExceptionTypeDelegate.convert(SQLExceptionTypeDelegate.java:51) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:58) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:129) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getPhysicalConnection(LogicalConnectionManagedImpl.java:156) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.getConnectionForTransactionManagement(LogicalConnectionManagedImpl.java:286) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.begin(LogicalConnectionManagedImpl.java:294) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl.begin(JdbcResourceLocalTransactionCoordinatorImpl.java:232) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.engine.transaction.internal.TransactionImpl.begin(TransactionImpl.java:83) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.springframework.orm.jpa.vendor.HibernateJpaDialect.beginTransaction(HibernateJpaDialect.java:176) ~[spring-orm-6.2.6.jar:6.2.6]
+	at org.springframework.orm.jpa.JpaTransactionManager.doBegin(JpaTransactionManager.java:420) ~[spring-orm-6.2.6.jar:6.2.6]
+	... 19 common frames omitted
+Caused by: java.sql.SQLTransientConnectionException: co-pool - Connection is not available, request timed out after 30014ms (total=0, active=0, idle=0, waiting=0)
+	at com.zaxxer.hikari.pool.HikariPool.createTimeoutException(HikariPool.java:686) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:179) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:144) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:127) ~[HikariCP-5.1.0.jar:na]
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:126) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.internal.NonContextualJdbcConnectionAccess.obtainConnection(NonContextualJdbcConnectionAccess.java:46) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	at org.hibernate.resource.jdbc.internal.LogicalConnectionManagedImpl.acquireConnectionIfNeeded(LogicalConnectionManagedImpl.java:126) ~[hibernate-core-6.6.13.Final.jar:6.6.13.Final]
+	... 26 common frames omitted
+Caused by: com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:165) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:55) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:837) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:420) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:238) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:180) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:137) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:360) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:202) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:461) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:724) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariPool$PoolEntryCreator.call(HikariPool.java:703) ~[HikariCP-5.1.0.jar:na]
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317) ~[na:na]
+	... 3 common frames omitted
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502) ~[na:na]
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486) ~[na:na]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:52) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:95) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:140) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:156) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:79) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:142) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:961) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:825) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 13 common frames omitted
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:690) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327) ~[na:na]
+	at java.base/java.net.Socket.connect(Socket.java:751) ~[na:na]
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:144) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:53) ~[mysql-connector-j-9.1.0.jar:9.1.0]
+	... 16 common frames omitted
+
+2026-11-27T18:17:23.738+08:00  INFO 5684 --- [campus-overflow] [ionShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2026-11-27T18:17:23.741+08:00  INFO 5684 --- [campus-overflow] [ionShutdownHook] com.zaxxer.hikari.HikariDataSource       : co-pool - Shutdown initiated...
+[ERROR] Surefire is going to kill self fork JVM. The exit has elapsed 30 seconds after System.exit(0).
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] 
+[INFO] --- jacoco:0.8.12:report (report) @ co-bootstrap ---
+[INFO] Loading execution data file E:\tmp\coverage-all-6.exec
+[INFO] Analyzed bundle 'CampusOverflow :: Bootstrap（启动装配）' with 18 classes
+[INFO] 
+[INFO] --- failsafe:3.5.3:verify (default) @ co-bootstrap ---
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for CampusOverflow :: Parent 0.1.0-SNAPSHOT:
+[INFO] 
+[INFO] CampusOverflow :: Parent ........................... SUCCESS [  0.647 s]
+[INFO] CampusOverflow :: Shared Kernel .................... SUCCESS [  2.289 s]
+[INFO] CampusOverflow :: Identity 身份与认证 ................... SUCCESS [  0.012 s]
+[INFO] Identity 身份与认证 :: api（发布语言） ........................ SUCCESS [  0.067 s]
+[INFO] Identity 身份与认证 :: domain（纯 Java） ................... SUCCESS [  1.567 s]
+[INFO] Identity 身份与认证 :: application（用例编排） ................ SUCCESS [  3.100 s]
+[INFO] Identity 身份与认证 :: infrastructure（持久化与适配器） .......... SUCCESS [  1.603 s]
+[INFO] Identity 身份与认证 :: interfaces（REST 接口层） ............. SUCCESS [  0.134 s]
+[INFO] CampusOverflow :: Q&A 问答核心 ......................... SUCCESS [  0.005 s]
+[INFO] Q&A 问答核心 :: api（发布语言） .............................. SUCCESS [  1.478 s]
+[INFO] Q&A 问答核心 :: domain（纯 Java） ......................... SUCCESS [  1.633 s]
+[INFO] Q&A 问答核心 :: application（用例编排） ...................... SUCCESS [  2.025 s]
+[INFO] Q&A 问答核心 :: infrastructure（持久化与适配器） ................ SUCCESS [  4.624 s]
+[INFO] Q&A 问答核心 :: interfaces（REST 接口层） ................... SUCCESS [  0.078 s]
+[INFO] CampusOverflow :: Reputation 声誉与激励 ................. SUCCESS [  0.004 s]
+[INFO] Reputation 声誉与激励 :: api（发布语言） ...................... SUCCESS [  0.057 s]
+[INFO] Reputation 声誉与激励 :: domain（纯 Java） ................. SUCCESS [  1.601 s]
+[INFO] Reputation 声誉与激励 :: application（用例编排） .............. SUCCESS [  4.180 s]
+[INFO] Reputation 声誉与激励 :: infrastructure（持久化与适配器） ........ SUCCESS [  3.363 s]
+[INFO] Reputation 声誉与激励 :: interfaces（REST 接口层） ........... SUCCESS [  0.070 s]
+[INFO] CampusOverflow :: Discovery 内容发现 ................... SUCCESS [  0.004 s]
+[INFO] Discovery 内容发现 :: api（发布语言） ........................ SUCCESS [  0.044 s]
+[INFO] Discovery 内容发现 :: domain（纯 Java） ................... SUCCESS [  1.387 s]
+[INFO] Discovery 内容发现 :: application（用例编排） ................ SUCCESS [  1.633 s]
+[INFO] Discovery 内容发现 :: infrastructure（持久化与适配器） .......... SUCCESS [  0.081 s]
+[INFO] Discovery 内容发现 :: interfaces（REST 接口层） ............. SUCCESS [  0.060 s]
+[INFO] CampusOverflow :: Bootstrap（启动装配） .................. SUCCESS [01:07 min]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:39 min
+[INFO] Finished at: 2026-11-27T18:17:24+08:00
+[INFO] ------------------------------------------------------------------------

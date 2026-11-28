@@ -16,4 +16,7 @@ public interface NotificationRepository {
     long countUnread(long recipientId);
 
     int markAllRead(long recipientId);
+
+    /** 问题删除后清理指向该问题的通知，避免保留已删标题和 404 链接。 */
+    int deleteByQuestionId(long questionId);
 }

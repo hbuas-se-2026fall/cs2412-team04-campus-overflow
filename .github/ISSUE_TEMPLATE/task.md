@@ -6,7 +6,7 @@ labels: ["type:task"]
 assignees: ""
 ---
 
-<!-- 提交前补 ctx:identity/qa/reputation/discovery/frontend/infra 和 priority:must/should/could/wont；被阻塞时加 status:blocked -->
+<!-- 提交前补 ctx:identity/qa/reputation/discovery/frontend/infra 和 priority:must/should/could/wont。status:* 标签已于 2026-11-17 停用，阻塞写在正文，不要再挂 status:blocked。 -->
 
 ## 任务描述
 

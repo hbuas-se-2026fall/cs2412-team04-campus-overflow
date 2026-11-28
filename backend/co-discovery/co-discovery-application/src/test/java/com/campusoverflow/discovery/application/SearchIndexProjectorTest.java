@@ -18,6 +18,7 @@ import com.campusoverflow.reputation.api.event.BountyOpenedEvent;
 import com.campusoverflow.shared.event.ProcessedEventStore;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -32,8 +33,9 @@ class SearchIndexProjectorTest {
     private final Set<String> seen = new HashSet<>();
     private final ProcessedEventStore processed = (eventId, consumer) -> seen.add(eventId + ":" + consumer);
     private Long acceptedAnswerId = 50L;
+    private boolean questionDeleted = false;
     private final QaQueryApi qa = questionId ->
-            Optional.of(new QuestionRef(questionId, 1L, 100L, "title", acceptedAnswerId, false));
+            Optional.of(new QuestionRef(questionId, 1L, 100L, "title", acceptedAnswerId, questionDeleted));
     private final SearchIndexProjector projector = new SearchIndexProjector(index, processed, qa);
 
     @Test
@@ -50,6 +52,32 @@ class SearchIndexProjectorTest {
         assertThat(doc.courseId()).isEqualTo(100L);
         assertThat(doc.authorId()).isEqualTo(3L);
         assertThat(doc.tags()).containsExactly("数据结构", "红黑树");
+    }
+
+    @Test
+    void deletedQuestionIsNotInsertedByLatePostedEvent() {
+        questionDeleted = true;
+        QuestionPostedEvent e = new QuestionPostedEvent("e-deleted-post", NOW, 7L, 3L, 100L, "已删除的问题",
+                "正文", List.of("数据结构"));
+
+        projector.on(e);
+
+        assertThat(index.inserted).isEmpty();
+    }
+
+    @Test
+    void editRebuildsMissingProjectionInsteadOfLosingIt() {
+        index.updateResult = 0;
+        QuestionEditedEvent e = new QuestionEditedEvent("e-rebuild", NOW, 7L, "编辑后的标题", "编辑后的正文",
+                List.of("数据结构", "红黑树"));
+
+        projector.on(e);
+
+        assertThat(index.inserted).hasSize(1);
+        assertThat(index.inserted.get(0).questionId()).isEqualTo(7L);
+        assertThat(index.inserted.get(0).title()).isEqualTo("编辑后的标题");
+        assertThat(index.inserted.get(0).courseId()).isEqualTo(100L);
+        assertThat(index.inserted.get(0).authorId()).isEqualTo(1L);
     }
 
     @Test
@@ -114,6 +142,7 @@ class SearchIndexProjectorTest {
 
     private static final class FakeIndex implements SearchIndex {
         final List<SearchDocument> inserted = new ArrayList<>();
+        int updateResult = 1;
         final List<Integer> answerCountDeltas = new ArrayList<>();
         final List<Long> accepted = new ArrayList<>();
         final List<Long> clearedAccepted = new ArrayList<>();
@@ -122,8 +151,8 @@ class SearchIndexProjectorTest {
         final List<Boolean> bountyStates = new ArrayList<>();
 
         @Override public void insert(SearchDocument document) { inserted.add(document); }
-        @Override public void updateText(long questionId, String title, String bodyText, List<String> tags,
-                                         Instant at) { }
+        @Override public int updateText(long questionId, String title, String bodyText, List<String> tags,
+                                        Instant at) { return updateResult; }
         @Override public void adjustAnswerCount(long questionId, int delta, Instant at) {
             answerCountDeltas.add(delta);
         }
@@ -134,6 +163,8 @@ class SearchIndexProjectorTest {
         @Override public void markDeleted(long questionId) { deleted.add(questionId); }
         @Override public List<String> findTags(long questionId) { return List.of(); }
         @Override public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags,
+                                                                          boolean allCourses,
+                                                                          Collection<Long> visibleCourseIds,
                                                                           int limit) { return List.of(); }
     }
 }

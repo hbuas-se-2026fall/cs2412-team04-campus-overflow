@@ -11,16 +11,23 @@ import type { Bounty } from '../types';
  */
 export function BountyDialog({
   questionId,
+  courseId,
+  accepted,
   canOpen,
   onChanged,
 }: {
   questionId: number;
+  /** 问题所属课程；公开问题（未挂课程）为 undefined，后端会拒 REP-1007 */
+  courseId?: number;
+  /** 问题是否已采纳答案；已采纳后不可再发起悬赏（后端 REP-1001） */
+  accepted: boolean;
   /** 后端 permissions.canManage 为 true 时才允许发起（教师在课程内才能悬赏） */
   canOpen: boolean;
   onChanged?: () => void;
 }) {
   const [bounty, setBounty] = useState<Bounty | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [open, setOpen] = useState(false);
   const [points, setPoints] = useState('50');
   const [days, setDays] = useState('7');
@@ -31,16 +38,22 @@ export function BountyDialog({
 
   const load = () => {
     setLoading(true);
+    setLoadError('');
     api
       .bountyOf(questionId)
       .then(setBounty)
-      .catch(() => setBounty(null))
+      .catch((e: unknown) => {
+        setBounty(null);
+        setLoadError(describe(e));
+      })
       .finally(() => setLoading(false));
   };
 
+  // FE-02：采纳后问题状态变化，悬赏会被结算/关闭；把 accepted 纳入依赖，采纳后重载悬赏状态。
   useEffect(() => {
     load();
-  }, [questionId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionId, accepted]);
 
   // 每秒刷新一次「当前时间」，驱动倒计时重新计算
   useEffect(() => {
@@ -76,6 +89,12 @@ export function BountyDialog({
       onChanged?.();
     } catch (e) {
       setError(describe(e));
+      // 审计 2-7：409（REP-2001 已结束 / REP-2002 已有进行中的悬赏）说明本地状态已过期，
+      // 只报错不刷新会让用户反复提交同一个必败请求，这里同步重拉一次悬赏状态。
+      if (e instanceof ApiError && e.status === 409) {
+        load();
+        onChanged?.();
+      }
     } finally {
       setBusy(false);
     }
@@ -87,10 +106,24 @@ export function BountyDialog({
 
   return (
     <div className="bounty-box">
-      {bounty ? <BountyStatus bounty={bounty} now={now} /> : <p className="muted">该问题还没有悬赏。</p>}
+      {/* 审计 2-11：加载失败时不能显示「该问题还没有悬赏」——那会把「不知道」说成「没有」，
+          并会因为 bounty 为 null 而误展示「发起悬赏」入口。失败只给失败态 + 重试。 */}
+      {loadError ? (
+        <p className="error">
+          悬赏信息加载失败：{loadError}
+          <button className="link" onClick={load}>
+            重试
+          </button>
+        </p>
+      ) : bounty ? (
+        <BountyStatus bounty={bounty} now={now} />
+      ) : (
+        <p className="muted">该问题还没有悬赏。</p>
+      )}
 
-      {/* FE-09：已有进行中的悬赏时不再显示「发起悬赏」（后端同一问题只允许一个 OPEN） */}
-      {canOpen && !open && bounty?.status !== 'OPEN' && (
+      {/* FE-02：门控 = 可管理 + 必须是课程问题 + 未采纳 + 无进行中悬赏 + 悬赏状态已知。
+          公开问题（无 courseId）后端必拒 REP-1007，已采纳必拒 REP-1001，故这里不显示按钮。 */}
+      {canOpen && !loadError && courseId != null && !accepted && !open && bounty?.status !== 'OPEN' && (
         <button
           onClick={() => {
             setOpen(true);
@@ -181,18 +214,26 @@ function formatRemain(ms: number): string {
   return `${s} 秒`;
 }
 
-/** REP-1001（已关闭/已采纳）、REP-1002（积分不足）、REP-1003/1004（越界）→ 中文提示 */
+/** 悬赏业务码 → 中文提示（含 REP-2001/2002 冲突与 REP-3001 无权限，审计 2-7 补充） */
 function describe(e: unknown): string {
   if (e instanceof ApiError) {
     switch (e.code) {
       case 'REP-1001':
         return '问题已关闭或已采纳，不能发起悬赏';
+      case 'REP-1007':
+        return '公开问题不能发起悬赏，请选择所属课程的问题';
       case 'REP-1002':
         return '可用悬赏积分不足';
       case 'REP-1003':
         return '悬赏积分需在 10–500 之间';
       case 'REP-1004':
         return '悬赏期限需在 1–14 天之间';
+      case 'REP-2001':
+        return '该悬赏已结束，无需再操作';
+      case 'REP-2002':
+        return '该问题已有进行中的悬赏';
+      case 'REP-3001':
+        return '只有课程管理者（教师/助教/管理员）可以发起悬赏';
       case 'QA-3001':
         return '只有课程教师/助教可以发起悬赏';
       case 'QA-1020':
@@ -200,6 +241,7 @@ function describe(e: unknown): string {
       default:
         if (e.status === 403) return '你没有权限发起悬赏';
         if (e.status === 404) return '问题不存在或已被删除';
+        if (e.status === 409) return '悬赏状态已变化，已为你刷新';
         if (e.status === 422) return '提交内容不符合规则，请检查积分与天数';
         return e.message || '发起悬赏失败，请稍后重试';
     }

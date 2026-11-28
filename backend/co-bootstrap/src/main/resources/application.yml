@@ -21,6 +21,8 @@ spring:
       hibernate.order_inserts: true
   flyway:
     enabled: true
+    # 允许补入 V202611230001（唯一索引前清理历史重复 OPEN）；已有库上该脚本是无操作。
+    out-of-order: true
     # 每个上下文拥有独立的迁移目录，互不干扰（平台表放在 platform）
     locations: classpath:db/migration/platform,classpath:db/migration/identity,classpath:db/migration/qa,classpath:db/migration/reputation,classpath:db/migration/discovery
   data:
@@ -99,7 +101,10 @@ co:
     view-flush-interval-ms: 60000
   reputation:
     bounty-expiry-interval-ms: 300000
-    reconcile-cron: "0 30 3 * * *"
+    # 审计 2-17：代码读的是 reconcile-interval-ms / reconcile-initial-delay-ms（@Scheduled fixedDelay），
+    # 原先写的 reconcile-cron 没有任何地方读取，等于配置不生效。
+    reconcile-interval-ms: 60000
+    reconcile-initial-delay-ms: 15000
   discovery:
     search:
       engine: fulltext            # fulltext（MySQL ngram，默认）| like（退化实现，用于对照）
@@ -126,10 +131,14 @@ server:
   servlet:
     session:
       cookie:
-        secure: true
+        # 跟随部署环境：HTTP 部署设 false（否则 Secure Cookie 不被浏览器回传，登录后丢会话）；
+        # HTTPS 部署必须设 true。与 deploy/docker-compose.yml 的 COOKIE_SECURE 保持一致。
+        secure: ${COOKIE_SECURE:false}
 springdoc:
   swagger-ui:
     enabled: false                 # 生产环境关闭在线文档
+  api-docs:
+    enabled: false                 # 审计 2-5：OpenAPI JSON 也必须关，否则 /v3/api-docs 仍可匿名拿到全量接口描述
 co:
   security:
     field-key: ${CO_FIELD_KEY}     # 未注入则启动失败（快速失败优于带着默认密钥上线）

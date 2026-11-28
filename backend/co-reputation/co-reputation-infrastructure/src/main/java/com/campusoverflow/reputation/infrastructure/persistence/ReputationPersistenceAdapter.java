@@ -50,6 +50,12 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public Optional<ReputationAccount> findByUserIdForUpdate(long userId) {
+        // 行锁读取：仅限已存在的账户；不存在时由调用方以 open(...) 新建（首个事件路径）
+        return accounts.findByIdForUpdate(userId).map(ReputationPersistenceAdapter::toDomain);
+    }
+
+    @Override
     public List<ReputationAccount> findAllByUserId(Collection<Long> userIds) {
         return accounts.findAllById(userIds).stream().map(ReputationPersistenceAdapter::toDomain).toList();
     }
@@ -117,6 +123,15 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public List<LedgerEntry> findAllBetween(Instant from, Instant to) {
+        return ledger.findByCreatedAtGreaterThanEqualAndCreatedAtLessThanOrderByIdAsc(from, to).stream()
+                .map(e -> new LedgerEntry(e.getId(), e.getUserId(), e.getEventId(),
+                        ReputationReason.valueOf(e.getReason()), e.getDelta(), e.getRefType(), e.getRefId(),
+                        e.getCreatedAt()))
+                .toList();
+    }
+
+    @Override
     public Map<Long, Long> sumByUser() {
         Map<Long, Long> result = new HashMap<>();
         for (Object[] row : ledger.sumGroupByUser()) {
@@ -134,6 +149,11 @@ public class ReputationPersistenceAdapter
     }
 
     @Override
+    public Optional<Bounty> findByIdForUpdate(long id) {
+        return bounties.findByIdForUpdate(id).map(ReputationPersistenceAdapter::toDomain);
+    }
+
+    @Override
     public Optional<Bounty> findLatestByQuestion(long questionId) {
         return bounties.findFirstByQuestionIdOrderByIdDesc(questionId).map(ReputationPersistenceAdapter::toDomain);
     }
@@ -143,6 +163,15 @@ public class ReputationPersistenceAdapter
         return bounties.findByStatusAndExpiresAtLessThanEqualOrderByExpiresAt(BountyStatus.OPEN.name(), now,
                         org.springframework.data.domain.PageRequest.of(0, limit)).stream()
                 .map(ReputationPersistenceAdapter::toDomain).toList();
+    }
+
+    @Override
+    public Map<Long, Long> sumOpenPointsBySponsor() {
+        Map<Long, Long> result = new HashMap<>();
+        for (Object[] row : bounties.sumPointsByStatus(BountyStatus.OPEN.name())) {
+            result.put(((Number) row[0]).longValue(), ((Number) row[1]).longValue());
+        }
+        return result;
     }
 
     @Override

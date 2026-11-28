@@ -3,7 +3,7 @@
 > 负责人：青岑（QA）
 > 范围：Lab1–Lab3 / V3 Sprint 0
 > 版本：v1.0
-> 状态：历史计划（Sprint 0）。表中“待执行”为当时记录；实际执行结果见 [`docs/final/03-quality.md`](../final/03-quality.md) 与 `scripts/smoke/`，本文件不再更新。
+> 状态：历史计划（Sprint 0）。表中“待执行”为当时记录；实际执行结果见 [`docs/final/03-quality.md`](../final/03-quality.md)、[`final-test-report.md`](final-test-report.md) 与 `scripts/smoke/`，本文件不再更新。
 
 ## 1. 测试目标
 
@@ -20,7 +20,7 @@
 
 ### 2.2 本轮不覆盖
 
-- 发布问题、回答、投票、评论、采纳的后端行为（Q&A 领域方法标 TODO(S2)，Sprint 2 实现）
+- 发布问题、回答、投票、评论、采纳的后端行为（Sprint 0 时 Q&A 领域方法曾标 TODO(S2)；截至 2026-11-27 全仓已无 `TODO(S`，实现与验收见 [`final-test-report.md`](final-test-report.md)）
 - 声誉、搜索、通知、排行榜（Sprint 3）
 
 ## 3. 测试环境
@@ -53,6 +53,19 @@
 ## 5. 缺陷记录
 
 见 [`defects.md`](defects.md)。
+
+## 5.1 2026-11-27 追溯（历史计划 → 最终证据）
+
+| 用例 | 最终覆盖证据 |
+| --- | --- |
+| T-01～T-05 认证 | `final-test-report.md` 的 281 单测 + `scripts/smoke/`；FlowIT 5 条已在本地 Testcontainers 跑通，CI 最终 HEAD 待补 |
+| T-06～T-08 课程 | `co-identity-application` 11 条 + 前端课程页 |
+| T-09～T-11 前端 | `frontend` Vitest 16 条 + 手工走查截图 |
+| T-12 发布问题 | 已实现；`co-qa-domain` 44 条、`co-qa-application` 56 条 |
+| T-13 CI 检查 | BUG-002 已关闭（PR 触发 CI） |
+| T-14 分支保护 | BUG-003 已关闭（规则集 #27436601） |
+
+> 本文件保留 Sprint 0 历史状态，不把“待执行”改成“已执行”；真实执行结果以上表与最终测试报告为准。
 
 ## 6. 退出标准
 

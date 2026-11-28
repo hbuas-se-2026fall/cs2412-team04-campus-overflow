@@ -55,9 +55,16 @@ public final class QaTestFixtures {
         public final Map<Long, Integer> answerCountDeltas = new HashMap<>();
         public final Map<Long, Integer> scoreDeltas = new HashMap<>();
         public int saves;
+        public int lockedLoads;
 
         @Override
         public Optional<Question> findById(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public Optional<Question> findByIdForUpdate(long id) {
+            lockedLoads++;
             return Optional.ofNullable(store.get(id));
         }
 
@@ -90,6 +97,16 @@ public final class QaTestFixtures {
         }
 
         @Override
+        public boolean adjustAnswerCountIfOpen(long questionId, int delta) {
+            Question question = store.get(questionId);
+            if (question == null || question.isDeleted()) {
+                return false;
+            }
+            answerCountDeltas.merge(questionId, delta, Integer::sum);
+            return true;
+        }
+
+        @Override
         public void adjustScore(long questionId, int delta) {
             scoreDeltas.merge(questionId, delta, Integer::sum);
         }
@@ -103,6 +120,11 @@ public final class QaTestFixtures {
         @Override
         public Optional<Answer> findById(long id) {
             return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public Optional<Long> findQuestionId(long answerId) {
+            return Optional.ofNullable(store.get(answerId)).map(Answer::questionId);
         }
 
         @Override
@@ -235,12 +257,13 @@ public final class QaTestFixtures {
         public int invalidations;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
-            return Optional.empty();
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
+            return new Lookup(0L, Optional.empty());
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                        PageResult<QuestionSummaryView> value) {
         }
 
         @Override
@@ -266,6 +289,14 @@ public final class QaTestFixtures {
         @Override
         public void adjustUsage(Collection<String> tagNames, int delta) {
             tagNames.forEach(name -> {
+                adjustments.add((delta > 0 ? "+" : "") + delta + ":" + name);
+                usage.merge(name, delta, Integer::sum);
+            });
+        }
+
+        @Override
+        public void adjustDeltas(java.util.Map<String, Integer> deltas) {
+            deltas.forEach((name, delta) -> {
                 adjustments.add((delta > 0 ? "+" : "") + delta + ":" + name);
                 usage.merge(name, delta, Integer::sum);
             });
@@ -361,33 +392,37 @@ public final class QaTestFixtures {
         public int hits;
         public int misses;
         public int invalidations;
+        private long generation;
 
         @Override
-        public Optional<PageResult<QuestionSummaryView>> get(Long courseId, Long viewerId, PageRequest page) {
+        public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
             Optional<PageResult<QuestionSummaryView>> value =
-                    Optional.ofNullable(store.get(key(courseId, viewerId, page)));
+                    Optional.ofNullable(store.get(key(courseId, viewerId, page, scope, generation)));
             if (value.isPresent()) {
                 hits++;
             } else {
                 misses++;
             }
-            return value;
+            return new Lookup(generation, value);
         }
 
         @Override
-        public void put(Long courseId, Long viewerId, PageRequest page, PageResult<QuestionSummaryView> value) {
-            store.put(key(courseId, viewerId, page), value);
+        public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                        PageResult<QuestionSummaryView> value) {
+            store.put(key(courseId, viewerId, page, scope, generation), value);
         }
 
         @Override
         public void invalidateAll() {
             invalidations++;
+            generation++;
             store.clear();
         }
 
-        private static String key(Long courseId, Long viewerId, PageRequest page) {
-            return (courseId == null ? "all" : courseId) + ":" + (viewerId == null ? "anon" : viewerId)
-                    + ":" + page.page() + ":" + page.size();
+        private static String key(Long courseId, Long viewerId, PageRequest page, String scope, long generation) {
+            return generation + ":" + (courseId == null ? "all" : courseId) + ":"
+                    + (viewerId == null ? "anon" : viewerId) + ":" + scope + ":"
+                    + page.page() + ":" + page.size();
         }
     }
 }

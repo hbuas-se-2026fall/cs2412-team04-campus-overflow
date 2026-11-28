@@ -45,28 +45,20 @@ net stop MySQL80
 docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 ```
 
-方式二，把容器端口映射到 3307，不动本机 MySQL。建一个本地覆盖文件
-`deploy/docker-compose.local.yml`（该文件已在 `.gitignore` 中，不会入库）：
-
-```yaml
-services:
-  mysql:
-    ports: !override
-      - "3307:3306"
-```
-
-> 注意必须写 `!override`。compose 合并多个 `-f` 时，`ports` 默认是**追加**而不是替换，
-> 不写 `!override` 会变成 3306 和 3307 同时暴露，3306 仍然冲突。
-
-然后带上覆盖文件启动，并让后端连 3307：
+方式二，把容器端口映射到 3307，不动本机 MySQL。dev compose 的端口已支持环境变量覆盖，不需要额外的覆盖文件：
 
 ```bash
-docker compose -f deploy/docker-compose.dev.yml -f deploy/docker-compose.local.yml up -d mysql redis
+# 只改 MySQL 对外端口；Redis 同理用 REDIS_PORT
+MYSQL_PORT=3307 docker compose -f deploy/docker-compose.dev.yml up -d mysql redis
 
-# 从仓库根进入后端目录，再指定端口启动（默认 3306 见 application.yml 的 ${DB_PORT:3306}）
+# 后端连 3307（默认 3306，见 application.yml 的 ${DB_PORT:3306}）
 cd backend
 DB_PORT=3307 mvn -pl co-bootstrap -am spring-boot:run
 ```
+
+> 早期文档让你手写 `deploy/docker-compose.local.yml` 再用 `-f` 合并，并提醒 `ports` 必须写 `!override`
+> 才能覆盖。该文件在 `.gitignore` 里、仓库中并不存在，容易照抄失败（审计 P-23/P-24）；
+> 现已改为 `MYSQL_PORT` / `REDIS_PORT` 环境变量，无需任何本地文件。
 
 PowerShell 写法：
 
@@ -76,23 +68,30 @@ $env:DB_PORT = "3307"
 mvn -pl co-bootstrap -am spring-boot:run
 ```
 
-### 2.3 启动后端（demo profile）
+### 2.3 启动后端（dev + demo profile）
 
 ```bash
 cd backend
 mvn -pl co-bootstrap -am -DskipTests package
-java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=demo
+# demo 需要 dev 的默认值（DB 密码、字段密钥），所以两个 profile 一起启用；
+# 只写 --spring.profiles.active=demo 会启动失败：
+#   缺 DB_PASSWORD  -> Flyway: Access denied for user 'campus' (using password: NO)
+#   缺 CO_FIELD_KEY -> FieldEncryptor 构造失败（审计 P-25 记录）
+java -jar co-bootstrap/target/campus-overflow.jar --spring.profiles.active=dev,demo
 ```
 
+> 若 MySQL 容器映射到 3307（见 §2.2 方式二），再加 `DB_PORT=3307`。
+> 审计 P-25 记录：旧版这里只写 `--spring.profiles.active=demo`，照抄会启动失败。
+
 也可以在 IntelliJ 里直接运行 `CampusOverflowApplication`，或用
-`mvn -pl co-bootstrap spring-boot:run -Dspring-boot.run.profiles=demo`
+`mvn -pl co-bootstrap spring-boot:run -Dspring-boot.run.profiles=dev,demo`
 （后者要求依赖已经在本地 Maven 仓库中）。
 
 - 后端：<http://localhost:8080>
 - Swagger：<http://localhost:8080/swagger-ui.html>
 - 健康检查：<http://localhost:8080/actuator/health>
 
-`demo` profile 会由 `DemoDataSeeder` 写入演示账号、课程、问题和悬赏；重复启动会跳过已存在的数据。
+`demo` profile 会由 `DemoDataSeeder` 写入演示账号、课程、问题和悬赏；重复启动会跳过已存在的数据。必须同时启用 `dev` 以加载本地数据库密码与字段密钥默认值，或显式注入 `DB_PASSWORD`/`CO_FIELD_KEY`/`CO_FIELD_MAC_KEY`。
 如果只想启动空库，把 profile 换成 `dev`。
 
 ### 2.4 启动前端
@@ -162,14 +161,20 @@ mvn verify               # 单元测试 + 架构检查 + 覆盖率门禁 + 集�
 
 ```bash
 cd frontend
+npm run lint
+npm run format:check
 npm run typecheck
+npm run test:run
 npm run build
 ```
+
+> Vitest + Testing Library 组件测试（`src/**/*.test.tsx`）；首次需 `npm install`。
 
 ### 4.3 CI
 
 GitHub Actions 的 `CI` 流水线包含后端编译、全量单元测试、ArchUnit、覆盖率门禁、
-集成测试（Testcontainers，硬门禁，失败即阻断）和前端类型检查/构建。
+集成测试（Testcontainers，硬门禁，失败即阻断），以及前端 ESLint、Prettier 格式检查、
+类型检查、组件单元测试（Vitest）与构建。
 目标为 `main` 的 PR / `main` push 还会构建前后端镜像；`main` push 同时推送 GHCR（sha + latest）。
 
 ## 5. Docker 一键部署
@@ -194,12 +199,29 @@ docker compose -f deploy/docker-compose.dev.yml up -d --build
 
 访问：
 
-| 服务 | 地址 |
-| --- | --- |
-| 前端 | <http://localhost/> |
-| 后端 API | <http://localhost:8080/> |
-| Swagger | <http://localhost:8080/swagger-ui.html> |
-| 健康检查 | <http://localhost:8080/actuator/health> |
+| 服务 | 地址（生产 compose） | 地址（本地开发 dev compose） |
+| --- | --- | --- |
+| 前端 | <http://localhost/> | <http://localhost/> |
+| 后端 API | <http://localhost/api/>（经 Nginx 同源代理，8080 不从 host 暴露） | <http://localhost:8080/> |
+| Swagger | 生产默认关闭 | <http://localhost:8080/swagger-ui.html> |
+| 健康检查 | <http://localhost/actuator/health>（Nginx 只开放此 actuator 端点） | <http://localhost:8080/actuator/health> |
+
+> 生产 compose **不映射后端 8080 到 host**：直出会绕过 Nginx 的 `client_max_body_size 2m`
+> 和 actuator 端点白名单（`/actuator/prometheus`、`/actuator/info` 等敏感端点）。
+> 需要在容器内诊断时用：
+>
+> ```bash
+> docker compose --env-file deploy/.env -f deploy/docker-compose.yml exec backend \
+>   wget -qO- http://localhost:8080/actuator/health
+> ```
+>
+> 从宿主机看健康检查走 Nginx：`curl http://localhost/actuator/health`（审计 2-3c：原诊断命令缺 `--env-file`）。
+
+> ⚠️ **公网部署风险（待 PO 裁决，审计 2-3e）**：默认场景是 **HTTP 80 + `COOKIE_SECURE=false`**，
+> 会话 Cookie 与登录凭据在链路上是明文。校内网/本机演示可以接受；若要对公网开放，必须二选一：
+> ① 前面加 TLS（Nginx 443 + 证书）并把 `COOKIE_SECURE=true`；
+> ② 只在内网/隧道内访问，不直接暴露 80 端口。
+> 该取舍属产品/运维决策，代码侧不做强制（强制 `secure=true` 会让当前 HTTP 演示环境登录后立即丢会话）。
 
 加上监控（Prometheus + Grafana）：
 
@@ -220,7 +242,7 @@ MYSQL_ROOT_PASSWORD  MySQL root 密码（生产必填，无默认值）
 CO_FIELD_KEY         字段加密 AES 密钥（Base64 32 字节，生产必填）
 CO_FIELD_MAC_KEY     字段摘要 HMAC 密钥（Base64 32 字节，生产必填）
 SPRING_PROFILES      后端 profile，生产默认 prod（禁止 demo）
-COOKIE_SECURE        HTTPS 部署时设为 true（默认 true）
+COOKIE_SECURE        HTTP 部署保持 false（默认 false）；Nginx 启用 TLS、全程 https:// 后必须设为 true，否则 Secure Cookie 不回传、登录后丢会话
 GRAFANA_PASSWORD     Grafana 管理员密码（生产必填）
 ```
 

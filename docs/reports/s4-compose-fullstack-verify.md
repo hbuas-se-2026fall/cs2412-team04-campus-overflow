@@ -13,10 +13,20 @@
 即 README §5「Docker 一键部署」真正走的那条路径。
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d --build
+# 生产 compose 需要 deploy/.env 注入 DB_PASSWORD / MYSQL_ROOT_PASSWORD / CO_FIELD_KEY / CO_FIELD_MAC_KEY
+cp deploy/.env.example deploy/.env   # 填入真实值
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
 ```
 
+> 修订（2026-11-25，审计 F-09）：原版命令 `docker compose -f deploy/docker-compose.yml up -d --build`
+> 缺少 `--env-file`；当前生产 compose 对 `DB_PASSWORD` 等变量强制必填（`:?`），不带 env 会直接失败。
+
 ## 二、容器状态
+
+> ⚠️ **口径提醒（2026-11-25，审计 2-14）**：下表是 2026-11-18 当时的实测结果，当时 `deploy/docker-compose.yml`
+> **仍把后端 8080 映射到 host**。之后的部署收敛 PR 已把 `backend` 的 host 端口映射**删除**（流量只能经 Nginx 80），
+> 因此今天重跑本报告 §二 不会再看到 `0.0.0.0:8080->8080/tcp`，健康检查应改走 `http://localhost/actuator/health`。
+> 本表保留为历史实测记录，不代表当前 compose 的端口策略；以 `deploy/docker-compose.yml` 与 README §5 为准。
 
 | 容器 | 镜像 | 状态 | 端口 |
 | --- | --- | --- | --- |
@@ -39,7 +49,7 @@ co-redis     Up (healthy)              0.0.0.0:6379->6379/tcp
 
 | 验证项 | 命令 | 结果 |
 | --- | --- | --- |
-| 后端健康 | `curl http://localhost:8080/actuator/health` | `{"status":"UP","groups":["liveness","readiness"]}` |
+| 后端健康 | `curl http://localhost:8080/actuator/health`（当时 8080 仍直接映射；当前改为 `curl http://localhost/actuator/health`） | `{"status":"UP","groups":["liveness","readiness"]}` |
 | 前端可达 | `curl -o /dev/null -w "%{http_code}" http://localhost` | `200` |
 | **Nginx 反代后端** | `curl "http://localhost/api/v1/questions?page=1&size=2"` | 返回问题列表 JSON（含 3 条演示数据） |
 | 课程接口 | `curl http://localhost/api/v1/courses` | `[{"id":1,"code":"CS2001","name":"数据结构",...}]` |
@@ -130,6 +140,9 @@ services:
       - "3307:3306"
 ```
 
+> 修订（2026-11-25，审计 F-09）：`deploy/docker-compose.local.yml` 是当时的临时覆盖文件，现已不在仓库；
+> 本地开发改用 `deploy/docker-compose.dev.yml`（默认端口 3306、含 demo 数据），见 README §2.2。
+
 对应后端 `DB_PORT=3307`。仓库默认仍是 3306，`README.md` §2.2 已写明两种做法。
 
 > 踩坑提示：`ports` 在 compose 多文件合并时是**追加**而非替换，必须写 `!override`，
@@ -149,16 +162,22 @@ services:
 ## 七、复现步骤
 
 ```bash
-# 1) 起中间件（本机 3306 被占用时加 -f deploy/docker-compose.local.yml）
-docker compose -f deploy/docker-compose.yml up -d mysql redis
+# 0) 准备环境变量（当前生产 compose 必填）
+cp deploy/.env.example deploy/.env   # 填入 DB_PASSWORD / MYSQL_ROOT_PASSWORD / CO_FIELD_KEY / CO_FIELD_MAC_KEY
+
+# 1) 起中间件（本地开发可直接用 docker-compose.dev.yml，无需手写端口覆盖）
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d mysql redis
 
 # 2) 构建并启动全栈
-docker compose -f deploy/docker-compose.yml up -d --build
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d --build
 
 # 3) 验证
-curl http://localhost:8080/actuator/health    # {"status":"UP",...}
+curl http://localhost/actuator/health    # {"status":"UP",...}（经 Nginx 白名单）
 curl -o /dev/null -w "%{http_code}\n" http://localhost   # 200
 curl "http://localhost/api/v1/questions?page=1&size=2"   # 问题列表 JSON
 
 # 4) 浏览器打开 http://localhost/
 ```
+
+> 修订（2026-11-25，审计 F-09）：生产 compose 不再把后端 8080 暴露到 host，健康检查改走
+> `http://localhost/actuator/health`；本地开发请用 `deploy/docker-compose.dev.yml`。

@@ -30,8 +30,9 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * 演示数据（仅 demo profile 生效）：一门课、6 个账号、3 个问题，覆盖提问→回答→投票→认证→采纳→评论→悬赏全链路。
- * 课堂演示与验收时可直接登录查看效果；所有账号密码均为 {@value #PASSWORD}。
+ * 演示数据（仅 demo profile 生效）：一门课、8 个账号（含 2 个待认证学生）、4 个问题，
+ * 覆盖提问→回答→投票→认证→采纳→评论→悬赏全链路。课堂演示与验收时可直接登录查看效果；
+ * 所有账号密码均为 {@value #PASSWORD}。
  */
 @Component
 @Profile("demo")
@@ -90,6 +91,11 @@ public class DemoDataSeeder implements ApplicationRunner {
                 PASSWORD, "计算机工程学院", "计科2301"));
         long gangId = registration.register(new RegisterUserCommand("2023003", "小刚", "gang@campus.edu.cn",
                 PASSWORD, "计算机工程学院", "计科2302"));
+        // 待认证演示账号：不 verify、不加入课程，专门用于管理页“认证”演示。
+        registration.register(new RegisterUserCommand("SeedUser", "SeedUser", "seeduser@campus.edu.cn",
+                PASSWORD, "计算机工程学院", "计科2301"));
+        registration.register(new RegisterUserCommand("TestStudent", "TestStudent", "teststudent@campus.edu.cn",
+                PASSWORD, "计算机工程学院", "计科2301"));
         Actor ming = new Actor(mingId, "小明", Role.STUDENT);
         Actor hong = new Actor(hongId, "小红", Role.STUDENT);
         Actor gang = new Actor(gangId, "小刚", Role.STUDENT);
@@ -141,7 +147,14 @@ public class DemoDataSeeder implements ApplicationRunner {
                 想知道它的分词粒度 `ngram_token_size` 如何影响检索效果和索引体积？
                 """, List.of("mysql", "全文检索")));
 
-        log.info("演示数据初始化完成：管理员 admin01 / 教师 T2001 / 助教 TA3001 / 学生 2023001-2023003，密码 {}", PASSWORD);
+        // 第二条“红黑树”问题：让搜索命中 2 条、详情页相关问题有可演示的共享标签。
+        questions.post(ming, new PostQuestionCommand(courseId, "红黑树删除节点时为什么要做双黑修复？",
+                """
+                删除红黑树节点后，如果被删节点是黑色，某些路径的黑高会少 1。为什么不能只靠变色恢复，
+                什么时候需要旋转？双黑修复的终止条件是什么？
+                """, List.of("数据结构", "红黑树")));
+
+        log.info("演示数据初始化完成：管理员 admin01 / 教师 T2001 / 助教 TA3001 / 学生 2023001-2023003 / 待认证 SeedUser、TestStudent，密码 {}", PASSWORD);
     }
     /**
      * 悬赏依赖异步 UserRegistered 事件创建声誉账户；演示环境启动时用短重试避免 REP-1002

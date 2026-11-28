@@ -18,6 +18,12 @@
 
 > 本机没有 Docker，MySQL/Redis 用本地临时实例代替 `docker compose`；不影响 demo profile 的启动与 seeder 逻辑。
 
+> ⚠️ **版本口径（审计 P-58）**：上表的 **MySQL 8.4 / Redis 5.0 是替代实例的版本，不是仓库钉住的版本**。
+> `deploy/docker-compose.dev.yml` 声明的是 **MySQL `8.0.39` / Redis `7-alpine`**。所以本文只能证明
+> 「demo profile 的启动与 seeder 逻辑可用」，**不能作为 compose 钉住版本已通过验证的证据**。
+> 钉住版本的真实验证见 2026-11-27 在房国栋机器上的实测：`co-mysql-dev`（`mysql:8.0.39`，host 3307）+ `co-redis-dev`
+> （`redis:7-alpine`）均 healthy，`demo` 后端启动成功、`/api/v1/courses` 返回演示课程、问题列表可见 3 条演示问题。
+
 ## 二、启动日志（首次，含 seeder 初始化）
 
 ```text

@@ -13,7 +13,8 @@ const BY_CODE: Record<string, string> = {
   'QA-1004': '标签不能为空或格式不正确',
   'QA-1005': '每个问题需要 1–5 个标签',
   'QA-1015': '不能给自己的内容投票',
-  'QA-1020': '该问题已关闭，不能再进行操作',
+  'QA-1020': '该问题或回答已删除，不能再进行操作',
+  'QA-1021': '不能采纳或认证自己的回答',
   'QA-2002': '该问题已经采纳过答案，不能重复采纳',
   'QA-3001': '只有提问者或课程教师/助教可以采纳回答',
   'QA-3006': '没有权限查看该课程的问题',
@@ -33,6 +34,10 @@ const BY_CODE: Record<string, string> = {
   'REP-1003': '悬赏积分需在 10–500 之间',
   'REP-1004': '悬赏期限需在 1–14 天之间',
   'REP-1007': '公开问题不能发起悬赏，请选择所属课程的问题',
+  'REP-1005': '不能把悬赏发给自己',
+  'REP-2001': '该悬赏已结束，无需再操作',
+  'REP-2002': '该问题已有进行中的悬赏',
+  'REP-3001': '只有课程管理者（教师/助教/管理员）可以发起悬赏',
   'REP-3002': '只能查看自己的声誉流水',
 
   // Discovery
@@ -61,12 +66,27 @@ const BY_STATUS: Record<number, string> = {
   500: '服务器开小差了，请稍后重试',
 };
 
+/** 后端 message 可能是英文（如网关 HTML 错误、Spring 默认文案），中文界面不能直接透出。 */
+function hasCjk(text: string): boolean {
+  return /[\u4e00-\u9fa5]/.test(text);
+}
+
 export function errorMessage(e: unknown): string {
   if (e instanceof ApiError) {
-    return BY_CODE[e.code] ?? BY_STATUS[e.status] ?? e.message;
+    const byCode = BY_CODE[e.code];
+    if (byCode) return byCode;
+    // 业务码没收录、但后端给了中文说明时，优先用后端那句（比「请求参数有误」更具体）；
+    // 英文/为空才退回按状态码兜底，避免把英文原文透到界面上。
+    if (hasCjk(e.message)) return e.message;
+    const byStatus = BY_STATUS[e.status];
+    if (byStatus) return byStatus;
+    return '请求失败，请稍后重试';
   }
   if (e instanceof Error) {
-    return e.message || '网络异常，请检查网络后重试';
+    const msg = e.message || '';
+    // fetch 失败在各浏览器/环境下的英文文案：Failed to fetch / NetworkError / Load failed …
+    if (!msg || !hasCjk(msg)) return '网络异常，请检查网络后重试';
+    return msg;
   }
   return '未知错误，请稍后重试';
 }

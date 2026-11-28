@@ -202,8 +202,12 @@ class QingcenVoteCommentServiceTest {
         assertThat(comments.findById(topId)).isEmpty();
     }
 
+    /**
+     * 该用例故意使用不带问题行锁的假仓储，只验证 uk_vote 唯一键的兜底；
+     * 生产路径由 VoteService 的问题行锁串行化，真实并发需 MySQL IT。
+     */
     @Test
-    void concurrentVotesKeepSingleRecord() throws Exception {
+    void uniqueKeyStillProtectsIfQuestionLockIsBypassed() throws Exception {
         ConcurrentVotes concurrentVotes = new ConcurrentVotes();
         VoteService service = new VoteService(concurrentVotes, questions, answers, identity, events, cache, clock);
         CyclicBarrier bothRead = new CyclicBarrier(2);
@@ -297,6 +301,11 @@ class QingcenVoteCommentServiceTest {
 
         @Override
         public Optional<Comment> findById(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
+        public Optional<Comment> findByIdForUpdate(long id) {
             return Optional.ofNullable(store.get(id));
         }
 

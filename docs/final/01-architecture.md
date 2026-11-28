@@ -36,13 +36,13 @@ backend/pom.xml（父 POM：依赖版本、JaCoCo、覆盖率门槛 0.70）
 | --- | --- | --- | --- |
 | Identity | `co-identity` | 用户、课程、成员角色、会话、CSRF | `IdentityApi`（同步）、`UserRegisteredEvent`（异步） |
 | Q&A | `co-qa` | 问题/回答/投票/评论/采纳、软删除 | `QaQueryApi`（同步）、`QuestionPosted`/`AnswerSubmitted`/`VoteCast`/`AnswerAccepted` 等事件 |
-| Reputation | `co-reputation` | 声誉账户与账本、徽章、悬赏、排行榜 | `ReputationApi`；消费 Q&A 事件，发 `ReputationChanged`/`BadgeAwarded`/`Bounty*` |
-| Discovery | `co-discovery` | 搜索索引、相关问题、通知 | `SearchQuery`/`SearchPort`；消费 Q&A/Reputation 事件；排行榜由 Reputation 提供 |
+| Reputation | `co-reputation` | 声誉账户与账本、徽章、悬赏、排行榜 | `ReputationApi`；消费 Identity `UserRegisteredEvent` 与 Q&A 事件，发 `ReputationChanged`/`BadgeAwarded`/`Bounty*` |
+| Discovery | `co-discovery` | 搜索索引、相关问题、通知 | 无跨上下文同步 API（`co-discovery-api` 仅包声明）；`SearchQuery`/`SearchPort` 为内部领域端口；消费 Q&A/Reputation 事件；排行榜由 Reputation 提供 |
 
 上下文映射与事件风暴见：
 
 - [`docs/ddd/context-map.md`](../ddd/context-map.md) / [`context-map.png`](../ddd/context-map.png)
-- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 30 事件）
+- [`docs/ddd/event-storming.png`](../ddd/event-storming.png)（4 上下文 / 14 个实际事件，与 `events.md` 一致）
 - [`docs/ddd/glossary.md`](../ddd/glossary.md)（统一语言）
 
 ## 1.4 关键流程
@@ -54,7 +54,7 @@ PUT /api/v1/questions/{id}/accepted-answer
   → AnswerCommandService.accept（Q&A 事务：改 Question.acceptedAnswerId）
   → 写 outbox_event(AnswerAcceptedEvent)
   → OutboxRelay 异步投递
-      → ReputationEventHandlers.on(AnswerAccepted)：+15 声誉、徽章、悬赏结算
+      → ReputationEventHandlers.on(AnswerAccepted)：+15 声誉（自答 +0）、徽章、悬赏结算
       → Discovery 投影：搜索文档/通知
 ```
 
@@ -62,7 +62,8 @@ PUT /api/v1/questions/{id}/accepted-answer
 
 - 事务性发件箱（ADR-002）：业务数据与事件同事务写入 `outbox_event`；
 - 消费端按 `(event_id, user_id, reason)`（账本）/ `processed_event`（投影）去重，至少一次投递只生效一次；
-- 对账 FF-8：`GET /api/v1/admin/reputation/reconciliation` 校验「账户余额 = 流水之和」。
+- 对账 FF-8：`GET /api/v1/admin/reputation/reconciliation` 校验「账户余额 = 流水之和」；
+  `GET /api/v1/admin/reputation/reconciliation/points` 校验「冻结积分 = 所有 OPEN 悬赏之和」，指标 `co_reputation_points_mismatches`。
 
 **搜索**
 
@@ -72,7 +73,7 @@ PUT /api/v1/questions/{id}/accepted-answer
 ## 1.5 可观测性
 
 - Actuator 暴露 `/actuator/prometheus`（`health,info,metrics,prometheus`）；
-- 自定义指标：`co_outbox_backlog`、`co_outbox_dead_letters`、`co_reputation_mismatches`；
+- 自定义指标：`co_outbox_backlog`、`co_outbox_dead_letters`、`co_reputation_mismatches`、`co_reputation_points_mismatches`；
 - Grafana 四面板见 [`deploy/grafana/`](../../deploy/grafana/)；Prometheus 抓取配置 [`deploy/prometheus.yml`](../../deploy/prometheus.yml)。
 
 ## 1.6 答辩可能被问到的三点

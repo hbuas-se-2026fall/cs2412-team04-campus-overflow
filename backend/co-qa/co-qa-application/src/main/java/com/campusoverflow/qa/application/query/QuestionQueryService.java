@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -57,6 +58,9 @@ public class QuestionQueryService {
      * <p>课程问题仅课程成员可见；公开问题（course_id 为空）始终可见。未登录用户只看公开问题。
      * 缓存 key 带 viewerId，避免把某成员可见的课程列表返回给未加入课程的人。</p>
      */
+    // READ_COMMITTED：identity.courseIdsOfUser 是本事务第一条 SQL；若沿用 RR 快照，
+    // 在 cache.get 读到新代际后仍可能把旧快照写进新代际，污染 75 秒缓存。
+    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public PageResult<QuestionSummaryView> list(Long courseId, PageRequest page, Actor viewerOrNull) {
         boolean allCourses = viewerOrNull != null && viewerOrNull.isAdmin();
         Set<Long> visibleCourseIds = viewerOrNull == null
@@ -67,7 +71,15 @@ public class QuestionQueryService {
         }
 
         Long viewerId = viewerOrNull == null ? null : viewerOrNull.userId();
-        Optional<PageResult<QuestionSummaryView>> cached = cache.get(courseId, viewerId, page);
+        // 缓存 key 必须包含“可见范围指纹”：用户加入课程/被改角色后立刻换 key，
+        // 不能等 75 秒 TTL 或依赖写入方记得 bump 代际。
+        String scope = viewerOrNull == null ? "anon"
+                : allCourses ? "admin"
+                : "member:" + visibleCourseIds.stream().sorted().map(String::valueOf)
+                        .collect(java.util.stream.Collectors.joining(","));
+        QuestionListCache.Lookup lookup = cache.get(courseId, viewerId, page, scope);
+        // 先取出 Optional 再判空，避免对同一表达式重复求值（Sonar java:S3655）。
+        Optional<PageResult<QuestionSummaryView>> cached = lookup.value();
         if (cached.isPresent()) {
             return cached.get();
         }
@@ -84,12 +96,16 @@ public class QuestionQueryService {
 
         PageResult<QuestionSummaryView> result = rows.map(row -> toSummary(row, authors.get(row.authorId()),
                 visibleAcceptedIds));
-        cache.put(courseId, viewerId, page, result);
+        cache.put(courseId, viewerId, page, scope, lookup.generation(), result);
         return result;
     }
 
     /** 详情：正文渲染成安全 HTML，回答按“已采纳 → 得分 → 时间”排序，评论挂到各自的宿主上。 */
-    public QuestionDetailView detail(long questionId, Actor actorOrNull) {
+    /**
+     * 详情读取。默认计入一次浏览（页面首次打开）；写操作后的重载应传 countView=false，
+     * 否则同一次访问会因投票/评论/采纳后的 reload 而重复计数（审计 2-2）。
+     */
+    public QuestionDetailView detail(long questionId, Actor actorOrNull, boolean countView) {
         QuestionRow row = readModel.findQuestion(questionId)
                 .orElseThrow(() -> new NotFoundException("QA-1000", "问题不存在或已被删除：" + questionId));
         requireCanView(row, actorOrNull);
@@ -131,7 +147,9 @@ public class QuestionQueryService {
                 .toList();
 
         // 浏览数只写 Redis，由定时任务批量落库，所以放在最后、且不影响读取结果
-        viewCounter.increment(questionId);
+        if (countView) {
+            viewCounter.increment(questionId);
+        }
 
         return new QuestionDetailView(row.id(), row.title(), row.body(), renderer.toSafeHtml(row.body()),
                 row.tags(), courseRefOf(row), AuthorView.of(row.authorId(), users.get(row.authorId())),

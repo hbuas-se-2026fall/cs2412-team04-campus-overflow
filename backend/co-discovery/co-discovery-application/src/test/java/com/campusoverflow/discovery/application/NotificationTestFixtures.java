@@ -9,9 +9,11 @@ import com.campusoverflow.qa.api.QaQueryApi;
 import com.campusoverflow.qa.api.QuestionRef;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
+import com.campusoverflow.shared.security.Role;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +67,14 @@ final class NotificationTestFixtures {
         }
 
         @Override
+        public int deleteByQuestionId(long questionId) {
+            String link = "/questions/" + questionId;
+            int before = store.size();
+            store.values().removeIf(n -> link.equals(n.link()));
+            return before - store.size();
+        }
+
+        @Override
         public int markAllRead(long recipientId) {
             int updated = 0;
             for (Notification n : store.values()) {
@@ -88,12 +98,21 @@ final class NotificationTestFixtures {
     static final class StubIdentity implements IdentityApi {
         private final Map<Long, UserSummary> users = new HashMap<>();
         private final Map<String, UserSummary> byName = new HashMap<>();
+        private final Set<Long> members = new HashSet<>();
 
         StubIdentity withUser(long id, String name) {
-            UserSummary user = new UserSummary(id, name, com.campusoverflow.shared.security.Role.STUDENT, true,
-                    "计算机工程学院");
+            return withUser(id, name, Role.STUDENT);
+        }
+
+        StubIdentity withUser(long id, String name, Role role) {
+            UserSummary user = new UserSummary(id, name, role, true, "计算机工程学院");
             users.put(id, user);
             byName.put(name, user);
+            return this;
+        }
+
+        StubIdentity withCourseMember(long userId) {
+            members.add(userId);
             return this;
         }
 
@@ -126,7 +145,7 @@ final class NotificationTestFixtures {
 
         @Override
         public boolean isCourseMember(long userId, long courseId) {
-            return false;
+            return members.contains(userId);
         }
 
         @Override
@@ -140,6 +159,16 @@ final class NotificationTestFixtures {
 
         StubQa withQuestion(long id, long authorId, String title) {
             questions.put(id, new QuestionRef(id, authorId, 100L, title, null, false));
+            return this;
+        }
+
+        StubQa withPublicQuestion(long id, long authorId, String title) {
+            questions.put(id, new QuestionRef(id, authorId, null, title, null, false));
+            return this;
+        }
+
+        StubQa withDeletedQuestion(long id, long authorId, String title) {
+            questions.put(id, new QuestionRef(id, authorId, 100L, title, null, true));
             return this;
         }
 

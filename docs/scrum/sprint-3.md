@@ -9,6 +9,12 @@
 >
 > 收口说明：本文件原为 PO 代拟草案，S3 在 11-16～11-17 压缩执行完毕，SM 未另出计划会纪要；
 > 下文 §三～§五 已按**实际合并记录**（PR #117～#133）回填，验收项逐条附证据。
+>
+> 计划会 / Review / 回顾说明（2026-11-25 补记，审计 F-15）：S3 与 S2 收口、S4 发布交叠，采用**压缩执行**——
+> ① 计划会未单独出纪要，以本文件 §一～§三 作为计划依据；② Sprint Review 由 §八「PO 验收结论」
+> （2026-11-25 补记，对照 V3 §9.1 七维度）代替，未另开评审会；③ Retro（回顾）并入
+> [`docs/final/04-process.md`](../final/04-process.md) 的流程改进记录，未单出回顾纪要。
+> 以上未执行项均为「压缩执行」所致，非遗漏。
 
 ---
 
@@ -21,6 +27,8 @@
 | 本次不做 | S4 发布项（v1.0.0、Grafana 面板、禁用账号）；新功能面不做扩张 | T4 系列留给 Sprint 4 |
 
 ## 二、当前基础（S2 期间已提前完成）
+
+> 测试数为 S3 当时快照（2026-11-16/17）；最终测试数见 [`final-test-report.md`](../qa/final-test-report.md)（当前 281 单测 + 5 IT）。
 
 | 项 | 状态 | 证据 |
 | --- | --- | --- |
@@ -39,10 +47,10 @@
 | 刘俊琒（A） | T3-04 | `SearchIndexProjector` 十个方法：firstTime 幂等 + Posted/Edited/AnswerSubmitted/ContentDeleted/Accepted/VoteCast(仅 QUESTION)/Bounty 事件投影 | 同一事件投递两次只生效一次 |
 | 青岑（C） | T3-05 | `DiscoveryQueryService` search/related：SearchPort → 批量作者 → 视图；中文词命中、单字 422 DIS-1001 | 域测试 + 应用测试全绿 |
 | 房国栋（D） | T3-10 | 前端搜索页（标签/未回答/悬赏筛选 + 四排序）、相关问题侧栏、通知单条已读、@昵称高亮 | 三处在界面可用；**T4-03 之外的 S3 前端全部收口** |
-| 房国栋（D） | SM | 主持计划会（确认本文件）+ 开工/中途/收口 **3 次同步**（压缩执行，未按周一/三/五逐日站会）+ 燃尽图归档 | `docs/scrum/sprint-3-burndown.png`、§四 |
+| 房国栋（D） | SM | 开工/收口 **2 次同步**（压缩执行：未开计划会、未按周一/三/五逐日站会）；中途 11-16 14:00 有一次例行复核，不计入正式同步）+ 燃尽图归档 | `docs/scrum/sprint-3-burndown.png`、§四 |
 | 陈明哲（E） | T3-08 | 删除 Discovery 剩余骨架；本地与 CI 跑 `mvn verify`（含 CampusOverflowFlowIT）；CI 恢复完整门禁；ADR-009 状态改“已完成” | 5 个后端阶段 + 前端阶段全绿 |
 | 陈明哲（E） | T3-09 | 根 POM `domain.coverage.minimum` 收口 0.70 并保证通过 | JaCoCo 报告 ≥70% |
-| 魏志国（B，PO） | PO | PB-31~40 验收口径与 Milestone 描述；评审会 9.1 七维度自查 | 任意证据当场可指出 |
+| 魏志国（PO） | PO | PB-31~39 验收口径与 Milestone 描述；按 V3 §9.1 七维度做 PO 自评（事后补记，未召开正式 Sprint Review） | 任意证据当场可指出 |
 | 全员 | T3-11 | demo profile 完整走查演示数据，走不通记缺陷 Issue | 演示路径 0 阻断缺陷 |
 | 全员 | T3-12 | 回归测试与缺陷修复，功能冻结 | `mvn verify` 全绿且无 P0/P1 缺陷 |
 
@@ -52,29 +60,34 @@
 > （流程改进已记入 [`04-process.md`](../final/04-process.md)）。下表按当日合并到 `develop` 的 PR 回填，
 > 只记录可查证的事实，不虚构发言。
 
-| 时间 | 类型 | 本日完成（按合并 PR 归集） | 阻塞与处置 |
+> 时刻口径更正（审计 W-11）：下表原写「09:00 / 14:00 / 08:30」等具体时刻，但所列 PR 的实际合并时间分别为
+> #117 17:22、#120 20:18、#119 18:53（11-16）、#122 20:38、#126 22:02、#128 22:16（11-16）、
+> #132 10:36、#133 10:55（11-17），均晚于所标时刻。故改为**按日归集**，不标具体开会时刻，避免时间线不成立。
+
+| 日期 | 类型 | 当日合并到 develop 的 PR（归集） | 阻塞与处置 |
 | --- | --- | --- | --- |
-| 2026-11-16 09:00 | 开工同步 | #117 搜索词归一化 + 相关问题排序（C）；#120 `SearchIndexProjector` 十方法（B 代 A）；#119 搜索 422 / 索引阻塞证据 | 中文搜索首测 `total=0`（投影器未实现）→ 当日 #120 合并后解除 |
-| 2026-11-16 14:00 | 中途复核 | #122 中文搜索与相关问题通过证据；#126 通知测试 5+3 条 + CI 纳入 discovery + `discovery.http`；#128 可观测性四面板 | — |
-| 2026-11-17 08:30 | 收口同步 | #132 discovery 覆盖率证据（78.26%）；#133 S3/S4 材料骨架收口；全仓 `mvn verify` 27 模块全绿 | 前端三处走查记录于 2026-11-18 补齐（`s3-front-*.png` 六张，见 §五），S4 另有 5 分钟演示视频 |
+| 2026-11-16 | 开工同步（当日归集，时刻不详） | #117 搜索词归一化 + 相关问题排序（C，17:22 合并）；#119 搜索 422 / 索引阻塞证据（18:53）；#120 `SearchIndexProjector` 十方法（B 代 A，20:18） | 中文搜索首测 `total=0`（投影器未实现）→ 当日 #120 合并后解除 |
+| 2026-11-16 | 中途复核（当日归集，时刻不详） | #122 中文搜索与相关问题通过证据（20:38）；#126 通知测试 + CI 纳入 discovery + `discovery.http`（22:02）；#128 可观测性四面板（22:16） | — |
+| 2026-11-17 | 收口同步（当日归集，时刻不详） | #132 discovery 覆盖率证据（78.26%，10:36）；#133 S3/S4 材料骨架收口（10:55）；全仓 `mvn verify` 27 模块全绿 | 前端三处走查记录于 2026-11-18 补齐（`s3-front-*.png` 六张，见 §五），S4 另有 5 分钟演示视频 |
 
 ## 五、验收清单（S3 收口，2026-11-17）
 
-- [x] `mvn verify` 全绿（5 个后端阶段 + 前端阶段），CI 完整门禁恢复（E 复核 2026-11-16）
+- [x] `mvn verify` 全绿（5 个后端阶段 + 前端阶段）——**S3 收口时（2026-11-17 上午）CI 门禁尚未收紧**：移除集成测试容错是 `b586eda`（11-17 17:11），删 `SPRINT_MODULES` 恢复全量 test/verify 是 `dfbc8f4`（11-18 09:06）。两项均晚于 S3 收口，属 S4 质量收口范围（审计 2-19 更正，2026-11-25）。
 - [x] co-discovery 模块 **0 TODO**（`DiscoveryQueryService`、`SearchIndexProjector`）
 - [x] `domain.coverage.minimum=0.70` 通过；ADR-009 状态改“已完成”
 - [x] 中文搜索命中（ADR-005 ngram 口径）：`q=红黑树` → `total=2`，命中 id=7/id=8，见 [`sprint-3-search.md`](sprint-3-search.md) §3 与 [`sprint-3-search-hit.png`](sprint-3-search-hit.png)
 - [x] 相关问题返回有序列表：`Related count: 1`，排序口径见 `RelatedQuestionPolicy`（同文件 §3、[`sprint-3-search-related.png`](sprint-3-search-related.png)）
-- [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 5 条（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
+- [x] 通知：同一事件不重复发 / 只能标记自己的 / 未读数正确 —— `NotificationProjectorTest` 7 条（原 5 条 + 2 条课程成员可见性）（回答只通知提问者一次、自答不通知、采纳与认证跳过自身动作、@提及每人一次、悬赏与徽章幂等）+ `NotificationServiceTest` 3 条（未读数按当前 actor、标记他人通知被拒、全部已读幂等）
 - [x] 前端三处可用（2026-11-18 补逐条截图，此前只有 S4 视频覆盖）：`QuestionListPage`（关键词 + 标签 + 未回答 + 四排序）、`QuestionDetailPage` 相关问题侧栏与 `@昵称` 高亮、`NotificationsPage`（单条已读/全部已读/未读数）；演示见 `docs/final/demo-v1.0.0.webm`（55 秒）
   - 逐条截图（2026-11-18 复采，本机 `demo` profile + 浏览器实拍）：
     - 搜索页两栏布局（左结果 / 右相关标签 + 相关问题 + 热门标签）：[`s3-front-search.png`](s3-front-search.png)
     - 单字关键词 422 中文提示（`DIS-1001` → 「每个关键词至少 2 个字符」）：[`s3-front-search-422.png`](s3-front-search-422.png)
     - 详情页 `@昵称` 高亮（评论里 `@小红` 蓝底标记）：[`s3-front-mention.png`](s3-front-mention.png)
-    - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)
+    - 详情页相关问题侧栏：[`s3-front-related.png`](s3-front-related.png)（2026-11-27 用当前 seeder 重拍：q1 右侧显示“红黑树删除节点时为什么要做双黑修复？”，不再是“暂无相关问题”）。
     - 通知页未读数角标（`通知 6`）与 6 条未读列表：[`s3-front-notifications.png`](s3-front-notifications.png)
-    - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)
-- [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频；缺陷台账 BUG-001～BUG-006 全部关闭，无 P0/P1 遗留（[`docs/qa/defects.md`](../qa/defects.md)）
+    - 单条已读后立即变灰、未读数 6 → 5、该行「标为已读」按钮消失：[`s3-front-notifications-read.png`](s3-front-notifications-read.png)（2026-11-27 用当前代码重拍：顶栏角标 5、页面“5 条未读”，已一致）
+- [x] T3-11 demo 走查：T1-15 主链路 `SMOKE PASS` + 演示视频（[`docs/qa/defects.md`](../qa/defects.md)）
+- [x] 缺陷台账：S3 收口时 BUG-001/002/003/005/006 已关闭；**BUG-004 当时仍为「部分修复」**，其最终关闭发生在 S4（2026-11-25 重写 `events.md` 与 `event-storming.png` 为 14 事件；审计 2-19 更正）
 - [x] T3-12 功能冻结：S3 范围 31 SP 全部合入 `develop`，v1.0.0 于 2026-11-17 发布
 - [x] 燃尽图归档 [`sprint-3-burndown.png`](sprint-3-burndown.png)
 
@@ -96,6 +109,9 @@
 ![Sprint 3 burndown](sprint-3-burndown.png)
 
 生成脚本：[`scripts/dev-env/make-sprint3-burndown.ps1`](../../scripts/dev-env/make-sprint3-burndown.ps1)（改数据后重跑即可）。
+
+> ⚠️ **口径说明（审计 P-60）**：该脚本内的数据点是**手工写死的数组**，不是从 PR/Issue 记录计算得出；
+> 上表「实际剩余」以合并 PR 记录人工归集，燃尽图仅作趋势示意。
 
 ## 六、CI 与验证（E 复核，2026-11-16）
 
@@ -127,7 +143,7 @@
 | --- | --- | --- | --- |
 | 1 | 可运行软件 | ✅ 通过 | 搜索 `q=红黑树` 命中、单字 422 `DIS-1001`、相关问题 200；通知未读/已读；排行榜四周期 200 |
 | 2 | 提交历史 | ✅ 通过 | S3 相关 PR：#117（词归一/相关排序）、#120（投影器十方法）、#126（通知测试 + CI 纳入 discovery）、#160（S3 收口） |
-| 3 | 贡献者分布 | ✅ 通过 | A/B/C/D 均有提交：青岑 #117/#122、刘俊琒 #120/#160、房国栋 #127–#130 通知前端、魏志国验收与决策 |
+| 3 | 贡献者分布 | ✅ 通过（口径已更正） | A/B/C/D 均有提交：青岑 #117/#122、刘俊琒 #120/#160、房国栋 #126（通知测试与前端）/S3 前端走查、魏志国验收与决策。**原写「房国栋 #127–#130 通知前端」有误**：#127–#130 是 S4 的 T4-02/04/05/07（魏志国/陈明哲/青岑），已改正（审计 P-18） |
 | 4 | PR 与评审 | ✅ 通过 | 各 PR 经非作者 Approve 合并；#160 由刘俊琒收口并经评审 |
 | 5 | Issue | ✅ 通过 | PB-31~39 对应 Issue（#57–#65）随交付关闭；看板同步见 `docs/backlog/board-sync-2026-11-17.md` |
 | 6 | 分支 | ✅ 通过 | 短生命周期分支 + PR；`develop` 保护含必需检查（2026-11-17 起） |

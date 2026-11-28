@@ -29,7 +29,7 @@
 
 ## 三、自动化测试
 
-`AdminUserServiceTest` **3/3**：
+`AdminUserServiceTest` **4/4（S4 当时）**；2026-11-27 已扩充为 **8/8**（新增改角色、认证、建教职工、列表权限与状态字段用例）：
 
 1. 非 ADMIN 禁用 → `ForbiddenException`；
 2. 管理员禁自己 → `BusinessRuleException` ID-1007；

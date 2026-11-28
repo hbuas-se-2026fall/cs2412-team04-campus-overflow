@@ -6,6 +6,7 @@ import com.campusoverflow.shared.util.UtcTime;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -36,13 +37,16 @@ public class JdbcSearchIndex implements SearchIndex {
     }
 
     @Override
-    public void updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
-        jdbc.update("""
+    public int updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
+        int updated = jdbc.update("""
                 UPDATE dis_search_doc SET title = :title, body_text = :body, tag_count = :tagCount,
                        last_activity_at = :at WHERE question_id = :id
                 """, new MapSqlParameterSource().addValue("id", questionId).addValue("title", title)
                 .addValue("body", bodyText).addValue("tagCount", tags.size()).addValue("at", UtcTime.toDb(at)));
-        replaceTags(questionId, tags);
+        if (updated > 0) {
+            replaceTags(questionId, tags);
+        }
+        return updated;
     }
 
     @Override
@@ -95,17 +99,32 @@ public class JdbcSearchIndex implements SearchIndex {
     }
 
     @Override
-    public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, int limit) {
-        return jdbc.query("""
-                        SELECT d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted,
-                               COUNT(*) AS shared
-                        FROM dis_question_tag t JOIN dis_search_doc d ON d.question_id = t.question_id
-                        WHERE t.tag IN (:tags) AND t.question_id <> :id AND d.deleted = FALSE
-                        GROUP BY d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted
-                        ORDER BY shared DESC, d.score DESC
-                        LIMIT :limit
-                        """, new MapSqlParameterSource().addValue("tags", tags).addValue("id", questionId)
-                        .addValue("limit", limit),
+    public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, boolean allCourses,
+                                                             Collection<Long> visibleCourseIds, int limit) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted,
+                       COUNT(*) AS shared
+                FROM dis_question_tag t JOIN dis_search_doc d ON d.question_id = t.question_id
+                WHERE t.tag IN (:tags) AND t.question_id <> :id AND d.deleted = FALSE
+                """);
+        MapSqlParameterSource p = new MapSqlParameterSource().addValue("tags", tags).addValue("id", questionId)
+                .addValue("limit", limit).addValue("ownTagCount", tags.size());
+        if (!allCourses) {
+            sql.append(" AND (d.course_id IS NULL");
+            if (visibleCourseIds != null && !visibleCourseIds.isEmpty()) {
+                sql.append(" OR d.course_id IN (:visibleCourseIds)");
+                p.addValue("visibleCourseIds", visibleCourseIds);
+            }
+            sql.append(")");
+        }
+        sql.append("""
+                 GROUP BY d.question_id, d.title, d.course_id, d.tag_count, d.score, d.answer_count, d.accepted
+                 ORDER BY CAST(COUNT(*) AS DECIMAL(10, 6))
+                              / NULLIF(:ownTagCount + d.tag_count - COUNT(*), 0) DESC,
+                          d.score DESC
+                 LIMIT :limit
+                """);
+        return jdbc.query(sql.toString(), p,
                 (rs, i) -> new RelatedCandidate(rs.getLong("question_id"), rs.getString("title"),
                         nullableLong(rs, "course_id"), rs.getInt("shared"), rs.getInt("tag_count"),
                         rs.getInt("score"), rs.getInt("answer_count"), rs.getBoolean("accepted")));

@@ -22,7 +22,7 @@
 1. 发布 PR [#135](https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/pull/135)：魏志国、青岑 Approve，后端/前端/镜像三检查绿，已合并 `10925c7`；
 2. annotated tag `v1.0.0` 打在 main `10925c7`；
 3. GitHub Release 已发布：https://github.com/hbuas-se-2026fall/cs2412-team04-campus-overflow/releases/tag/v1.0.0；
-4. [`docs/final/README.md`](../final/README.md) 已更新 9.4 勾选。
+4. main 最新 [`docs/final/README.md`](../final/README.md) 已更新 9.4 勾选；**tag `v1.0.0` 内的 README 是发布时快照（仍有 4 项未勾）**，最终材料在 main 后续提交。
 
 ## 三、Tag 与历史版本
 
@@ -40,7 +40,7 @@ v1.0.0 -> 10925c7   v1.0.0 发布（main，PR #135）
 | --- | --- | --- |
 | 发布 PR 审批 | 已闭环 | #135 获魏志国、青岑 Approve 后合并（`10925c7`） |
 | 干净环境全栈 compose | ✅ 已闭环 | 房国栋 2026-11-18 在 Docker Desktop 29.9.3 上 `docker compose up -d --build` 起 backend/web 四容器，Nginx 80 反代，health=UP；见 [`s4-compose-fullstack-verify.md`](s4-compose-fullstack-verify.md) |
-| `docs/final` 视频/个人总结 | ✅ 已闭环 | 5 分钟视频 + 5/5 个人总结已归档，9.4 七项全勾 |
+| `docs/final` 视频/个人总结 | ✅ main 最新已闭环 | 5 分钟视频 + 5/5 个人总结已归档；tag 内仍是 2 份总结、无视频 |
 | 两次彩排未执行 | T4-08 未闭环 | 按 [`rehearsal-log.md`](../final/rehearsal-log.md) 排期 |
 
 ## 五、干净环境部署验证

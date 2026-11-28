@@ -29,6 +29,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
     }
 
     @Override
+    public Optional<Question> findByIdForUpdate(long id) {
+        return jpa.findByIdForUpdate(id).map(QuestionRepositoryAdapter::toDomain);
+    }
+
+    @Override
     public Question save(Question q) {
         QuestionJpaEntity e = q.id() == null
                 ? new QuestionJpaEntity(q.authorId(), q.courseId(), q.createdAt())
@@ -55,6 +60,11 @@ public class QuestionRepositoryAdapter implements QuestionRepository {
     @Override
     public void adjustAnswerCount(long questionId, int delta) {
         jpa.adjustAnswerCount(questionId, delta);
+    }
+
+    @Override
+    public boolean adjustAnswerCountIfOpen(long questionId, int delta) {
+        return jpa.adjustAnswerCountIfOpen(questionId, delta) == 1;
     }
 
     @Override

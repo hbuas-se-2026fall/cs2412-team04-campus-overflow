@@ -16,6 +16,8 @@ import com.campusoverflow.reputation.domain.LedgerRepository;
 import com.campusoverflow.reputation.domain.ReputationAccount;
 import com.campusoverflow.reputation.domain.ReputationAccountRepository;
 import com.campusoverflow.reputation.domain.ReputationReason;
+import com.campusoverflow.reputation.domain.VoteAward;
+import com.campusoverflow.reputation.domain.VoteAwardRepository;
 import com.campusoverflow.shared.audit.AuditTrail;
 import com.campusoverflow.shared.event.IntegrationEvent;
 import com.campusoverflow.shared.event.IntegrationEventPublisher;
@@ -87,12 +89,16 @@ public class ReputationTestFixtures {
     public final MutableClock clock = new MutableClock(Instant.parse("2026-10-10T10:00:00Z"));
     public final InMemoryAccounts accounts = new InMemoryAccounts();
     public final InMemoryLedger ledger = new InMemoryLedger();
+    public final InMemoryVoteAwards voteAwards = new InMemoryVoteAwards();
     public final InMemoryBadges badges = new InMemoryBadges();
     public final InMemoryBounties bounties = new InMemoryBounties();
     public final RecordingEvents events = new RecordingEvents();
     public final RecordingAudit audit = new RecordingAudit();
     public final StubIdentity identity = new StubIdentity();
     public final StubQa qa = new StubQa();
+    public final java.util.Set<String> processedEvents = new java.util.HashSet<>();
+    public final com.campusoverflow.shared.event.ProcessedEventStore processedStore =
+            (eventId, consumer) -> processedEvents.add(eventId + ":" + consumer);
 
     public final BadgeService badgeService;
     public final ReputationLedgerService ledgerService;
@@ -101,9 +107,10 @@ public class ReputationTestFixtures {
 
     public ReputationTestFixtures() {
         this.badgeService = new BadgeService(badges, events, clock);
-        this.ledgerService = new ReputationLedgerService(accounts, ledger, badgeService, events, clock);
+        this.ledgerService = new ReputationLedgerService(accounts, ledger, voteAwards, badgeService, events, clock);
         this.bountyService = new BountyService(bounties, accounts, ledgerService, qa, identity, events, audit, clock);
-        this.handlers = new ReputationEventHandlers(accounts, ledger, ledgerService, badgeService, bountyService, clock);
+        this.handlers = new ReputationEventHandlers(accounts, ledger, ledgerService, badgeService, bountyService,
+                processedStore, clock);
     }
 
     // ---------- 常用构造 ----------
@@ -151,6 +158,13 @@ public class ReputationTestFixtures {
         return bountyService.open(sponsor, questionId, points, days);
     }
 
+    /** 把问题引用标记为已采纳某回答，供“到期任务 vs 采纳事件”竞态用例使用。 */
+    public void acceptQuestion(long questionId, long answerId) {
+        QuestionRef old = qa.questions.get(questionId);
+        qa.questions.put(questionId, new QuestionRef(old.id(), old.authorId(), old.courseId(), old.title(),
+                answerId, old.deleted()));
+    }
+
     // ---------- 替身实现 ----------
 
     /** 内存账户仓储。 */
@@ -161,6 +175,12 @@ public class ReputationTestFixtures {
         @Override
         public Optional<ReputationAccount> findByUserId(long userId) {
             return Optional.ofNullable(store.get(userId));
+        }
+
+        @Override
+        public Optional<ReputationAccount> findByUserIdForUpdate(long userId) {
+            // 内存夹具无并发：行锁读取等价于普通读取
+            return findByUserId(userId);
         }
 
         @Override
@@ -238,6 +258,13 @@ public class ReputationTestFixtures {
             return sums;
         }
 
+        @Override
+        public List<LedgerEntry> findAllBetween(Instant from, Instant to) {
+            return entries.stream()
+                    .filter(e -> !e.createdAt().isBefore(from) && e.createdAt().isBefore(to))
+                    .toList();
+        }
+
         public int size() {
             return entries.size();
         }
@@ -248,6 +275,26 @@ public class ReputationTestFixtures {
 
         public List<LedgerEntry> all() {
             return List.copyOf(entries);
+        }
+    }
+
+    /** 内存投票实际入账状态：按 (voterId, targetType, targetId) 唯一。 */
+    public static final class InMemoryVoteAwards implements VoteAwardRepository {
+
+        private final Map<String, VoteAward> store = new LinkedHashMap<>();
+
+        @Override
+        public Optional<VoteAward> find(long voterId, String targetType, long targetId) {
+            return Optional.ofNullable(store.get(key(voterId, targetType, targetId)));
+        }
+
+        @Override
+        public void save(VoteAward award) {
+            store.put(key(award.voterId(), award.targetType(), award.targetId()), award);
+        }
+
+        private static String key(long voterId, String targetType, long targetId) {
+            return voterId + ":" + targetType + ":" + targetId;
         }
     }
 
@@ -298,6 +345,11 @@ public class ReputationTestFixtures {
         }
 
         @Override
+        public Optional<Bounty> findByIdForUpdate(long id) {
+            return Optional.ofNullable(store.get(id));
+        }
+
+        @Override
         public Optional<Bounty> findLatestByQuestion(long questionId) {
             return store.values().stream()
                     .filter(b -> b.questionId() == questionId)
@@ -307,6 +359,14 @@ public class ReputationTestFixtures {
         @Override
         public List<Bounty> findDue(Instant now, int limit) {
             return store.values().stream().filter(b -> b.isDue(now)).limit(limit).toList();
+        }
+
+        @Override
+        public Map<Long, Long> sumOpenPointsBySponsor() {
+            return store.values().stream()
+                    .filter(b -> b.status() == BountyStatus.OPEN)
+                    .collect(java.util.stream.Collectors.groupingBy(Bounty::sponsorId,
+                            java.util.stream.Collectors.summingLong(Bounty::points)));
         }
 
         @Override

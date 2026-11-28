@@ -13,7 +13,10 @@ import com.campusoverflow.discovery.domain.search.SearchSort;
 import com.campusoverflow.identity.api.CourseSummary;
 import com.campusoverflow.identity.api.IdentityApi;
 import com.campusoverflow.identity.api.UserSummary;
+import com.campusoverflow.qa.api.QaQueryApi;
+import com.campusoverflow.qa.api.QuestionRef;
 import com.campusoverflow.shared.domain.ForbiddenException;
+import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
 import com.campusoverflow.shared.security.Actor;
@@ -39,7 +42,7 @@ class DiscoveryQueryServiceTest {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> new PageResult<>(List.of(hit), 1, 1, 20),
                 new EmptyIndex(),
-                new StubIdentity().withUser(3, "小红", Role.STUDENT));
+                new StubIdentity().withUser(3, "小红", Role.STUDENT), new ExistingQuestionQa());
 
         PageResult<SearchResultView> result = service.search(new SearchQuery("红黑树", null, null,
                 SearchSort.RELEVANCE, false, false, new PageRequest(1, 20), false, Set.of()));
@@ -60,7 +63,7 @@ class DiscoveryQueryServiceTest {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> PageResult.empty(1, 20),
                 new EmptyIndex(),
-                new StubIdentity().withUser(3, "小红", Role.STUDENT));
+                new StubIdentity().withUser(3, "小红", Role.STUDENT), new ExistingQuestionQa());
         Actor outsider = new Actor(3, "小红", Role.STUDENT);
 
         assertThatThrownBy(() -> service.search(new SearchQuery("红黑树", 100L, null,
@@ -77,7 +80,7 @@ class DiscoveryQueryServiceTest {
                     return PageResult.empty(1, 20);
                 },
                 new EmptyIndex(),
-                new StubIdentity().withUser(3, "小红", Role.STUDENT).withCourseMember(3, 200L));
+                new StubIdentity().withUser(3, "小红", Role.STUDENT).withCourseMember(3, 200L), new ExistingQuestionQa());
         Actor member = new Actor(3, "小红", Role.STUDENT);
 
         service.search(new SearchQuery("红黑树", null, null, SearchSort.RELEVANCE, false, false,
@@ -96,12 +99,57 @@ class DiscoveryQueryServiceTest {
                         List.of(
                                 new SearchIndex.RelatedCandidate(1, "公开问题", null, 1, 2, 10, 1, false),
                                 new SearchIndex.RelatedCandidate(2, "课程问题", 100L, 1, 2, 5, 1, false))),
-                new StubIdentity().withUser(3, "路人", Role.STUDENT));
+                new StubIdentity().withUser(3, "路人", Role.STUDENT), new ExistingQuestionQa());
         Actor outsider = new Actor(3, "路人", Role.STUDENT);
 
         List<RelatedQuestionView> result = service.related(99, 10, outsider);
 
         assertThat(result).extracting(RelatedQuestionView::id).containsExactly(1L);
+    }
+
+    @Test
+    void relatedRejectsMissingSourceQuestion() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity(), questionId -> Optional.empty());
+
+        assertThatThrownBy(() -> service.related(999, 5)).isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void relatedRejectsCourseSourceForOutsider() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity().withUser(3, "路人", Role.STUDENT), new CourseQuestionQa());
+        Actor outsider = new Actor(3, "路人", Role.STUDENT);
+
+        assertThatThrownBy(() -> service.related(99, 5, outsider))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void relatedAllowsCourseSourceForMember() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity().withUser(3, "课程学生", Role.STUDENT).withCourseMember(3, 100L),
+                new CourseQuestionQa());
+        Actor member = new Actor(3, "课程学生", Role.STUDENT);
+
+        assertThat(service.related(99, 5, member)).isEmpty();
+    }
+
+    @Test
+    void relatedRejectsCourseSourceForAnonymous() {
+        DiscoveryQueryService service = new DiscoveryQueryService(
+                query -> PageResult.empty(1, 20),
+                new EmptyIndex(List.of("java"), List.of()),
+                new StubIdentity(), new CourseQuestionQa());
+
+        assertThatThrownBy(() -> service.related(99, 5))
+                .isInstanceOf(ForbiddenException.class);
     }
 
     @Test
@@ -114,7 +162,7 @@ class DiscoveryQueryServiceTest {
                                 new SearchIndex.RelatedCandidate(1, "A", null, 1, 4, 10, 1, false),
                                 new SearchIndex.RelatedCandidate(2, "B", null, 2, 3, 1, 4, true),
                                 new SearchIndex.RelatedCandidate(3, "C", null, 2, 2, 5, 0, false))),
-                new StubIdentity());
+                new StubIdentity(), new ExistingQuestionQa());
 
         List<RelatedQuestionView> result = service.related(99, 2);
 
@@ -129,7 +177,7 @@ class DiscoveryQueryServiceTest {
         DiscoveryQueryService service = new DiscoveryQueryService(
                 query -> PageResult.empty(1, 20),
                 new EmptyIndex(List.of(), List.of()),
-                new StubIdentity());
+                new StubIdentity(), new ExistingQuestionQa());
 
         assertThat(service.related(99, 5)).isEmpty();
     }
@@ -157,18 +205,38 @@ class DiscoveryQueryServiceTest {
         }
 
         @Override
-        public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, int limit) {
-            return candidates;
+        public List<RelatedCandidate> findCandidatesSharingTags(long questionId, List<String> tags, boolean allCourses,
+                                                                 Collection<Long> visibleCourseIds, int limit) {
+            return candidates.stream()
+                    .filter(c -> allCourses || c.courseId() == null || visibleCourseIds.contains(c.courseId()))
+                    .limit(limit)
+                    .toList();
         }
 
         @Override public void insert(SearchDocument document) { }
-        @Override public void updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) { }
+        @Override public int updateText(long questionId, String title, String bodyText, List<String> tags, Instant at) {
+            return 0;
+        }
         @Override public void adjustAnswerCount(long questionId, int delta, Instant at) { }
         @Override public void adjustScore(long questionId, int delta) { }
         @Override public void markAccepted(long questionId, Instant at) { }
         @Override public void clearAccepted(long questionId, Instant at) { }
         @Override public void setBountyOpen(long questionId, boolean open) { }
         @Override public void markDeleted(long questionId) { }
+    }
+
+    private static final class ExistingQuestionQa implements QaQueryApi {
+        @Override
+        public Optional<QuestionRef> findQuestion(long questionId) {
+            return Optional.of(new QuestionRef(questionId, 1L, null, "公开的相关问题源问题", null, false));
+        }
+    }
+
+    private static final class CourseQuestionQa implements QaQueryApi {
+        @Override
+        public Optional<QuestionRef> findQuestion(long questionId) {
+            return Optional.of(new QuestionRef(questionId, 1L, 100L, "课程问题", null, false));
+        }
     }
 
     private static final class StubIdentity implements IdentityApi {

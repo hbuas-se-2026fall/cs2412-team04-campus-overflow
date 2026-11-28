@@ -72,12 +72,20 @@ public class AdminUserService {
         return saved.id();
     }
 
+    /**
+     * 调整全局角色。
+     *
+     * <p>审计魏-9：会话里缓存了登录时的 {@code Actor.role}（`SecurityUser` 在登录时固化角色），
+     * 只改库不撤会话时，被降权的账号在会话过期前仍持有旧权限（例如刚被降级的 ADMIN 仍能访问
+     * {@code /api/v1/admin/**}）。因此改角色后**立即撤销该用户全部会话**，与 {@link #disable} 一致。
+     */
     @Transactional
     public void changeRole(Actor actor, long userId, Role role) {
         User user = load(userId);
         Role old = user.role();
         user.changeRole(actor, role);
         users.save(user);
+        sessions.revokeAll(user.username());
         audit.record("ROLE_CHANGED", actor.userId(), "USER", String.valueOf(userId), old + " -> " + role);
     }
 
@@ -103,6 +111,6 @@ public class AdminUserService {
 
     static UserView toView(User u) {
         return new UserView(u.id(), Masking.account(u.username()), u.displayName(), u.role(), u.verified(),
-                u.college(), u.className(), u.createdAt());
+                u.status(), u.college(), u.className(), u.createdAt());
     }
 }

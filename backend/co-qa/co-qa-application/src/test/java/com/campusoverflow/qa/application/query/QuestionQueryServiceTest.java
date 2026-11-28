@@ -8,6 +8,7 @@ import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryListCache;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.InMemoryReadModel;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubIdentity;
 import com.campusoverflow.qa.application.fake.QaTestFixtures.StubRenderer;
+import com.campusoverflow.qa.application.port.QuestionListCache;
 import com.campusoverflow.shared.domain.NotFoundException;
 import com.campusoverflow.shared.page.PageRequest;
 import com.campusoverflow.shared.page.PageResult;
@@ -15,6 +16,8 @@ import com.campusoverflow.shared.security.Actor;
 import com.campusoverflow.shared.security.Role;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -73,6 +76,35 @@ class QuestionQueryServiceTest {
     }
 
     @Test
+    @DisplayName("列表：回填缓存必须使用读取时的代际号，避免旧快照写进新代")
+    void listWritesBackWithGenerationSeenAtRead() {
+        AtomicLong putGeneration = new AtomicLong(-1);
+        QuestionListCache fixedGenerationCache = new QuestionListCache() {
+            @Override
+            public Lookup get(Long courseId, Long viewerId, PageRequest page, String scope) {
+                return new Lookup(7L, Optional.empty());
+            }
+
+            @Override
+            public void put(Long courseId, Long viewerId, PageRequest page, String scope, long generation,
+                            PageResult<QuestionSummaryView> value) {
+                putGeneration.set(generation);
+            }
+
+            @Override
+            public void invalidateAll() {
+            }
+        };
+        QuestionQueryService serviceWithFixedCache = new QuestionQueryService(readModel, identity,
+                new StubRenderer(), viewCounter, fixedGenerationCache);
+        readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
+
+        serviceWithFixedCache.list(null, PAGE, ming);
+
+        assertThat(putGeneration).hasValue(7L);
+    }
+
+    @Test
     @DisplayName("列表：作者信息批量回填，摘要截断到 160 字，有采纳回答时 accepted 为真")
     void listMapsAuthorExcerptAndAcceptedFlag() {
         String longBody = "变色为什么不够？".repeat(60);
@@ -105,7 +137,7 @@ class QuestionQueryServiceTest {
         readModel.myVotes.put("QUESTION:12", 1);
         readModel.myVotes.put("ANSWER:50", -1);
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         assertThat(detail.myVote()).isEqualTo(1);
         assertThat(detail.permissions().canEdit()).isTrue();
@@ -137,7 +169,7 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
         readModel.answers.add(new AnswerRow(51L, 2L, "补充一个反例更直观。", 3, null, NOW, NOW));
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         // 幽灵标记清除：详情不带采纳 ID，回答也不显示已采纳
         assertThat(detail.acceptedAnswerId()).isNull();
@@ -165,7 +197,7 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", 50L));
         readModel.answers.add(new AnswerRow(50L, 2L, "关键看叔叔节点的颜色。", 8, null, NOW, NOW));
 
-        QuestionDetailView detail = service.detail(12L, ming);
+        QuestionDetailView detail = service.detail(12L, ming, true);
 
         assertThat(detail.acceptedAnswerId()).isEqualTo(50L);
         assertThat(detail.answers().get(0).accepted()).isTrue();
@@ -202,7 +234,7 @@ class QuestionQueryServiceTest {
     void detailForAnonymous() {
         readModel.questions.add(publicQuestionRow(12L, 1L, "没有关联课程的公开问题标题", "公开问题对所有用户可见。"));
 
-        QuestionDetailView detail = service.detail(12L, null);
+        QuestionDetailView detail = service.detail(12L, null, true);
 
         assertThat(detail.myVote()).isZero();
         assertThat(detail.permissions()).isEqualTo(PermissionsView.NONE);
@@ -214,7 +246,7 @@ class QuestionQueryServiceTest {
     void anonymousCannotViewCourseQuestion() {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
 
-        assertThatThrownBy(() -> service.detail(12L, null))
+        assertThatThrownBy(() -> service.detail(12L, null, true))
                 .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
     }
 
@@ -224,14 +256,14 @@ class QuestionQueryServiceTest {
         readModel.questions.add(questionRow(12L, 1L, "红黑树插入后为什么必须旋转？", "变色为什么不够？", null));
         Actor outsider = new Actor(3, "路人", Role.STUDENT);
 
-        assertThatThrownBy(() -> service.detail(12L, outsider))
+        assertThatThrownBy(() -> service.detail(12L, outsider, true))
                 .isInstanceOf(com.campusoverflow.shared.domain.ForbiddenException.class);
     }
 
     @Test
     @DisplayName("详情：问题不存在或已删除时返回 404")
     void detailOfMissingQuestionIsNotFound() {
-        assertThatThrownBy(() -> service.detail(999L, ming)).isInstanceOf(NotFoundException.class);
+        assertThatThrownBy(() -> service.detail(999L, ming, true)).isInstanceOf(NotFoundException.class);
     }
 
     @Test

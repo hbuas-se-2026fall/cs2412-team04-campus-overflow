@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import { useAuth } from '../auth';
 import { MarkdownPreview } from '../components/MarkdownPreview';
@@ -104,9 +104,8 @@ export function AskPage() {
       {error && <p className="error">{error}</p>}
       {!hasCourse && (
         <p className="muted">
-          你还没有加入任何课程，可以先到
-          <a href="/courses">课程页</a>
-          加入，加入后提问会自动关联课程；也可以直接发布公开问题。
+          你还没有加入任何课程，可以先到 <Link to="/courses">课程页</Link>
+          加入；加入后需在上方「所属课程」下拉里选择，问题才会关联课程，否则会发布为公开问题。
         </p>
       )}
       <button className="primary" onClick={submit} disabled={!canSubmit}>

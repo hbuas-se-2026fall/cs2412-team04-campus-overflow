@@ -71,6 +71,54 @@ class AdminUserServiceTest {
         assertThat(audit.actions).contains("DISABLE_USER");
     }
 
+    @Test
+    void changeRoleAlsoRevokesSessionsSoStaleRoleCannotOutliveIt() {
+        // 审计魏-9：会话里固化了登录时的角色；不撤会话则变更后的权限要等会话过期才生效
+        service.changeRole(admin, 1L, Role.ADMIN);
+
+        User promoted = users.findById(1L).orElseThrow();
+        assertThat(promoted.role()).isEqualTo(Role.ADMIN);
+        assertThat(sessions.revoked).containsExactly("T2001");
+        assertThat(audit.actions).contains("ROLE_CHANGED");
+    }
+
+    @Test
+    void verifyMarksUserVerifiedAndAudits() {
+        users.save(User.reconstitute(null, "2026001", "待认证", "pending@campus.edu.cn", "hash",
+                Role.STUDENT, UserStatus.ACTIVE, false, "计算机工程学院", "计科2301", NOW, 0));
+
+        service.verify(admin, 3L);
+
+        assertThat(users.findById(3L).orElseThrow().verified()).isTrue();
+        assertThat(audit.actions).contains("USER_VERIFIED");
+    }
+
+    @Test
+    void createStaffPersistsVerifiedRoleAndAudits() {
+        long id = service.createStaff(admin, new CreateStaffCommand("T3001", "新老师", "new@campus.edu.cn",
+                "abcd1234", Role.TEACHER, "计算机工程学院"));
+
+        User created = users.findById(id).orElseThrow();
+        assertThat(created.role()).isEqualTo(Role.TEACHER);
+        assertThat(created.verified()).isTrue();
+        assertThat(audit.actions).contains("STAFF_CREATED");
+    }
+
+    @Test
+    void listByVerificationRejectsNonAdmin() {
+        assertThatThrownBy(() -> service.listByVerification(teacher, false, new PageRequest(1, 20)))
+                .isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    void adminViewExposesStatusSoDisabledRowsCanBeRendered() {
+        service.disable(admin, 1L);
+
+        UserView view = AdminUserService.toView(users.findById(1L).orElseThrow());
+
+        assertThat(view.status()).isEqualTo(UserStatus.DISABLED);
+    }
+
     private static final class FakeUsers implements UserRepository {
         private final Map<Long, User> store = new HashMap<>();
         private final AtomicLong sequence = new AtomicLong();

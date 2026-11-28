@@ -112,5 +112,27 @@ PB-05（注册，3）+ PB-06（发布问题，5）+ PB-07（列表，3）+ PB-08
 | PB-16 | 热门标签浏览（Should） | 复用 `US-07-tag-filter.feature` 的热门标签场景（`TagController.popular`，limit 1–50） |
 | PB-17 | QaQueryApi 查询问题引用（Must） | 技术接口：`QaQueryApiImplTest` 4 条 + 悬赏/通知 E2E（`BountyAndAccountTest`、通知用例），无用户场景 |
 
-> 审计 W-03 收口（2026-11-25）：48 条 PBI 中 Must 项已全部有验收依据——用户可见功能补 `.feature`（PB-12/13），
-> 技术接口（PB-17）与 Should 项（PB-14/16）在表中明确"复用哪个场景/哪组测试"，不再存在无验收依据的 Must 项。
+### 其余 PBI 的验收依据（用户故事之外的条目）
+
+48 条 PBI 中只有上表 13 条有独立/复用的 `.feature` 场景；其余条目（含 16 条 Must）
+以**领域/应用层测试、接口测试或可复核报告**作为验收依据，不虚构 Gherkin 文件。对照如下：
+
+| Backlog | 验收依据（真实存在） |
+| --- | --- |
+| PB-01 / PB-02 / PB-04 | `docs/lab1-submission/README.md`（仓库与分支保护）、`docs/final/03-quality.md`（CI 门禁）、`docs/reports/s4-clean-env-full-flow.md` |
+| PB-03 | `docs/ddd/events.md`、`docs/ddd/context-map.md`、`docs/ddd/glossary.md` |
+| PB-18 | `docs/adr/009-渐进式质量门禁.md`、`ArchitectureTest`、行走骨架空监听器（tech-debt #44） |
+| PB-20 / PB-21 / PB-22 / PB-27 | `ReputationAccount`、`ReputationEventHandlersTest`、`ReputationRulebookTest`、`ReputationQueryAuthorizationTest` |
+| PB-24 / PB-25 | `QingcenBountyServiceTest`、`BountyAndAccountTest`、`http/bounty.http` |
+| PB-30 / PB-39 | `docs/final/03-quality.md` 各模块用例数与覆盖率报告 |
+| PB-31 / PB-32 | `DiscoveryQueryServiceTest`、`SearchIndexProjectorTest`、`docs/scrum/sprint-3-search.md` |
+| PB-34 / PB-36 | `NotificationProjectorTest`、`NotificationServiceTest`、`http/discovery.http` |
+| PB-37 | `CampusOverflowFlowIT`、`docs/final/03-quality.md` 覆盖率 |
+| PB-40 | `docs/reports/s4-disable-account.md`（禁用账号 + 会话撤销） |
+| PB-46 | `docs/reports/s4-compose-fullstack-verify.md`、`docs/reports/s4-clean-env-full-flow.md` |
+
+> 审计 W-03/W-07/W-47 更正：此前"Must 项已全部有验收依据"的表述过度——上表 13 条为 `.feature` 依据，
+> 本表覆盖其余条目（含 16 条 Must）的测试/报告依据。两条表合起来覆盖全部 48 条，
+> 但**有验收依据 ≠ 有 Gherkin 场景**：用户可见故事中有 16 条 Must 无独立 feature， pb 编号见上表，
+> 评审按"测试/报告可复核"认定，不宣称全部有 Gherkin。孤儿文件 `US-06-favorite-question.feature`
+> 无对应 PBI（收藏未纳入 v1.0.0，见 `docs/scrum/sprint-1-demo.md`），不计入映射。

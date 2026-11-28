@@ -18,6 +18,7 @@ import com.campusoverflow.shared.security.Actor;
 import java.time.Clock;
 import java.time.Instant;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 /** 用例：评论与二级回复。评论中的 @昵称 由 Discovery 解析并发送提醒。 */
@@ -41,15 +42,16 @@ public class CommentService {
         this.clock = clock;
     }
 
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public long post(Actor actor, PostCommentCommand cmd) {
-        Question question = resolveQuestion(cmd.targetType(), cmd.targetId());
+        Question question = resolveQuestionForUpdate(cmd.targetType(), cmd.targetId());
         requireCanParticipate(question, actor);
         long questionId = question.id();
 
         Comment parent = null;
         if (cmd.parentId() != null) {
-            parent = comments.findById(cmd.parentId())
+            // 锁父评论：与“删除父评论”串行化，避免父评论删掉后还插入一条悬挂回复。
+            parent = comments.findByIdForUpdate(cmd.parentId())
                     .orElseThrow(() -> new NotFoundException("QA-4003", "父评论不存在"));
         }
 
@@ -65,9 +67,13 @@ public class CommentService {
      * 删除评论。只有作者或管理员可以删；删除顶层评论时级联删除它的全部回复，
      * 避免留下挂在不存在的父评论下的孤儿回复。
      */
-    @Transactional
+    @Transactional(isolation = Isolation.READ_COMMITTED)
     public void delete(Actor actor, long commentId) {
-        Comment comment = comments.findById(commentId)
+        // 先取 questionId，再按“问题行 -> 评论行”的固定顺序加锁，和 post 保持同一锁序。
+        Comment initial = comments.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("QA-4003", "评论不存在"));
+        questions.findByIdForUpdate(initial.questionId());
+        Comment comment = comments.findByIdForUpdate(commentId)
                 .orElseThrow(() -> new NotFoundException("QA-4003", "评论不存在"));
 
         if (!actor.isAdmin() && !actor.is(comment.authorId())) {
@@ -80,19 +86,23 @@ public class CommentService {
         comments.delete(comment);
     }
 
-    private Question resolveQuestion(TargetType type, long targetId) {
+    /** 锁目标问题后再首次读取回答/问题，避免并发删除留下孤儿评论。 */
+    private Question resolveQuestionForUpdate(TargetType type, long targetId) {
         if (type == TargetType.QUESTION) {
-            return questions.findById(targetId)
+            return questions.findByIdForUpdate(targetId)
                     .filter(q -> !q.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
         }
         if (type == TargetType.ANSWER) {
-            Answer answer = answers.findById(targetId)
-                    .filter(a -> !a.isDeleted())
+            long questionId = answers.findQuestionId(targetId)
                     .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
-            return questions.findById(answer.questionId())
+            Question question = questions.findByIdForUpdate(questionId)
                     .filter(q -> !q.isDeleted())
                     .orElseThrow(() -> new NotFoundException("QA-4001", "问题不存在"));
+            answers.findById(targetId)
+                    .filter(a -> !a.isDeleted())
+                    .orElseThrow(() -> new NotFoundException("QA-4002", "回答不存在"));
+            return question;
         }
         throw new BusinessRuleException("QA-4003", "不支持的评论目标");
     }

@@ -26,9 +26,11 @@ import org.springframework.transaction.support.TransactionTemplate;
 /**
  * 发件箱中继：轮询未投递事件 → 反序列化 → 通过进程内事件总线（ApplicationEventPublisher）分发给订阅者。
  * <ul>
- *   <li>认领：SELECT ... FOR UPDATE SKIP LOCKED + 租约（locked_until），支持多实例并行而不重复认领；</li>
+ *   <li>认领：SELECT ... FOR UPDATE（不 SKIP LOCKED）+ 租约，最多 batch-size 条；当前按单实例部署设计，
+ *       多实例并行需要给 outbox 增加 aggregate_id/sequence 后再用 SKIP LOCKED；</li>
  *   <li>投递语义：至少一次。订阅者必须幂等（账本唯一键 / processed_event 表）；</li>
- *   <li>顺序：批内按 id 顺序投递，遇到失败即停止本批（避免后续事件越过失败事件），失败事件指数退避重试；</li>
+ *   <li>顺序：批内按 id 顺序投递，遇到失败即停止本批，并把失败行之后的行租约延长到同一重试时间，
+ *       确保失败事件被重试前，后续事件不会被其他轮次越过；</li>
  *   <li>超过最大重试次数即成为“死信”，由指标 co_outbox_dead_letters 暴露并告警，人工处理后可将 attempts 清零重放。</li>
  * </ul>
  */
@@ -67,16 +69,18 @@ public class OutboxRelay {
         this.maxAttempts = maxAttempts;
         this.published = registry.counter("co_outbox_published_total");
         this.failed = registry.counter("co_outbox_failed_total");
-        Gauge.builder("co_outbox_backlog", this, r -> r.count("attempts < " + maxAttempts)).register(registry);
-        Gauge.builder("co_outbox_dead_letters", this, r -> r.count("attempts >= " + maxAttempts)).register(registry);
+        Gauge.builder("co_outbox_backlog", this, OutboxRelay::backlogCount).register(registry);
+        Gauge.builder("co_outbox_dead_letters", this, OutboxRelay::deadLetterCount).register(registry);
     }
 
     @Scheduled(fixedDelayString = "${co.outbox.poll-interval-ms:500}")
     public void relay() {
         // 严格按 id 顺序处理：一次只认领最老的未投递事件；失败即停，绝不越过它处理后续事件。
         // 早期实现失败后释放后续行租约，会让 QuestionEdited 先于 QuestionPosted 执行，形成乱序投影。
-        for (Row row : claim()) {
+        List<Row> batch = claim();
+        for (Row row : batch) {
             if (!dispatch(row)) {
+                holdFollowing(batch, row);
                 break;
             }
         }
@@ -88,8 +92,8 @@ public class OutboxRelay {
             List<Long> ids = jdbc.queryForList("""
                     SELECT id FROM outbox_event
                     WHERE published_at IS NULL AND attempts < ? AND (locked_until IS NULL OR locked_until < ?)
-                    ORDER BY id LIMIT 1 FOR UPDATE
-                    """, Long.class, maxAttempts, now);
+                    ORDER BY id LIMIT ? FOR UPDATE
+                    """, Long.class, maxAttempts, now, batchSize);
             if (ids.isEmpty()) {
                 return List.of();
             }
@@ -101,6 +105,20 @@ public class OutboxRelay {
                             rs.getString("payload")));
         });
         return rows == null ? List.of() : rows;
+    }
+
+    /** 失败行之后的行保持锁定到同一重试时间，避免下一轮把它们提前投递（严格顺序）。 */
+    private void holdFollowing(List<Row> batch, Row failedRow) {
+        List<Long> rest = batch.stream().map(Row::id).filter(id -> id > failedRow.id()).toList();
+        if (rest.isEmpty()) {
+            return;
+        }
+        LocalDateTime until = jdbc.queryForObject("SELECT locked_until FROM outbox_event WHERE id = ?",
+                LocalDateTime.class, failedRow.id());
+        if (until != null) {
+            named.update("UPDATE outbox_event SET locked_until = :until WHERE id IN (:ids) AND published_at IS NULL",
+                    new MapSqlParameterSource("ids", rest).addValue("until", until));
+        }
     }
 
     private boolean dispatch(Row row) {
@@ -135,10 +153,27 @@ public class OutboxRelay {
         log.info("清理已投递的发件箱事件 {} 条", n);
     }
 
-    private double count(String condition) {
+    /** 待投递条数（尝试次数未到上限）。SQL 为字面量 + 占位符，阈值走绑定参数。 */
+    private double backlogCount() {
+        return countWhere("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND attempts < ?",
+                maxAttempts);
+    }
+
+    /** 死信条数（尝试次数已达上限）。 */
+    private double deadLetterCount() {
+        return countWhere("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND attempts >= ?",
+                maxAttempts);
+    }
+
+    /**
+     * 执行计数 SQL。
+     *
+     * <p>只接受调用方写死的字面量 SQL，阈值一律用 {@code ?} 绑定参数，不做字符串拼接——
+     * 既避免 SQL 注入风险（Sonar java:S2077），也让语句可被数据库预编译缓存。
+     */
+    private double countWhere(String sql, int threshold) {
         try {
-            Long n = jdbc.queryForObject("SELECT COUNT(*) FROM outbox_event WHERE published_at IS NULL AND "
-                    + condition, Long.class);
+            Long n = jdbc.queryForObject(sql, Long.class, threshold);
             return n == null ? 0 : n;
         } catch (RuntimeException e) {
             return Double.NaN;

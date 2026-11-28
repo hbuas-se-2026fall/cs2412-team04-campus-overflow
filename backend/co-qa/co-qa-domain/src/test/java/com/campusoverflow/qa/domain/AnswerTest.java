@@ -26,6 +26,16 @@ class AnswerTest {
     }
 
     @Test
+    void courseManagerCannotEndorseOwnAnswer() {
+        Question q = QuestionTest.persistedQuestion();
+        Answer own = QuestionTest.persistedAnswer(q, teacher.userId(), 50);
+
+        assertThatThrownBy(() -> own.endorse(teacher, true))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("自己");
+    }
+
+    @Test
     void acceptedAnswerCannotBeDeletedByItsAuthor() {
         Question q = QuestionTest.persistedQuestion();
         Answer a = QuestionTest.persistedAnswer(q, answerer.userId(), 50);

@@ -173,6 +173,16 @@ button.link {
   color: var(--accent);
   font-weight: 600;
 }
+/* 审计 P-54：列表里的「已采纳」需要看得见的文字，而不只是一段颜色类 */
+.accepted-tag {
+  margin-left: 4px;
+  padding: 0 4px;
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  color: var(--accent);
+  font-size: 11px;
+  font-style: normal;
+}
 .qtitle {
   font-size: 17px;
   font-weight: 600;
@@ -225,6 +235,11 @@ article h1 {
 .votebox button {
   padding: 2px 8px;
 }
+/* FE-04：我的投票选中态（myVote === 1 / -1） */
+.votebox button.active {
+  color: var(--brand);
+  font-weight: 700;
+}
 .check-mark {
   color: var(--accent);
   font-size: 18px;
@@ -263,6 +278,13 @@ article h1 {
   font-size: 13px;
   padding: 4px 0;
   border-bottom: 1px dashed var(--line);
+}
+/* FE-03：二级回复缩进一层 */
+.comment.reply {
+  margin-left: 20px;
+}
+.comment-form.reply {
+  margin-left: 20px;
 }
 .comment-form {
   display: flex;

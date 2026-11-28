@@ -22,6 +22,11 @@ public class CommentRepositoryAdapter implements CommentRepository {
     }
 
     @Override
+    public Optional<Comment> findByIdForUpdate(long id) {
+        return jpa.findByIdForUpdate(id).map(this::toDomain);
+    }
+
+    @Override
     public List<Comment> findReplies(long parentId) {
         return jpa.findByParentIdOrderByCreatedAtAsc(parentId).stream().map(this::toDomain).toList();
     }

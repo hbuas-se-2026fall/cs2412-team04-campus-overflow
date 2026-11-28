@@ -22,7 +22,8 @@ public interface IdentityApi {
 
     /**
      * 是否有权管理课程内的内容（采纳、教师认证、发布悬赏等）：
-     * 管理员；或该课程的教师/助教。courseId 为 null（未关联课程的问题）时，全局教师角色亦可。
+     * 管理员；或该课程的教师/助教。courseId 为 null（未关联课程的问题）时仅管理员可管理，
+     * 全局教师角色不自动获得管理权（PO 决策 2026-11-25，审计 W-06）。
      */
     boolean canManageCourse(long userId, Long courseId);
 

@@ -64,8 +64,10 @@ public class QuestionController {
     @Operation(summary = "问题详情（含回答、评论、我的投票与可执行操作）")
     @GetMapping("/{questionId}")
     public QuestionDetailView detail(@PathVariable long questionId,
+                                     @Parameter(description = "是否计入浏览量；写操作后的重载传 false")
+                                     @RequestParam(defaultValue = "true") boolean countView,
                                      @Parameter(hidden = true) Optional<Actor> actor) {
-        return queries.detail(questionId, actor.orElse(null));
+        return queries.detail(questionId, actor.orElse(null), countView);
     }
 
     @Operation(summary = "编辑问题")
