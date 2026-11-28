@@ -65,7 +65,7 @@ boolean questionOpen = !question.deleted() && question.acceptedAnswerId() == nul
 
 因此 `QuestionRef(id, authorId, courseId, title, acceptedAnswerId, deleted)` 字段够用，不需要改 `co-qa-api` 的契约。
 
-## 七、DoD 自查（团队 DoD 共 6 条）
+## 七、DoD 自查（按章程初版 6 条口径；现行 12 条见 docs/team/dor-dod.md）
 
 | # | DoD 条目 | 证据 | 状态 |
 | --- | --- | --- | --- |

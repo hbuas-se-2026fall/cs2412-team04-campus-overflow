@@ -116,9 +116,9 @@ curl -s -H "Authorization: Bearer $TOKEN" \
 - 达标线：Git 2.40+、JDK 21、Node.js 20+、Docker 可运行
 - 已知情况：Lab 1 时期 `backend` 整体 `mvn clean test` 为红（`co-qa-domain` 的 `TODO(S2)` 桩未实现），
   当时按「整体红 + 附原因」与「已实现模块绿」两段取证，避免被误判为环境问题；当时日志见 [`logs/mvn-test-fangguodong.log`](logs/mvn-test-fangguodong.log)。
-  **2026-11-18 复跑已全绿**：`cd backend && mvn -B clean test` → 27 模块 / 165 用例 / `BUILD SUCCESS`，见 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log)。。。
   **2026-11-17 更新**：S4 收口后桩已全部落地，本机全量复跑为 `BUILD SUCCESS`（27 模块 / 165 用例 / 0 失败），
   见 [`env/env-liujunfeng.txt`](env/env-liujunfeng.txt) §3 与 [`screenshots/mvn-test-liujunfeng.png`](screenshots/mvn-test-liujunfeng.png)。
+  **2026-11-18 复跑已全绿**：`cd backend && mvn -B clean test` → 27 模块 / 165 用例 / `BUILD SUCCESS`，见 [`logs/mvn-test-fangguodong-20261118.log`](logs/mvn-test-fangguodong-20261118.log)。
 
 ## 7. 身份绑定核查（E4）
 

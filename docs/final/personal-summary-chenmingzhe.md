@@ -12,7 +12,7 @@
 | 交付物 | 证据 | 结果 |
 | --- | --- | --- |
 | 渐进门禁与 CI 范围扩容（Q&A → Reputation → Discovery） | `.github/workflows/ci.yml`、PR #96 / #103 / 本轮 #126 | 五后端阶段 + 前端全绿 |
-| 域覆盖率门槛 0.70 | `backend/pom.xml`、JaCoCo 报告；qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26% | 通过 |
+| 域覆盖率门槛 0.70 | `backend/pom.xml`、JaCoCo 报告；qa 83.12% / identity 75.74% / reputation 81.93% / discovery 78.26%（v1.0.0 时点值） | 通过 |
 | 声誉幂等与结算测试 | `ReputationTestFixtures`、`ReputationEventHandlersTest`（6 条）、`ReputationSettlementTest`（6 条），PR #103 | 50+ 测试全绿 |
 | T1-15 端到端冒烟 | `scripts/smoke/smoke.ps1` / `.sh`、PR #104 | `SMOKE PASS`，一条命令跑通主链路 |
 | 可观测性 | `co_reputation_mismatches` 定时刷新、Grafana 四面板 + provisioning、`deploy/prometheus.yml` | 四指标可复现 |

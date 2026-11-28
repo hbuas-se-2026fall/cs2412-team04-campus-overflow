@@ -55,7 +55,7 @@
 8. 时间够再演示「建教职工」/「改角色」/「禁用」，不够则口述并展示
    [`screenshots/admin/admin-users-pending.png`](screenshots/admin/admin-users-pending.png)
    与 [`screenshots/admin/admin-forbidden.png`](screenshots/admin/admin-forbidden.png)。
-9. 禁用演示：已认证用户行点「禁用」→ 确认；该账号现有会话立即失效，重新登录返回 401。禁用截图待用当前构建重拍。
+9. 禁用演示：已认证用户行点「禁用」→ 确认；该账号现有会话立即失效，重新登录返回 401。禁用截图已用当前构建重拍（2026-11-27，见 `screenshots/admin/README.md`）。
 
 > 青岑的完整计时讲稿见 [`rehearsal-qingcen.md`](rehearsal-qingcen.md)，刘俊琒（问答主流程 4:00）见 [`rehearsal-liujunfeng.md`](rehearsal-liujunfeng.md)。
 

@@ -139,7 +139,7 @@ export const api = {
     return get<Page<SearchResult>>(`/v1/search/questions?${search}`);
   },
   related: (questionId: number) =>
-    get<{ id: number; title: string; answerCount: number; accepted: boolean }[]>(
+    get<{ id: number; title: string; answerCount: number; accepted: boolean; similarity: number }[]>(
       `/v1/questions/${questionId}/related`,
     ),
   popularTags: () => get<{ name: string; questionCount: number }[]>('/v1/tags/popular?limit=15'),

@@ -1,4 +1,4 @@
-# 四个 domain 覆盖率证据（v1.0.0）
+# 四个 domain 覆盖率证据（2026-11-27 重采；标题原为 v1.0.0，数据与 tag 内快照不同，见下方说明）
 
 > 本地复核：青岑（QA）　日期：2026-11-27（基线 `5a74fb0` + 未提交管理页改动，JDK 21.0.10；原采集人陈明哲）
 > 门槛：根 POM `domain.coverage.minimum=0.70`，四个 domain 模块各自 `check-domain-coverage` 通过
